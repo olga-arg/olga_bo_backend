@@ -28,7 +28,7 @@ jobs:
       run: |
         npm install serverless
         npm install serverless-domain-manager
-        serverless deploy
+        npx serverless deploy
 
 #    - name: Build
 #      run: go build -v ./...
