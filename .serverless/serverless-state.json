@@ -1,17 +1,24 @@
 {
   "service": {
-    "service": "olga-backend",
+    "service": "olga-backoffice-backend",
     "serviceObject": {
-      "name": "olga-backend"
+      "name": "olga-backoffice-backend"
     },
     "provider": {
       "name": "aws",
       "runtime": "go1.x",
       "stage": "dev",
       "region": "sa-east-1",
-      "environment": {
-        "SERVICE_NAME": "olga-backend"
-      },
+      "iamRoleStatements": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "dynamodb:*",
+            "s3:*"
+          ],
+          "Resource": "*"
+        }
+      ],
       "versionFunctions": true,
       "compiledCloudFormationTemplate": {
         "AWSTemplateFormatVersion": "2010-09-09",
@@ -86,10 +93,16 @@
               }
             }
           },
-          "CreateUsersLogGroup": {
+          "HelloLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/olga-backend-dev-createUsers"
+              "LogGroupName": "/aws/lambda/olga-backoffice-backend-dev-hello"
+            }
+          },
+          "WorldLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/olga-backoffice-backend-dev-world"
             }
           },
           "IamRoleLambdaExecution": {
@@ -117,7 +130,7 @@
                     "Fn::Join": [
                       "-",
                       [
-                        "olga-backend",
+                        "olga-backoffice-backend",
                         "dev",
                         "lambda"
                       ]
@@ -134,7 +147,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/olga-backend-dev*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/olga-backoffice-backend-dev*:*"
                           }
                         ]
                       },
@@ -145,9 +158,12 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/olga-backend-dev*:*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/olga-backoffice-backend-dev*:*:*"
                           }
                         ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
                       }
                     ]
                   }
@@ -158,7 +174,7 @@
                 "Fn::Join": [
                   "-",
                   [
-                    "olga-backend",
+                    "olga-backoffice-backend",
                     "dev",
                     {
                       "Ref": "AWS::Region"
@@ -169,25 +185,20 @@
               }
             }
           },
-          "CreateUsersLambdaFunction": {
+          "HelloLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/olga-backend/dev/1677638855102-2023-03-01T02:47:35.102Z/olga-backend.zip"
+                "S3Key": "serverless/olga-backoffice-backend/dev/1677692472653-2023-03-01T17:41:12.653Z/olga-backoffice-backend.zip"
               },
-              "Handler": "lambdas/lambda1/build/bin/main",
+              "Handler": "bin/hello",
               "Runtime": "go1.x",
-              "FunctionName": "olga-backend-dev-createUsers",
+              "FunctionName": "olga-backoffice-backend-dev-hello",
               "MemorySize": 1024,
               "Timeout": 6,
-              "Environment": {
-                "Variables": {
-                  "SERVICE_NAME": "olga-backend"
-                }
-              },
               "Role": {
                 "Fn::GetAtt": [
                   "IamRoleLambdaExecution",
@@ -196,217 +207,140 @@
               }
             },
             "DependsOn": [
-              "CreateUsersLogGroup"
+              "HelloLogGroup"
             ]
           },
-          "CreateUsersLambdaVersionhxOqX1Ve49cbUT3RN2MiQMjbyI4aMBhFrVMAnByHnQ": {
+          "WorldLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/olga-backoffice-backend/dev/1677692472653-2023-03-01T17:41:12.653Z/olga-backoffice-backend.zip"
+              },
+              "Handler": "bin/world",
+              "Runtime": "go1.x",
+              "FunctionName": "olga-backoffice-backend-dev-world",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "WorldLogGroup"
+            ]
+          },
+          "HelloLambdaVersionrKgWBkvmuRtAqxkFPLzCwpWpQFZKOrishZWkPNav360": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "CreateUsersLambdaFunction"
+                "Ref": "HelloLambdaFunction"
               },
-              "CodeSha256": "8cmMMN+MmTTk8FYzvlcPwPBMhZLtinurqp8fwQSbiWY="
+              "CodeSha256": "L3u9FofuftPGgQKMGcWtD648p9bj53y5xycrwyeciSw="
             }
           },
-          "ApiGatewayRestApi": {
-            "Type": "AWS::ApiGateway::RestApi",
+          "WorldLambdaVersionmQ5rg6wELovl7ed4hh8Vsi60apdaJDmHwC3KFp25V4": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
             "Properties": {
-              "Name": "dev-olga-backend",
-              "EndpointConfiguration": {
-                "Types": [
-                  "EDGE"
-                ]
+              "FunctionName": {
+                "Ref": "WorldLambdaFunction"
               },
-              "Policy": ""
+              "CodeSha256": "L3u9FofuftPGgQKMGcWtD648p9bj53y5xycrwyeciSw="
             }
           },
-          "ApiGatewayResourceHello": {
-            "Type": "AWS::ApiGateway::Resource",
+          "WorldLogsSubscriptionFilterCloudWatchLog1": {
+            "Type": "AWS::Logs::SubscriptionFilter",
+            "DependsOn": "WorldLambdaPermissionLogsSubscriptionFilterCloudWatchLog",
             "Properties": {
-              "ParentId": {
+              "LogGroupName": "/aws/lambda/world",
+              "FilterPattern": "",
+              "DestinationArn": {
                 "Fn::GetAtt": [
-                  "ApiGatewayRestApi",
-                  "RootResourceId"
+                  "WorldLambdaFunction",
+                  "Arn"
                 ]
-              },
-              "PathPart": "hello",
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
               }
             }
           },
-          "ApiGatewayMethodHelloGet": {
-            "Type": "AWS::ApiGateway::Method",
-            "Properties": {
-              "HttpMethod": "GET",
-              "RequestParameters": {},
-              "ResourceId": {
-                "Ref": "ApiGatewayResourceHello"
-              },
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              },
-              "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
-              "Integration": {
-                "IntegrationHttpMethod": "POST",
-                "Type": "AWS",
-                "Uri": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition"
-                      },
-                      ":apigateway:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":lambda:path/2015-03-31/functions/",
-                      {
-                        "Fn::GetAtt": [
-                          "CreateUsersLambdaFunction",
-                          "Arn"
-                        ]
-                      },
-                      "/invocations"
-                    ]
-                  ]
-                },
-                "PassthroughBehavior": "NEVER",
-                "RequestTemplates": {
-                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  ",
-                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  "
-                },
-                "IntegrationResponses": [
-                  {
-                    "StatusCode": "200",
-                    "SelectionPattern": "",
-                    "ResponseParameters": {},
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": "400",
-                    "SelectionPattern": "[\\s\\S]*\\[400\\][\\s\\S]*",
-                    "ResponseParameters": {},
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": "401",
-                    "SelectionPattern": "[\\s\\S]*\\[401\\][\\s\\S]*",
-                    "ResponseParameters": {},
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": "403",
-                    "SelectionPattern": "[\\s\\S]*\\[403\\][\\s\\S]*",
-                    "ResponseParameters": {},
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": "404",
-                    "SelectionPattern": "[\\s\\S]*\\[404\\][\\s\\S]*",
-                    "ResponseParameters": {},
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": "422",
-                    "SelectionPattern": "[\\s\\S]*\\[422\\][\\s\\S]*",
-                    "ResponseParameters": {},
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": "500",
-                    "SelectionPattern": "[\\s\\S]*(Process\\s?exited\\s?before\\s?completing\\s?request|\\[500\\])[\\s\\S]*",
-                    "ResponseParameters": {},
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": "502",
-                    "SelectionPattern": "[\\s\\S]*\\[502\\][\\s\\S]*",
-                    "ResponseParameters": {},
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": "504",
-                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(.*Task timed out after \\d+\\.\\d+ seconds$)",
-                    "ResponseParameters": {},
-                    "ResponseTemplates": {}
-                  }
-                ]
-              },
-              "MethodResponses": [
-                {
-                  "ResponseParameters": {},
-                  "ResponseModels": {},
-                  "StatusCode": "200"
-                },
-                {
-                  "ResponseParameters": {},
-                  "ResponseModels": {},
-                  "StatusCode": "400"
-                },
-                {
-                  "ResponseParameters": {},
-                  "ResponseModels": {},
-                  "StatusCode": "401"
-                },
-                {
-                  "ResponseParameters": {},
-                  "ResponseModels": {},
-                  "StatusCode": "403"
-                },
-                {
-                  "ResponseParameters": {},
-                  "ResponseModels": {},
-                  "StatusCode": "404"
-                },
-                {
-                  "ResponseParameters": {},
-                  "ResponseModels": {},
-                  "StatusCode": "422"
-                },
-                {
-                  "ResponseParameters": {},
-                  "ResponseModels": {},
-                  "StatusCode": "500"
-                },
-                {
-                  "ResponseParameters": {},
-                  "ResponseModels": {},
-                  "StatusCode": "502"
-                },
-                {
-                  "ResponseParameters": {},
-                  "ResponseModels": {},
-                  "StatusCode": "504"
-                }
-              ]
-            },
-            "DependsOn": [
-              "CreateUsersLambdaPermissionApiGateway"
-            ]
-          },
-          "ApiGatewayDeployment1677638854359": {
-            "Type": "AWS::ApiGateway::Deployment",
-            "Properties": {
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              },
-              "StageName": "dev"
-            },
-            "DependsOn": [
-              "ApiGatewayMethodHelloGet"
-            ]
-          },
-          "CreateUsersLambdaPermissionApiGateway": {
+          "WorldLambdaPermissionLogsSubscriptionFilterCloudWatchLog": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "CreateUsersLambdaFunction",
+                  "WorldLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "logs.",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ".amazonaws.com"
+                  ]
+                ]
+              },
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":logs:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":log-group:",
+                    "/aws/lambda/world",
+                    ":*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "dev-olga-backoffice-backend",
+              "ProtocolType": "HTTP"
+            }
+          },
+          "HttpApiStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "StageName": "$default",
+              "AutoDeploy": true,
+              "DefaultRouteSettings": {
+                "DetailedMetricsEnabled": false
+              }
+            }
+          },
+          "HelloLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "HelloLambdaFunction",
                   "Arn"
                 ]
               },
@@ -430,31 +364,131 @@
                     },
                     ":",
                     {
-                      "Ref": "ApiGatewayRestApi"
+                      "Ref": "HttpApi"
                     },
-                    "/*/*"
+                    "/*"
                   ]
                 ]
               }
             }
           },
-          "usersTable": {
-            "Type": "AWS::DynamoDB::Table",
+          "HttpApiIntegrationHello": {
+            "Type": "AWS::ApiGatewayV2::Integration",
             "Properties": {
-              "TableName": "usersTable",
-              "AttributeDefinitions": [
-                {
-                  "AttributeName": "id",
-                  "AttributeType": "S"
-                }
-              ],
-              "KeySchema": [
-                {
-                  "AttributeName": "id",
-                  "KeyType": "HASH"
-                }
-              ],
-              "BillingMode": "PAY_PER_REQUEST"
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"HelloLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteGetHello": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "GET /hello",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationHello"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationHello"
+          },
+          "WorldLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "WorldLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationWorld": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"WorldLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteGetWorld": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "GET /world",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationWorld"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationWorld"
+          },
+          "ReceiptsBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "dev-olga-backoffice-receipts-bucket"
+            }
+          },
+          "WorldLambdaLogs": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/world"
             }
           }
         },
@@ -464,27 +498,45 @@
               "Ref": "ServerlessDeploymentBucket"
             },
             "Export": {
-              "Name": "sls-olga-backend-dev-ServerlessDeploymentBucketName"
+              "Name": "sls-olga-backoffice-backend-dev-ServerlessDeploymentBucketName"
             }
           },
-          "CreateUsersLambdaFunctionQualifiedArn": {
+          "HelloLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "CreateUsersLambdaVersionhxOqX1Ve49cbUT3RN2MiQMjbyI4aMBhFrVMAnByHnQ"
+              "Ref": "HelloLambdaVersionrKgWBkvmuRtAqxkFPLzCwpWpQFZKOrishZWkPNav360"
             },
             "Export": {
-              "Name": "sls-olga-backend-dev-CreateUsersLambdaFunctionQualifiedArn"
+              "Name": "sls-olga-backoffice-backend-dev-HelloLambdaFunctionQualifiedArn"
             }
           },
-          "ServiceEndpoint": {
-            "Description": "URL of the service endpoint",
+          "WorldLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "WorldLambdaVersionmQ5rg6wELovl7ed4hh8Vsi60apdaJDmHwC3KFp25V4"
+            },
+            "Export": {
+              "Name": "sls-olga-backoffice-backend-dev-WorldLambdaFunctionQualifiedArn"
+            }
+          },
+          "HttpApiId": {
+            "Description": "Id of the HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            },
+            "Export": {
+              "Name": "sls-olga-backoffice-backend-dev-HttpApiId"
+            }
+          },
+          "HttpApiUrl": {
+            "Description": "URL of the HTTP API",
             "Value": {
               "Fn::Join": [
                 "",
                 [
                   "https://",
                   {
-                    "Ref": "ApiGatewayRestApi"
+                    "Ref": "HttpApi"
                   },
                   ".execute-api.",
                   {
@@ -493,13 +545,12 @@
                   ".",
                   {
                     "Ref": "AWS::URLSuffix"
-                  },
-                  "/dev"
+                  }
                 ]
               ]
             },
             "Export": {
-              "Name": "sls-olga-backend-dev-ServiceEndpoint"
+              "Name": "sls-olga-backoffice-backend-dev-HttpApiUrl"
             }
           }
         }
@@ -601,79 +652,62 @@
     ],
     "pluginsData": {},
     "functions": {
-      "createUsers": {
-        "handler": "lambdas/lambda1/build/bin/main",
+      "hello": {
+        "handler": "bin/hello",
         "events": [
           {
-            "http": {
-              "path": "hello",
-              "method": "get",
-              "integration": "AWS",
-              "request": {
-                "passThrough": "NEVER"
-              },
-              "response": {
-                "statusCodes": {
-                  "200": {
-                    "pattern": ""
-                  },
-                  "400": {
-                    "pattern": "[\\s\\S]*\\[400\\][\\s\\S]*"
-                  },
-                  "401": {
-                    "pattern": "[\\s\\S]*\\[401\\][\\s\\S]*"
-                  },
-                  "403": {
-                    "pattern": "[\\s\\S]*\\[403\\][\\s\\S]*"
-                  },
-                  "404": {
-                    "pattern": "[\\s\\S]*\\[404\\][\\s\\S]*"
-                  },
-                  "422": {
-                    "pattern": "[\\s\\S]*\\[422\\][\\s\\S]*"
-                  },
-                  "500": {
-                    "pattern": "[\\s\\S]*(Process\\s?exited\\s?before\\s?completing\\s?request|\\[500\\])[\\s\\S]*"
-                  },
-                  "502": {
-                    "pattern": "[\\s\\S]*\\[502\\][\\s\\S]*"
-                  },
-                  "504": {
-                    "pattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(.*Task timed out after \\d+\\.\\d+ seconds$)"
-                  }
-                }
-              }
-            }
+            "httpApi": {
+              "path": "/hello",
+              "method": "get"
+            },
+            "resolvedMethod": "GET",
+            "resolvedPath": "/hello"
           }
         ],
-        "name": "olga-backend-dev-createUsers",
+        "name": "olga-backoffice-backend-dev-hello",
         "package": {},
         "memory": 1024,
         "timeout": 6,
         "runtime": "go1.x",
         "vpc": {},
-        "versionLogicalId": "CreateUsersLambdaVersionhxOqX1Ve49cbUT3RN2MiQMjbyI4aMBhFrVMAnByHnQ"
+        "versionLogicalId": "HelloLambdaVersionrKgWBkvmuRtAqxkFPLzCwpWpQFZKOrishZWkPNav360"
+      },
+      "world": {
+        "handler": "bin/world",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/world",
+              "method": "get"
+            },
+            "resolvedMethod": "GET",
+            "resolvedPath": "/world"
+          },
+          {
+            "cloudwatchLog": "/aws/lambda/world"
+          }
+        ],
+        "name": "olga-backoffice-backend-dev-world",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "go1.x",
+        "vpc": {},
+        "versionLogicalId": "WorldLambdaVersionmQ5rg6wELovl7ed4hh8Vsi60apdaJDmHwC3KFp25V4"
       }
     },
     "resources": {
       "Resources": {
-        "usersTable": {
-          "Type": "AWS::DynamoDB::Table",
+        "ReceiptsBucket": {
+          "Type": "AWS::S3::Bucket",
           "Properties": {
-            "TableName": "usersTable",
-            "AttributeDefinitions": [
-              {
-                "AttributeName": "id",
-                "AttributeType": "S"
-              }
-            ],
-            "KeySchema": [
-              {
-                "AttributeName": "id",
-                "KeyType": "HASH"
-              }
-            ],
-            "BillingMode": "PAY_PER_REQUEST"
+            "BucketName": "dev-olga-backoffice-receipts-bucket"
+          }
+        },
+        "WorldLambdaLogs": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/world"
           }
         }
       },
@@ -682,7 +716,8 @@
     "configValidationMode": "warn",
     "serviceFilename": "serverless.yml",
     "initialServerlessConfig": {
-      "service": "olga-backend",
+      "service": "olga-backoffice-backend",
+      "app": "olga-backoffice",
       "provider": {
         "$ref": "$[\"service\"][\"provider\"]"
       },
@@ -699,12 +734,13 @@
         "$ref": "$[\"service\"][\"custom\"]"
       }
     },
+    "app": "olga-backoffice",
     "layers": {},
     "isDashboardMonitoringPreconfigured": false,
-    "artifact": "/Users/valenvila/Projects/olga/olga_backend/.serverless/olga-backend.zip"
+    "artifact": "/Users/valenvila/Projects/olga/olga_backend/.serverless/olga-backoffice-backend.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/olga-backend/dev/1677638855102-2023-03-01T02:47:35.102Z",
-    "artifact": "olga-backend.zip"
+    "artifactDirectoryName": "serverless/olga-backoffice-backend/dev/1677692472653-2023-03-01T17:41:12.653Z",
+    "artifact": "olga-backoffice-backend.zip"
   }
 }
