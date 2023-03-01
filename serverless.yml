@@ -56,3 +56,5 @@ custom:
     basePath: 'api'
     stage: ${self:provider.stage}
     createRoute53Record: true
+    endpointType: regional
+    apiType: http
