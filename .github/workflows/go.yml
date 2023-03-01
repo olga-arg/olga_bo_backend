@@ -29,6 +29,8 @@ jobs:
         npm install serverless
         serverless plugin install -n serverless-domain-manager
 
+    - name: Deploy Serverless
+      run: sls deploy
 #    - name: Build
 #      run: go build -v ./...
 
