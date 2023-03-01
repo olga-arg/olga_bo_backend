@@ -12,7 +12,7 @@ provider:
 
 functions:
   createUsers:
-    handler: lambdas/lambda1/build/bin/main
+    handler: lambdas/lambda1/main
     events:
       - http:
           path: hello
@@ -42,4 +42,3 @@ custom:
     basePath: 'api'
     stage: ${self:provider.stage}
     createRoute53Record: true
-
