@@ -41,7 +41,7 @@ resources:
     ReceiptsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:provider.stage}-${self:app}-receipts-bucket
+        BucketName: ${self:provider.stage}-${self:app}-receipts
     WorldLambdaLogs:
       Type: AWS::Logs::LogGroup
       Properties:
