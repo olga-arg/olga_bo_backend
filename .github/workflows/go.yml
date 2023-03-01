@@ -30,7 +30,7 @@ jobs:
         npm install serverless-domain-manager
 
     - name: Deploy Serverless
-      run: sls deploy
+      run: serverless deploy
 #    - name: Build
 #      run: go build -v ./...
 
