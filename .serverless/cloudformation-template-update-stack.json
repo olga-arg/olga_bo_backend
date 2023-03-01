@@ -175,7 +175,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/olga-backoffice-backend/dev/1677692472653-2023-03-01T17:41:12.653Z/olga-backoffice-backend.zip"
+          "S3Key": "serverless/olga-backoffice-backend/dev/1677695560834-2023-03-01T18:32:40.834Z/olga-backoffice-backend.zip"
         },
         "Handler": "bin/hello",
         "Runtime": "go1.x",
@@ -200,7 +200,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/olga-backoffice-backend/dev/1677692472653-2023-03-01T17:41:12.653Z/olga-backoffice-backend.zip"
+          "S3Key": "serverless/olga-backoffice-backend/dev/1677695560834-2023-03-01T18:32:40.834Z/olga-backoffice-backend.zip"
         },
         "Handler": "bin/world",
         "Runtime": "go1.x",
@@ -218,24 +218,24 @@
         "WorldLogGroup"
       ]
     },
-    "HelloLambdaVersionrKgWBkvmuRtAqxkFPLzCwpWpQFZKOrishZWkPNav360": {
+    "HelloLambdaVersionSjWXzDlwnjb637GIPj3bZOJRGS15INGPJluEKQY69s": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "HelloLambdaFunction"
         },
-        "CodeSha256": "L3u9FofuftPGgQKMGcWtD648p9bj53y5xycrwyeciSw="
+        "CodeSha256": "9urkh1Hncpx+Avmns5PlKysb3nPoOdxxg/daljfmrMM="
       }
     },
-    "WorldLambdaVersionmQ5rg6wELovl7ed4hh8Vsi60apdaJDmHwC3KFp25V4": {
+    "WorldLambdaVersionA7NY3rYGtanqItS8Opmohhgc1SiKCwPGAmKQGk": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "WorldLambdaFunction"
         },
-        "CodeSha256": "L3u9FofuftPGgQKMGcWtD648p9bj53y5xycrwyeciSw="
+        "CodeSha256": "9urkh1Hncpx+Avmns5PlKysb3nPoOdxxg/daljfmrMM="
       }
     },
     "WorldLogsSubscriptionFilterCloudWatchLog1": {
@@ -493,7 +493,7 @@
     "HelloLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "HelloLambdaVersionrKgWBkvmuRtAqxkFPLzCwpWpQFZKOrishZWkPNav360"
+        "Ref": "HelloLambdaVersionSjWXzDlwnjb637GIPj3bZOJRGS15INGPJluEKQY69s"
       },
       "Export": {
         "Name": "sls-olga-backoffice-backend-dev-HelloLambdaFunctionQualifiedArn"
@@ -502,7 +502,7 @@
     "WorldLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "WorldLambdaVersionmQ5rg6wELovl7ed4hh8Vsi60apdaJDmHwC3KFp25V4"
+        "Ref": "WorldLambdaVersionA7NY3rYGtanqItS8Opmohhgc1SiKCwPGAmKQGk"
       },
       "Export": {
         "Name": "sls-olga-backoffice-backend-dev-WorldLambdaFunctionQualifiedArn"
