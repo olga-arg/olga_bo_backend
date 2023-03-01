@@ -27,7 +27,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
         npm install serverless
-        serverless plugin install -n serverless-domain-manager
+        npm install serverless-domain-manager
 
     - name: Deploy Serverless
       run: sls deploy
