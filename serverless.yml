@@ -53,6 +53,10 @@ resources:
       Type: AWS::Logs::LogGroup
       Properties:
         LogGroupName: /aws/lambda/world
+    World2LambdaLogs:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/world2
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
