@@ -192,7 +192,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/olga-backoffice-backend/dev/1677695560834-2023-03-01T18:32:40.834Z/olga-backoffice-backend.zip"
+                "S3Key": "serverless/olga-backoffice-backend/dev/1677861395014-2023-03-03T16:36:35.014Z/olga-backoffice-backend.zip"
               },
               "Handler": "bin/hello",
               "Runtime": "go1.x",
@@ -217,7 +217,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/olga-backoffice-backend/dev/1677695560834-2023-03-01T18:32:40.834Z/olga-backoffice-backend.zip"
+                "S3Key": "serverless/olga-backoffice-backend/dev/1677861395014-2023-03-03T16:36:35.014Z/olga-backoffice-backend.zip"
               },
               "Handler": "bin/world",
               "Runtime": "go1.x",
@@ -235,24 +235,24 @@
               "WorldLogGroup"
             ]
           },
-          "HelloLambdaVersionSjWXzDlwnjb637GIPj3bZOJRGS15INGPJluEKQY69s": {
+          "HelloLambdaVersionyYd6alZo7BQXhOMRgMQnnNKPmBMnCgxdla0zxWgzAOs": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "HelloLambdaFunction"
               },
-              "CodeSha256": "9urkh1Hncpx+Avmns5PlKysb3nPoOdxxg/daljfmrMM="
+              "CodeSha256": "htxDbUYX8nX1SfyCUGBaEKMcqq3oBUU1TxguDx0jxQE="
             }
           },
-          "WorldLambdaVersionA7NY3rYGtanqItS8Opmohhgc1SiKCwPGAmKQGk": {
+          "WorldLambdaVersionHWnFqpznfmw4595M8q1LL0elMZ4tbXxyPo3JAuybL0": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "WorldLambdaFunction"
               },
-              "CodeSha256": "9urkh1Hncpx+Avmns5PlKysb3nPoOdxxg/daljfmrMM="
+              "CodeSha256": "htxDbUYX8nX1SfyCUGBaEKMcqq3oBUU1TxguDx0jxQE="
             }
           },
           "WorldLogsSubscriptionFilterCloudWatchLog1": {
@@ -482,13 +482,32 @@
           "ReceiptsBucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
-              "BucketName": "dev-olga-backoffice-receipts-bucket"
+              "BucketName": "dev-olga-backoffice-receipts"
             }
           },
           "WorldLambdaLogs": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
               "LogGroupName": "/aws/lambda/world"
+            }
+          },
+          "usersTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "usersTable",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST"
             }
           }
         },
@@ -504,7 +523,7 @@
           "HelloLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "HelloLambdaVersionSjWXzDlwnjb637GIPj3bZOJRGS15INGPJluEKQY69s"
+              "Ref": "HelloLambdaVersionyYd6alZo7BQXhOMRgMQnnNKPmBMnCgxdla0zxWgzAOs"
             },
             "Export": {
               "Name": "sls-olga-backoffice-backend-dev-HelloLambdaFunctionQualifiedArn"
@@ -513,7 +532,7 @@
           "WorldLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "WorldLambdaVersionA7NY3rYGtanqItS8Opmohhgc1SiKCwPGAmKQGk"
+              "Ref": "WorldLambdaVersionHWnFqpznfmw4595M8q1LL0elMZ4tbXxyPo3JAuybL0"
             },
             "Export": {
               "Name": "sls-olga-backoffice-backend-dev-WorldLambdaFunctionQualifiedArn"
@@ -672,7 +691,7 @@
         "timeout": 6,
         "runtime": "go1.x",
         "vpc": {},
-        "versionLogicalId": "HelloLambdaVersionSjWXzDlwnjb637GIPj3bZOJRGS15INGPJluEKQY69s"
+        "versionLogicalId": "HelloLambdaVersionyYd6alZo7BQXhOMRgMQnnNKPmBMnCgxdla0zxWgzAOs"
       },
       "world": {
         "handler": "bin/world",
@@ -695,7 +714,7 @@
         "timeout": 6,
         "runtime": "go1.x",
         "vpc": {},
-        "versionLogicalId": "WorldLambdaVersionA7NY3rYGtanqItS8Opmohhgc1SiKCwPGAmKQGk"
+        "versionLogicalId": "WorldLambdaVersionHWnFqpznfmw4595M8q1LL0elMZ4tbXxyPo3JAuybL0"
       }
     },
     "resources": {
@@ -703,13 +722,32 @@
         "ReceiptsBucket": {
           "Type": "AWS::S3::Bucket",
           "Properties": {
-            "BucketName": "dev-olga-backoffice-receipts-bucket"
+            "BucketName": "dev-olga-backoffice-receipts"
           }
         },
         "WorldLambdaLogs": {
           "Type": "AWS::Logs::LogGroup",
           "Properties": {
             "LogGroupName": "/aws/lambda/world"
+          }
+        },
+        "usersTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "usersTable",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
           }
         }
       },
@@ -742,7 +780,7 @@
     "artifact": "/Users/valenvila/Projects/olga/olga_backend/.serverless/olga-backoffice-backend.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/olga-backoffice-backend/dev/1677695560834-2023-03-01T18:32:40.834Z",
+    "artifactDirectoryName": "serverless/olga-backoffice-backend/dev/1677861395014-2023-03-03T16:36:35.014Z",
     "artifact": "olga-backoffice-backend.zip"
   }
 }
