@@ -21,7 +21,7 @@ jobs:
           go-version: 1.19
 
       - name: Go Build
-        run: make
+        run: make -C lambdas/
 
       - name: Serverless
         env:

@@ -192,9 +192,9 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/olga-backoffice-backend/dev/1677861395014-2023-03-03T16:36:35.014Z/olga-backoffice-backend.zip"
+                "S3Key": "serverless/olga-backoffice-backend/dev/1677873147452-2023-03-03T19:52:27.452Z/olga-backoffice-backend.zip"
               },
-              "Handler": "bin/hello",
+              "Handler": "lambdas/bin/hello",
               "Runtime": "go1.x",
               "FunctionName": "olga-backoffice-backend-dev-hello",
               "MemorySize": 1024,
@@ -217,9 +217,9 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/olga-backoffice-backend/dev/1677861395014-2023-03-03T16:36:35.014Z/olga-backoffice-backend.zip"
+                "S3Key": "serverless/olga-backoffice-backend/dev/1677873147452-2023-03-03T19:52:27.452Z/olga-backoffice-backend.zip"
               },
-              "Handler": "bin/world",
+              "Handler": "lambdas/bin/world",
               "Runtime": "go1.x",
               "FunctionName": "olga-backoffice-backend-dev-world",
               "MemorySize": 1024,
@@ -235,24 +235,24 @@
               "WorldLogGroup"
             ]
           },
-          "HelloLambdaVersionyYd6alZo7BQXhOMRgMQnnNKPmBMnCgxdla0zxWgzAOs": {
+          "HelloLambdaVersionZjzMw5ln4Xvwkon1dytyuRUYcwiYXy11DyN2AvqLGI": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "HelloLambdaFunction"
               },
-              "CodeSha256": "htxDbUYX8nX1SfyCUGBaEKMcqq3oBUU1TxguDx0jxQE="
+              "CodeSha256": "JzsTixmokcfvcftpgiwBZ8kni8N44oS8VhM+CMxKYQ8="
             }
           },
-          "WorldLambdaVersionHWnFqpznfmw4595M8q1LL0elMZ4tbXxyPo3JAuybL0": {
+          "WorldLambdaVersionqb05OlAGqCwrchZbXnUgSjKodooScN3rRqzzwcXM": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "WorldLambdaFunction"
               },
-              "CodeSha256": "htxDbUYX8nX1SfyCUGBaEKMcqq3oBUU1TxguDx0jxQE="
+              "CodeSha256": "JzsTixmokcfvcftpgiwBZ8kni8N44oS8VhM+CMxKYQ8="
             }
           },
           "WorldLogsSubscriptionFilterCloudWatchLog1": {
@@ -523,7 +523,7 @@
           "HelloLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "HelloLambdaVersionyYd6alZo7BQXhOMRgMQnnNKPmBMnCgxdla0zxWgzAOs"
+              "Ref": "HelloLambdaVersionZjzMw5ln4Xvwkon1dytyuRUYcwiYXy11DyN2AvqLGI"
             },
             "Export": {
               "Name": "sls-olga-backoffice-backend-dev-HelloLambdaFunctionQualifiedArn"
@@ -532,7 +532,7 @@
           "WorldLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "WorldLambdaVersionHWnFqpznfmw4595M8q1LL0elMZ4tbXxyPo3JAuybL0"
+              "Ref": "WorldLambdaVersionqb05OlAGqCwrchZbXnUgSjKodooScN3rRqzzwcXM"
             },
             "Export": {
               "Name": "sls-olga-backoffice-backend-dev-WorldLambdaFunctionQualifiedArn"
@@ -674,7 +674,7 @@
     "pluginsData": {},
     "functions": {
       "hello": {
-        "handler": "bin/hello",
+        "handler": "lambdas/bin/hello",
         "events": [
           {
             "httpApi": {
@@ -691,10 +691,10 @@
         "timeout": 6,
         "runtime": "go1.x",
         "vpc": {},
-        "versionLogicalId": "HelloLambdaVersionyYd6alZo7BQXhOMRgMQnnNKPmBMnCgxdla0zxWgzAOs"
+        "versionLogicalId": "HelloLambdaVersionZjzMw5ln4Xvwkon1dytyuRUYcwiYXy11DyN2AvqLGI"
       },
       "world": {
-        "handler": "bin/world",
+        "handler": "lambdas/bin/world",
         "events": [
           {
             "httpApi": {
@@ -714,7 +714,7 @@
         "timeout": 6,
         "runtime": "go1.x",
         "vpc": {},
-        "versionLogicalId": "WorldLambdaVersionHWnFqpznfmw4595M8q1LL0elMZ4tbXxyPo3JAuybL0"
+        "versionLogicalId": "WorldLambdaVersionqb05OlAGqCwrchZbXnUgSjKodooScN3rRqzzwcXM"
       }
     },
     "resources": {
@@ -780,7 +780,7 @@
     "artifact": "/Users/valenvila/Projects/olga/olga_backend/.serverless/olga-backoffice-backend.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/olga-backoffice-backend/dev/1677861395014-2023-03-03T16:36:35.014Z",
+    "artifactDirectoryName": "serverless/olga-backoffice-backend/dev/1677873147452-2023-03-03T19:52:27.452Z",
     "artifact": "olga-backoffice-backend.zip"
   }
 }
