@@ -19,13 +19,13 @@ provider:
 
 functions:
   hello:
-    handler: bin/hello
+    handler: lambdas/bin/hello
     events:
       - httpApi:
           path: /hello
           method: get
   world:
-    handler: bin/world
+    handler: lambdas/bin/world
     events:
       - httpApi:
           path: /world
