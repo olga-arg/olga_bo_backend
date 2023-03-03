@@ -31,6 +31,13 @@ functions:
           path: /world
           method: get
       - cloudwatchLog: '/aws/lambda/world'
+  world2:
+    handler: lambdas/bin/world2
+    events:
+      - httpApi:
+          path: /world2
+          method: get
+      - cloudwatchLog: '/aws/lambda/world2'
 
 #    Define function environment variables here
 #    environment:
