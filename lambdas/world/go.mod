@@ -1,4 +1,4 @@
-module olga_backend
+module world
 
 go 1.18
 

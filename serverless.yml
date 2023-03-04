@@ -18,12 +18,6 @@ provider:
 #    variable1: value1
 
 functions:
-  hello:
-    handler: lambdas/bin/hello
-    events:
-      - httpApi:
-          path: /hello
-          method: get
   world:
     handler: lambdas/bin/world
     events:
@@ -31,13 +25,13 @@ functions:
           path: /world
           method: get
       - cloudwatchLog: '/aws/lambda/world'
-  world2:
-    handler: lambdas/bin/world2
+  go-lambda-create-user:
+    handler: lambdas/bin/go-lambda-create-user
     events:
       - httpApi:
-          path: /world2
+          path: /go-lambda-create-user
           method: get
-      - cloudwatchLog: '/aws/lambda/world2'
+      - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
 
 #    Define function environment variables here
 #    environment:
@@ -53,10 +47,10 @@ resources:
       Type: AWS::Logs::LogGroup
       Properties:
         LogGroupName: /aws/lambda/world
-    World2LambdaLogs:
+    go-lambda-create-user-logs:
       Type: AWS::Logs::LogGroup
       Properties:
-        LogGroupName: /aws/lambda/world2
+        LogGroupName: /aws/lambda/go-lambda-create-user
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
