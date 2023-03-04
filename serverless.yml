@@ -47,7 +47,7 @@ resources:
       Type: AWS::Logs::LogGroup
       Properties:
         LogGroupName: /aws/lambda/world
-    go_lambda_create_user_logs:
+    goLambdaCreateUserLogs:
       Type: AWS::Logs::LogGroup
       Properties:
         LogGroupName: /aws/lambda/go-lambda-create-user
