@@ -53,7 +53,7 @@ resources:
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: usersTable
+        TableName: usersTable-deleteme
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
