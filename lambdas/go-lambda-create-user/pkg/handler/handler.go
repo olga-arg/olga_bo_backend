@@ -1,35 +1,56 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
+	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-create-user/internal/application"
+	"go-lambda-create-user/internal/storage"
+	"go-lambda-create-user/pkg/domain"
 	"go-lambda-create-user/pkg/dto"
-	"net/http"
 )
 
-type MyError struct{}
-
-func (m *MyError) Error() string {
-	return "bienvenido al error"
-}
-
-func CreateUser(app *application.App) func(ctx context.Context, request *http.Request) (response interface{}, err error) {
-	return func(ctx context.Context, request *http.Request) (response interface{}, err error) {
-		var input dto.UserInput
-		if err := json.NewDecoder(request.Body).Decode(&input); err != nil {
-			return nil, &MyError{}
-		}
-		userOutput, err := app.Processor.CreateUser(ctx, &input)
-		if err != nil {
-			return nil, err
-		}
-
-		response, err = json.Marshal(userOutput)
-		if err != nil {
-			return nil, err
-		}
-
-		return response, nil
+func CreateUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var input dto.CreateUserInput
+	err := json.Unmarshal([]byte(request.Body), &input)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       "Invalid request body",
+		}, nil
 	}
+
+	user := domain.User{
+		Name:  input.Name,
+		Email: input.Email,
+	}
+
+	db := application.NewDynamoDBClient()
+	userRepository := storage.NewUserRepository(db)
+
+	err = userRepository.Save(&user)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       "Error creating user",
+		}, nil
+	}
+
+	output := dto.CreateUserOutput{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+	}
+
+	response, err := json.Marshal(output)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       "Error creating user",
+		}, nil
+	}
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: 201,
+		Body:       string(response),
+	}, nil
 }

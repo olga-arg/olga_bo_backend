@@ -1,23 +1,15 @@
 package application
 
 import (
-	"context"
-	"go-lambda-create-user/internal/processor"
-	"go-lambda-create-user/internal/storage"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-type App struct {
-	Processor processor.Processor
-	storage   storage.Storage
-}
+func NewDynamoDBClient() *dynamodb.DynamoDB {
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
 
-func New(ctx context.Context) (*App, error) {
-	s, err := storage.NewDynamoDB()
-	if err != nil {
-		return nil, err
-	}
-	p := processor.New(s)
-	return &App{
-		Processor: p,
-	}, nil
+	return dynamodb.New(sess, aws.NewConfig().WithRegion("tu-region"))
 }
