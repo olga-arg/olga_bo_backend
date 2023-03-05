@@ -18,6 +18,25 @@ func NewUserRepository(db *dynamodb.DynamoDB) *UserRepository {
 	}
 }
 
+func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
+	result, err := r.db.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String("usersTable"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"email": {
+				S: aws.String(email),
+			},
+		},
+	})
+	if err != nil {
+		log.Println("Error getting user: ", err)
+		return false, err
+	}
+	if result.Item == nil {
+		return false, nil
+	}
+	return true, nil
+}
+
 func (r *UserRepository) Save(user *domain.User) error {
 	item, err := dynamodbattribute.MarshalMap(user)
 	if err != nil {

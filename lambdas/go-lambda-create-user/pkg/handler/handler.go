@@ -19,10 +19,30 @@ func CreateUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRe
 		}, nil
 	}
 
-	user := domain.NewUser(input.Name, input.Email)
+	user, error := domain.NewUser(input.Name, input.Email)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       error.Error(),
+		}, nil
+	}
 
 	db := application.NewDynamoDBClient()
 	userRepository := storage.NewUserRepository(db)
+
+	emailAlreadyExists, err := userRepository.EmailAlreadyExists(user.Email)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       "Error checking if email already exists",
+		}, nil
+	}
+	if emailAlreadyExists {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       "Email already exists",
+		}, nil
+	}
 
 	err = userRepository.Save(user)
 	if err != nil {
