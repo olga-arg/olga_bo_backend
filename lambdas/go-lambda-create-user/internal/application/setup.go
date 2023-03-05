@@ -11,5 +11,5 @@ func NewDynamoDBClient() *dynamodb.DynamoDB {
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 
-	return dynamodb.New(sess, aws.NewConfig().WithRegion("tu-region"))
+	return dynamodb.New(sess, aws.NewConfig().WithRegion("sa-east-1"))
 }

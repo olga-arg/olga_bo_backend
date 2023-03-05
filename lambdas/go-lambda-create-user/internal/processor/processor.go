@@ -8,25 +8,25 @@ import (
 )
 
 type Processor interface {
-	CreateUser(ctx context.Context, input *dto.UserInput) (*dto.UserOutput, error)
+	CreateUser(ctx context.Context, input *dto.CreateUserInput) (*dto.CreateUserOutput, error)
 }
 
 type processor struct {
-	storage storage.Storage
+	storage storage.UserRepository
 }
 
-func New(s storage.Storage) Processor {
+func New(s storage.UserRepository) Processor {
 	return &processor{
 		storage: s,
 	}
 }
 
-func (p *processor) CreateUser(ctx context.Context, input *dto.UserInput) (*dto.UserOutput, error) {
+func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) (*dto.CreateUserOutput, error) {
 	user := domain.NewUser(input.Name, input.Email)
-	if err := p.storage.CreateUser(ctx, user); err != nil {
+	if err := p.storage.Save(user); err != nil {
 		return nil, err
 	}
-	return &dto.UserOutput{
+	return &dto.CreateUserOutput{
 		ID:    user.ID,
 		Name:  user.Name,
 		Email: user.Email,
