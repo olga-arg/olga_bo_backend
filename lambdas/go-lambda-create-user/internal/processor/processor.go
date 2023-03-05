@@ -22,7 +22,7 @@ func New(s storage.UserRepository) Processor {
 }
 
 func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) (*dto.CreateUserOutput, error) {
-	user := domain.NewUser(input.Name, input.Email)
+	user, _ := domain.NewUser(input.Name, input.Email)
 	if err := p.storage.Save(user); err != nil {
 		return nil, err
 	}
