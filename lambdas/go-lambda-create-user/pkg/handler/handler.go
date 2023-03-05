@@ -31,7 +31,7 @@ func CreateUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRe
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
-			Body:       "Error creating user",
+			Body:       "Error creating user 00",
 		}, nil
 	}
 
@@ -45,7 +45,7 @@ func CreateUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRe
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
-			Body:       "Error creating user",
+			Body:       "Error creating user 01",
 		}, nil
 	}
 

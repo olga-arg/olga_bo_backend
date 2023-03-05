@@ -24,7 +24,7 @@ func (r *UserRepository) Save(user *domain.User) error {
 	}
 
 	_, err = r.db.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("tu-tabla-de-usuarios"),
+		TableName: aws.String("usersTable"),
 		Item:      item,
 	})
 
