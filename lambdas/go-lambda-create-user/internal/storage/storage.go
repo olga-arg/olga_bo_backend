@@ -19,6 +19,7 @@ func NewUserRepository(db *dynamodb.DynamoDB) *UserRepository {
 }
 
 func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
+	log.Println("Checking if email already exists: ", email)
 	result, err := r.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String("usersTable"),
 		Key: map[string]*dynamodb.AttributeValue{
