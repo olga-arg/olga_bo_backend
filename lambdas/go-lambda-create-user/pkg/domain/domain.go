@@ -1,5 +1,7 @@
 package domain
 
+import "github.com/google/uuid"
+
 type User struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
@@ -8,6 +10,7 @@ type User struct {
 
 func NewUser(name, email string) *User {
 	return &User{
+		ID:    uuid.NewString(),
 		Name:  name,
 		Email: email,
 	}

@@ -19,19 +19,16 @@ func CreateUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRe
 		}, nil
 	}
 
-	user := domain.User{
-		Name:  input.Name,
-		Email: input.Email,
-	}
+	user := domain.NewUser(input.Name, input.Email)
 
 	db := application.NewDynamoDBClient()
 	userRepository := storage.NewUserRepository(db)
 
-	err = userRepository.Save(&user)
+	err = userRepository.Save(user)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
-			Body:       "Error creating user 00",
+			Body:       "Error creating user in database",
 		}, nil
 	}
 
@@ -45,7 +42,7 @@ func CreateUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRe
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
-			Body:       "Error creating user 01",
+			Body:       "Error marshalling response",
 		}, nil
 	}
 
