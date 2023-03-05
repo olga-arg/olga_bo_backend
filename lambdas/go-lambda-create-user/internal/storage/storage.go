@@ -21,7 +21,7 @@ func NewUserRepository(db *dynamodb.DynamoDB) *UserRepository {
 func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
 	log.Println("Checking if email already exists: ", email)
 	result, err := r.db.Query(&dynamodb.QueryInput{
-		TableName:              aws.String("usersTable"),
+		TableName:              aws.String("users"),
 		IndexName:              aws.String("email-index"),
 		KeyConditionExpression: aws.String("email = :email"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
@@ -34,6 +34,7 @@ func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
 		log.Println("Error getting user: ", err)
 		return false, err
 	}
+	// The query should return 0 or 1 items, instead of a list of all matching items
 	if len(result.Items) == 0 {
 		return false, nil
 	}
@@ -48,7 +49,7 @@ func (r *UserRepository) Save(user *domain.User) error {
 	}
 
 	_, err = r.db.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("usersTable"),
+		TableName: aws.String("users"),
 		Item:      item,
 	})
 	if err != nil {
