@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -18,8 +19,14 @@ func NewUserRepository(db *dynamodb.DynamoDB) *UserRepository {
 }
 
 func (r *UserRepository) Save(user *domain.User) error {
+	fmt.Println("Saving user", user)
+	fmt.Println("Saving user ID", user.ID)
+	fmt.Println("Saving user Name", user.Name)
+	fmt.Println("Saving user Email", user.Email)
 	item, err := dynamodbattribute.MarshalMap(user)
+	fmt.Println("Saving user item", item)
 	if err != nil {
+		fmt.Println("Error marshalling user", err)
 		return err
 	}
 
@@ -27,6 +34,7 @@ func (r *UserRepository) Save(user *domain.User) error {
 		TableName: aws.String("usersTable"),
 		Item:      item,
 	})
+	fmt.Println("Error saving user", err)
 
 	return err
 }
