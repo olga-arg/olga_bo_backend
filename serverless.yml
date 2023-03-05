@@ -59,10 +59,10 @@ resources:
             AttributeType: S
           - AttributeName: email
             AttributeType: S
-          - AttributeName: name
-            AttributeType: S
         KeySchema:
           - AttributeName: id
+            KeyType: HASH
+          - AttributeName: email
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
