@@ -7,6 +7,7 @@ import (
 	"go-lambda-create-user/internal/processor"
 	"go-lambda-create-user/pkg/dto"
 	"net/http"
+	"github.com/go-playground/validator/v10"
 )
 
 type CreateUserHandler struct {
@@ -17,6 +18,8 @@ func NewCreateUserHandler(p processor.Processor) *CreateUserHandler {
 	return &CreateUserHandler{processor: p}
 }
 
+var validate = validator.New()
+
 func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	if request.Body == "" || len(request.Body) < 1 {
 		return events.APIGatewayProxyResponse{
@@ -24,23 +27,22 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 			Body:       "Missing request body",
 		}, nil
 	}
+
 	// Creates a CreateUserInput struct from the request body
 	var input dto.CreateUserInput
-
-	// Check that the request body has the name, surname and email fields
-	if input.Name == "" || input.Surname == "" || input.Email == "" {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body:       "Missing requiered fields",
-		}, nil
-	}
-
 	// Unmarshal the request body into the CreateUserInput struct
 	err := json.Unmarshal([]byte(request.Body), &input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
 			Body:       "Invalid request body",
+		}, nil
+	}
+
+	if err := validate.Struct(input); err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       err.Error(),
 		}, nil
 	}
 
