@@ -18,6 +18,20 @@ func NewCreateUserHandler(p processor.Processor) *CreateUserHandler {
 }
 
 func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	if request.Body == "" || len(request.Body) < 1 {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       "Missing request body",
+		}, nil
+	}
+
+	if input.Name == "" || input.Surname == "" || input.Email == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       "Missing required fields",
+		}, nil
+	}
+
 	// Creates a CreateUserInput struct from the request body
 	var input dto.CreateUserInput
 	// Unmarshal the request body into the CreateUserInput struct
