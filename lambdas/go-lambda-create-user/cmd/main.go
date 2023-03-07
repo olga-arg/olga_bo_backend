@@ -11,8 +11,8 @@ import (
 func main() {
 	db := application.NewDynamoDBClient()
 	userRepo := storage.NewUserRepository(db)
-	processor := processor.New(*userRepo)
-	createUserHandler := handler.NewCreateUserHandler(processor)
+	userProcessor := processor.New(*userRepo)
+	createUserHandler := handler.NewCreateUserHandler(userProcessor)
 
 	lambda.Start(createUserHandler.Handle)
 }

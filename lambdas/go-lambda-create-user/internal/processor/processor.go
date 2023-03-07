@@ -23,6 +23,7 @@ func New(s storage.UserRepository) Processor {
 }
 
 func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) (*dto.CreateUserOutput, error) {
+	// Checks if the email already exists
 	exists, err := p.storage.EmailAlreadyExists(input.Email)
 	if err != nil {
 		return nil, err
@@ -30,13 +31,20 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 	if exists {
 		return nil, errors.New("email already exists")
 	}
-	user, _ := domain.NewUser(input.Name, input.Email)
+	// Creates a new user. New user takes a name and email and returns a user struct
+	user, _ := domain.NewUser(input.Name, input.Surname, input.Email)
+	// Saves the user to the database if it doesn't already exist
 	if err := p.storage.Save(user); err != nil {
 		return nil, err
 	}
+	// Returns the user
 	return &dto.CreateUserOutput{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
+		ID:        user.ID,
+		Name:      user.Name,
+		Surname:   user.Surname,
+		Email:     user.Email,
+		IsAdmin:   user.IsAdmin,
+		Teams:     user.Teams,
+		Confirmed: user.Confirmed,
 	}, nil
 }

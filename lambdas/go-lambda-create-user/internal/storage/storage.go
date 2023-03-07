@@ -12,6 +12,7 @@ type UserRepository struct {
 	db *dynamodb.DynamoDB
 }
 
+// The repository is responsible for interacting with the database
 func NewUserRepository(db *dynamodb.DynamoDB) *UserRepository {
 	return &UserRepository{
 		db: db,
@@ -42,12 +43,13 @@ func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
 }
 
 func (r *UserRepository) Save(user *domain.User) error {
+	// First, the user struct is marshalled into a map that can be saved to the database
 	item, err := dynamodbattribute.MarshalMap(user)
 	if err != nil {
 		log.Println("Error marshalling user", err)
 		return err
 	}
-
+	// Then, the user is saved to the database using the PutItem method
 	_, err = r.db.PutItem(&dynamodb.PutItemInput{
 		TableName: aws.String("users"),
 		Item:      item,

@@ -18,7 +18,9 @@ func NewCreateUserHandler(p processor.Processor) *CreateUserHandler {
 }
 
 func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// Creates a CreateUserInput struct from the request body
 	var input dto.CreateUserInput
+	// Unmarshal the request body into the CreateUserInput struct
 	err := json.Unmarshal([]byte(request.Body), &input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
