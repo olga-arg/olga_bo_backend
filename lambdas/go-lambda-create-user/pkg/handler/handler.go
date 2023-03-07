@@ -39,10 +39,11 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		}, nil
 	}
 
+	// Validates that the JSON request body has the correct fields and that they are the correct type
 	if err := validate.Struct(input); err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
-			Body:       err.Error(),
+			Body:       "Missing or invalid fields in request body",
 		}, nil
 	}
 
