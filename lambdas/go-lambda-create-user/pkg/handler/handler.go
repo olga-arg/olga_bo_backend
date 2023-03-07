@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-create-user/internal/processor"
 	"go-lambda-create-user/pkg/dto"
@@ -22,12 +21,18 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	var input dto.CreateUserInput
 	err := json.Unmarshal([]byte(request.Body), &input)
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, errors.New("invalid input")
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       "Invalid request body",
+		}, nil
 	}
 
 	output, err := h.processor.CreateUser(context.Background(), &input)
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       err.Error(),
+		}, nil
 	}
 
 	responseBody, _ := json.Marshal(output)
