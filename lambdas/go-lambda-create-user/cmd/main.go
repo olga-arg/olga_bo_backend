@@ -2,9 +2,17 @@ package main
 
 import (
 	"github.com/aws/aws-lambda-go/lambda"
+	"go-lambda-create-user/internal/application"
+	"go-lambda-create-user/internal/processor"
+	"go-lambda-create-user/internal/storage"
 	"go-lambda-create-user/pkg/handler"
 )
 
 func main() {
-	lambda.Start(handler.CreateUser)
+	db := application.NewDynamoDBClient()
+	userRepo := storage.NewUserRepository(db)
+	processor := processor.New(*userRepo)
+	createUserHandler := handler.NewCreateUserHandler(processor)
+
+	lambda.Start(createUserHandler.Handle)
 }

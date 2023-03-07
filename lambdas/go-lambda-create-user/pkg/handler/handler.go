@@ -1,73 +1,39 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"github.com/aws/aws-lambda-go/events"
-	"go-lambda-create-user/internal/application"
-	"go-lambda-create-user/internal/storage"
-	"go-lambda-create-user/pkg/domain"
+	"go-lambda-create-user/internal/processor"
 	"go-lambda-create-user/pkg/dto"
+	"net/http"
 )
 
-func CreateUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+type CreateUserHandler struct {
+	processor processor.Processor
+}
+
+func NewCreateUserHandler(p processor.Processor) *CreateUserHandler {
+	return &CreateUserHandler{processor: p}
+}
+
+func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var input dto.CreateUserInput
 	err := json.Unmarshal([]byte(request.Body), &input)
 	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body:       "Invalid request body",
-		}, nil
+		return events.APIGatewayProxyResponse{}, errors.New("invalid input")
 	}
 
-	user, error := domain.NewUser(input.Name, input.Email)
+	output, err := h.processor.CreateUser(context.Background(), &input)
 	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body:       error.Error(),
-		}, nil
+		return events.APIGatewayProxyResponse{}, err
 	}
 
-	db := application.NewDynamoDBClient()
-	userRepository := storage.NewUserRepository(db)
-
-	emailAlreadyExists, err := userRepository.EmailAlreadyExists(user.Email)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       "Error checking if email already exists",
-		}, nil
-	}
-	if emailAlreadyExists {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body:       "Email already exists",
-		}, nil
-	}
-
-	err = userRepository.Save(user)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       "Error creating user in database",
-		}, nil
-	}
-
-	output := dto.CreateUserOutput{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
-	}
-
-	response, err := json.Marshal(output)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       "Error marshalling response",
-		}, nil
-	}
+	responseBody, _ := json.Marshal(output)
 
 	return events.APIGatewayProxyResponse{
-		StatusCode: 201,
-		Body:       string(response),
+		StatusCode: http.StatusCreated,
+		Body:       string(responseBody),
 	}, nil
 }
