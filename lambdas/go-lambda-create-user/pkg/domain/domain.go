@@ -11,6 +11,8 @@ type User struct {
 	Name      string   `json:"name"`
 	Surname   string   `json:"surname"`
 	Email     string   `json:"email"`
+	Limit     int      `json:"limit" default:"0"`
+	Password  string   `json:"password"`
 	IsAdmin   bool     `json:"isAdmin" default:"false"`
 	Teams     []string `json:"team" default:"[]"`
 	Confirmed bool     `json:"confirmed" default:"false"`

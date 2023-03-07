@@ -59,6 +59,6 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
-		Body:       string(responseBody),
+		Body:       "User created successfully",
 	}, nil
 }
