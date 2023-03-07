@@ -1,4 +1,4 @@
-package email_service
+package services
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	smtpAuthAdress = "smtp.olga.lat"
-	smtpServerAdress = "smtp.olga.lat:587"
+	smtpAuthAdress = "smtp.zoho.com"
+	smtpServerAdress = "smtp.zoho.com:587"
 )
 
 type EmailSender interface {
@@ -29,12 +29,13 @@ type emailSender struct {
 	fromEmailPassword string
 }
 
-func NewEmailSender(name string, fromEmailAdress string, fromEmailPassword string)
+func NewEmailSender(name string, fromEmailAdress string, fromEmailPassword string) EmailSender {
 	return &emailSender{
 		name: name,
 		fromEmailAdress: fromEmailAdress,
 		fromEmailPassword: fromEmailPassword,
 	}
+}
 
 func (sender *emailSender) SendEmail(
 	subject string,
@@ -56,9 +57,10 @@ func (sender *emailSender) SendEmail(
 		_, err := e.AttachFile(file)
 		if err != nil {
 			return fmt.Errorf("failed to attach file %s: %w", file, err)
+		}
 	}
 
-	smtpAuth := stmp.PlainAuth("", sender.fromEmailAdress, sender.fromEmailPassword, smtpAuthAdress)
+	smtpAuth := smtp.PlainAuth("", sender.fromEmailAdress, sender.fromEmailPassword, smtpAuthAdress)
 	return e.Send(smtpServerAdress, smtpAuth)
-}
+} 
 

@@ -1,6 +1,11 @@
-package service
+package services
 
-import "testing"
+import (
+	"testing"
+	"fmt"
+	"github.com/caarlos0/env/v6"
+	"github.com/stretchr/testify/require"
+)
 
 type Config struct {
 	EmailSenderName string `env:"EMAIL_SENDER_NAME"`
@@ -25,9 +30,8 @@ func TestSendEmail(t *testing.T) {
 	subject := "Test email"
 	body := "This is a test email"
 	to := []string{"ignacio.nahuel.ramos@gmail.com"}
-	attachFile := []string{"../../README.md"}
 
-	err = sender.SendEmail(subject, body, to, nil, nil, attachFile)
+	err = sender.SendEmail(subject, body, to, nil, nil, nil)
 	require.NoError(t, err)
 }
 
