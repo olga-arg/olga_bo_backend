@@ -24,6 +24,8 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 			Body:       "Missing request body",
 		}, nil
 	}
+	// Creates a CreateUserInput struct from the request body
+	var input dto.CreateUserInput
 
 	if input.Name == "" || input.Surname == "" || input.Email == "" {
 		return events.APIGatewayProxyResponse{
@@ -32,8 +34,6 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		}, nil
 	}
 
-	// Creates a CreateUserInput struct from the request body
-	var input dto.CreateUserInput
 	// Unmarshal the request body into the CreateUserInput struct
 	err := json.Unmarshal([]byte(request.Body), &input)
 	if err != nil {
