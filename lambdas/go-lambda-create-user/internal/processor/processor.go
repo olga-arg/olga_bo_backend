@@ -47,6 +47,6 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 		Limit:     user.Limit,
 		IsAdmin:   user.IsAdmin,
 		Teams:     user.Teams,
-		Confirmed: user.Confirmed,
+		Status: user.Status,
 	}, nil
 }

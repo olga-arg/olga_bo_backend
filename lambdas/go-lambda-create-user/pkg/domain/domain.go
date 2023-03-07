@@ -22,7 +22,7 @@ type User struct {
 	Limit     int                    `json:"limit" default:"0"`
 	IsAdmin   bool                   `json:"isAdmin" default:"false"`
 	Teams     []string               `json:"team" default:"[]"`
-	Confirmed ConfirmationStatus     `json:"confirmed" default:"0"`
+	Status    ConfirmationStatus     `json:"status" default:"Pending"`
 }
 
 func NewUser(name, surname, email string) (*User, error) {

@@ -9,5 +9,5 @@ type CreateUserOutput struct {
 	Limit     int                       `json:"limit"`
 	IsAdmin   bool                      `json:"isAdmin"`
 	Teams     []string                  `json:"team"`
-	Confirmed domain.ConfirmationStatus `json:"confirmed"`
+	Status    domain.ConfirmationStatus `json:"status"`
 }
