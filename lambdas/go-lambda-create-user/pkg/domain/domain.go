@@ -8,9 +8,9 @@ import (
 
 type User struct {
 	ID        string   `json:"id"`
-	Name      string   `json:"name"`
-	Surname   string   `json:"surname"`
-	Email     string   `json:"email"`
+	Name      string   `json:"name, required"`
+	Surname   string   `json:"surname, required"`
+	Email     string   `json:"email, required"`
 	IsAdmin   bool     `json:"isAdmin" default:"false"`
 	Teams     []string `json:"team" default:"[]"`
 	Confirmed bool     `json:"confirmed" default:"false"`

@@ -32,11 +32,6 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 		return nil, errors.New("email already exists")
 	}
 
-	// Checks if the required fields are empty
-	if input.Name == "" || input.Surname == "" || input.Email == "" {
-		return nil, errors.New("missing required fields")
-	}
-
 	// Creates a new user. New user takes a name and email and returns a user struct
 	user, _ := domain.NewUser(input.Name, input.Surname, input.Email)
 	// Saves the user to the database if it doesn't already exist
