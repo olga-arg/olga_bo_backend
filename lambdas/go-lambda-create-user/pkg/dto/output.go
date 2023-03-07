@@ -1,4 +1,5 @@
 package dto
+import "go-lambda-create-user/pkg/domain"
 
 type CreateUserOutput struct {
 	ID        string                    `json:"id"`
