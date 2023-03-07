@@ -27,10 +27,11 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	// Creates a CreateUserInput struct from the request body
 	var input dto.CreateUserInput
 
-	if request.Body.Name == "" || input.Body.Surname == "" || input.Request.Email == "" {
+	// Check that the request body has the name, surname and email fields
+	if input.Name == "" || input.Surname == "" || input.Email == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
-			Body:       "Missing required fields",
+			Body:       "Missing requiered fields",
 		}, nil
 	}
 
