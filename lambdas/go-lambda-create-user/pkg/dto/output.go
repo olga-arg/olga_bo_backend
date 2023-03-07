@@ -6,6 +6,7 @@ type CreateUserOutput struct {
 	Name      string                    `json:"name"`
 	Surname   string                    `json:"surname"`
 	Email     string                    `json:"email"`
+	Limit     int                       `json:"limit"`
 	IsAdmin   bool                      `json:"isAdmin"`
 	Teams     []string                  `json:"team"`
 	Confirmed domain.ConfirmationStatus `json:"confirmed"`
