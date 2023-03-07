@@ -44,6 +44,7 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 		Name:      user.Name,
 		Surname:   user.Surname,
 		Email:     user.Email,
+		Limit:     user.Limit,
 		IsAdmin:   user.IsAdmin,
 		Teams:     user.Teams,
 		Confirmed: user.Confirmed,
