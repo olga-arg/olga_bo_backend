@@ -6,16 +6,23 @@ import (
 	"github.com/pkg/errors"
 )
 
+type ConfirmationStatus int
+
+const (
+	Pending ConfirmationStatus = iota
+	Confirmed
+	Deleted
+)
+
 type User struct {
-	ID        string   `json:"id"`
-	Name      string   `json:"name"`
-	Surname   string   `json:"surname"`
-	Email     string   `json:"email"`
-	Limit     int      `json:"limit" default:"0"`
-	Password  string   `json:"password"`
-	IsAdmin   bool     `json:"isAdmin" default:"false"`
-	Teams     []string `json:"team" default:"[]"`
-	Confirmed bool     `json:"confirmed" default:"false"`
+	ID        string                 `json:"id"`
+	Name      string                 `json:"name"`
+	Surname   string                 `json:"surname"`
+	Email     string                 `json:"email"`
+	Limit     int                    `json:"limit" default:"0"`
+	IsAdmin   bool                   `json:"isAdmin" default:"false"`
+	Teams     []string               `json:"team" default:"[]"`
+	Confirmed ConfirmationStatus     `json:"confirmed" default:"0"`
 }
 
 func NewUser(name, surname, email string) (*User, error) {
