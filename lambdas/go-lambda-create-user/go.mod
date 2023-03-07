@@ -6,7 +6,6 @@ require (
 	github.com/aws/aws-lambda-go v1.38.0
 	github.com/aws/aws-sdk-go v1.44.214
 	github.com/badoux/checkmail v1.2.1
-	github.com/caarlos0/env/v6 v6.10.1
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/google/uuid v1.3.0
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible

@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	smtpAuthAdress = "smtp.zoho.com"
-	smtpServerAdress = "smtp.zoho.com:587"
+	smtpAuthAddress   = "smtp.zoho.com"
+	smtpServerAddress = "smtp.zoho.com:587"
 )
 
 type EmailSender interface {
@@ -24,15 +24,13 @@ type EmailSender interface {
 }
 
 type emailSender struct {
-	name string
-	fromEmailAdress string
+	fromEmailAddress  string
 	fromEmailPassword string
 }
 
-func NewEmailSender(name string, fromEmailAdress string, fromEmailPassword string) EmailSender {
+func NewEmailSender(fromEmailAddress string, fromEmailPassword string) EmailSender {
 	return &emailSender{
-		name: name,
-		fromEmailAdress: fromEmailAdress,
+		fromEmailAddress:  fromEmailAddress,
 		fromEmailPassword: fromEmailPassword,
 	}
 }
@@ -46,21 +44,13 @@ func (sender *emailSender) SendEmail(
 	attachFile []string,
 ) error {
 	e := email.NewEmail()
-	e.From = fmt.Sprintf("%s <%s>", sender.name, sender.fromEmailAdress)
+	e.From = fmt.Sprintf(sender.fromEmailAddress)
 	e.Subject = subject
 	e.HTML = []byte(body)
 	e.To = to
 	e.Cc = cc
 	e.Bcc = bcc
 
-	for _, file := range attachFile {
-		_, err := e.AttachFile(file)
-		if err != nil {
-			return fmt.Errorf("failed to attach file %s: %w", file, err)
-		}
-	}
-
-	smtpAuth := smtp.PlainAuth("", sender.fromEmailAdress, sender.fromEmailPassword, smtpAuthAdress)
-	return e.Send(smtpServerAdress, smtpAuth)
-} 
-
+	smtpAuth := smtp.PlainAuth("", sender.fromEmailAddress, sender.fromEmailPassword, smtpAuthAddress)
+	return e.Send(smtpServerAddress, smtpAuth)
+}
