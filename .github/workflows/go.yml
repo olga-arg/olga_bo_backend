@@ -23,6 +23,16 @@ jobs:
       - name: Go Build
         run: make -C lambdas/
 
+      - name: Check Changes
+        run: |
+          if git diff --quiet --exit-code serverless.yml; then
+            echo "No changes in serverless.yml"
+            echo "HAS_SERVERLESS_CHANGES=false" >> $GITHUB_ENV
+          else
+            echo "Changes in serverless.yml"
+            echo "HAS_SERVERLESS_CHANGES=true" >> $GITHUB_ENV
+          fi
+
       - name: Serverless
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -31,8 +41,20 @@ jobs:
         run: |
           npm install serverless
           npm install serverless-domain-manager
-          npx serverless deploy
-          npx serverless create_domain
+          if [ "$HAS_SERVERLESS_CHANGES" = "true" ]; then
+            npx serverless deploy
+            npx serverless create_domain
+          else
+            if [ -n "$(ls -A lambdas/bin/)" ]; then
+              for f in lambdas/bin/*; do
+                if [ -f "$f" ]; then
+                  FUNCTION_NAME=$(basename "$f" | cut -d '.' -f 1)
+                  echo "Updating code of $FUNCTION_NAME..."
+                  npx serverless deploy function -f "$FUNCTION_NAME"
+                fi
+              done
+            fi
+          fi
 
 #    - name: Build
 #      run: go build -v ./...
