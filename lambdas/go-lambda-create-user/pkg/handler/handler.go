@@ -65,7 +65,7 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
-			Body:       fmt.Sprintf("Error sending email from %s to %s", fromEmailAddress, input.Email)
+			Body:       fmt.Sprintf("Error sending email from %s to %s", fromEmailAddress, input.Email),
 		}, nil
 	}
 
