@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-create-user/internal/processor"
 	"go-lambda-create-user/pkg/dto"
+	"go-lambda-create-user/internal/services"
 	"net/http"
 	"github.com/go-playground/validator/v10"
 )
@@ -55,10 +56,24 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		}, nil
 	}
 
+	// Send email to user
+	if err := services.SendEmail(
+		subject := "Welcome to the team!",
+		body := "You have been added to the team. Please log in to your account to view your teams.",
+		to := []string{input.Email},
+		nil, nil, nil
+	); err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       err.Error(),
+		}, nil
+	}
+
 	responseBody, _ := json.Marshal(output)
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
-		Body:       string(responseBody),
+		Body:       "User created successfully",
 	}, nil
 }
+

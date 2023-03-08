@@ -12,6 +12,12 @@ const (
 	smtpServerAddress = "smtp.zoho.com:587"
 )
 
+type Config struct {
+	EmailSenderName     string `env:"EMAIL_SENDER_NAME"`
+	fromEmailAddress    string `env:"EMAIL_SENDER_ADDRESS"`
+	EmailSenderPassword string `env:"EMAIL_SENDER_PASSWORD"`
+}
+
 type EmailSender interface {
 	SendEmail(
 		subject string,
