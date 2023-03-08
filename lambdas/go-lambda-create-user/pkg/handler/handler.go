@@ -69,7 +69,7 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 
 	err = sender.SendEmail(subject, body, to, nil, nil, nil)
 
-	responseBody, _ := json.Marshal(output)
+	// responseBody, _ := json.Marshal(output)
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
