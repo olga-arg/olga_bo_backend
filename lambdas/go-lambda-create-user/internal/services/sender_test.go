@@ -1,23 +1,22 @@
 package services
 
 import (
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
+	"os"
 	"testing"
 )
 
-type Config struct {
-	EmailSenderName     string `env:"EMAIL_SENDER_NAME"`
-	fromEmailAddress    string `env:"EMAIL_SENDER_ADDRESS"`
-	EmailSenderPassword string `env:"EMAIL_SENDER_PASSWORD"`
-}
-
 func TestSendEmail(t *testing.T) {
-	sender := NewEmailSender("", "")
-
+	err := godotenv.Load("../../../../.env")
+	require.NoError(t, err)
+	fromEmailAddress := os.Getenv("EMAIL_SENDER_ADDRESS")
+	fromEmailPassword := os.Getenv("EMAIL_SENDER_PASSWORD")
+	sender := NewEmailSender(fromEmailAddress, fromEmailPassword)
 	subject := "Test email"
 	body := "This is a test email"
 	to := []string{""}
 
-	err := sender.SendEmail(subject, body, to, nil, nil, nil)
+	err = sender.SendEmail(subject, body, to, nil, nil, nil)
 	require.NoError(t, err)
 }

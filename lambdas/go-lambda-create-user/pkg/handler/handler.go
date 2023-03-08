@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
-	"go-lambda-create-user/internal/processor"
-	"go-lambda-create-user/pkg/dto"
-	"go-lambda-create-user/internal/services"
-	"net/http"
 	"github.com/go-playground/validator/v10"
+	"github.com/joho/godotenv"
+	"go-lambda-create-user/internal/processor"
+	"go-lambda-create-user/internal/services"
+	"go-lambda-create-user/pkg/dto"
+	"net/http"
+	"os"
 )
 
 type CreateUserHandler struct {
@@ -57,12 +59,15 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	}
 
 	// Send email to user
-	if err := services.SendEmail(
-		"Welcome to the team!",
-		"You have been added to the team. Please log in to your account to view your teams.",
-		[]string{input.Email},
-		nil, nil, nil,
-		)
+	err = godotenv.Load("../../../../.env")
+	fromEmailAddress := os.Getenv("EMAIL_SENDER_ADDRESS")
+	fromEmailPassword := os.Getenv("EMAIL_SENDER_PASSWORD")
+	sender := services.NewEmailSender(fromEmailAddress, fromEmailPassword)
+	subject := "Test email"
+	body := "This is a test email"
+	to := []string{input.Email}
+
+	err = sender.SendEmail(subject, body, to, nil, nil, nil)
 
 	responseBody, _ := json.Marshal(output)
 
@@ -71,4 +76,3 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		Body:       "User created successfully",
 	}, nil
 }
-
