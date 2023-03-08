@@ -64,7 +64,13 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		nil, nil, nil,
 		)
 
-	responseBody, _ := json.Marshal(output)
+	responseBody, err := json.Marshal(output)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       "Internal server error",
+		}, nil
+	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
