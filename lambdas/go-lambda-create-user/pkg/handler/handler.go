@@ -11,6 +11,7 @@ import (
 	"go-lambda-create-user/pkg/dto"
 	"net/http"
 	"os"
+	"sync"
 )
 
 type CreateUserHandler struct {
@@ -67,7 +68,15 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	body := "This is a test email"
 	to := []string{input.Email}
 
-	err = sender.SendEmail(subject, body, to, nil, nil, nil)
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		err = sender.SendEmail(subject, body, to, nil, nil, nil)
+	}()
+
+	wg.Wait()
 
 	// responseBody, _ := json.Marshal(output)
 
