@@ -58,16 +58,16 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 
 	// Send email to user
 	if err := services.SendEmail(
-		subject := "Welcome to the team!",
-		body := "You have been added to the team. Please log in to your account to view your teams.",
-		to := []string{input.Email},
-		nil, nil, nil
-	); err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body:       err.Error(),
-		}, nil
-	}
+		"Welcome to the team!",
+		"You have been added to the team. Please log in to your account to view your teams.",
+		[]string{input.Email},
+		nil, nil, nil,
+		); err != nil {
+	return events.APIGatewayProxyResponse{
+		StatusCode: 400,
+		Body:       err.Error(),
+	}, nil
+}
 
 	responseBody, _ := json.Marshal(output)
 
