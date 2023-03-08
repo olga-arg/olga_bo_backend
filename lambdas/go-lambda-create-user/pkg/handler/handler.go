@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
@@ -50,14 +51,6 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		}, nil
 	}
 
-	_, err = h.processor.CreateUser(context.Background(), &input)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body:       err.Error(),
-		}, nil
-	}
-
 	// Send email to user
 	err = godotenv.Load("../../../../.env")
 	fromEmailAddress := os.Getenv("EMAIL_SENDER_ADDRESS")
@@ -69,6 +62,14 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 
 	err = sender.SendEmail(subject, body, to, nil, nil, nil)
 
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       fmt.Sprintf("Error sending email from %s to %s", fromEmailAddress, input.Email)
+		}, nil
+	}
+
+	_, err = h.processor.CreateUser(context.Background(), &input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
