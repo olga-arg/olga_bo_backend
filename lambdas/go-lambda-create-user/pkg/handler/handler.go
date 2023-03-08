@@ -50,7 +50,7 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		}, nil
 	}
 
-	output, err := h.processor.CreateUser(context.Background(), &input)
+	_, err = h.processor.CreateUser(context.Background(), &input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
