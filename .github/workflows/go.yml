@@ -41,7 +41,7 @@ jobs:
         run: |
           npm install serverless
           npm install serverless-domain-manager
-          serverless plugin install --name serverless-ssm-fetch
+          npm install serverless-ssm-fetch
           if [ "$HAS_SERVERLESS_CHANGES" = "true" ]; then
             npx serverless deploy
             npx serverless create_domain
