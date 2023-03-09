@@ -12,6 +12,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        common_steps:
+          - name: Setup Serverless
+            env:
+              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+            run: |
+              npm install serverless
+              npm install serverless-domain-manager
+              npm install serverless-ssm-fetch
     outputs:
       output1: ${{ steps.filter.outputs.serverless }}
     steps:
@@ -31,26 +43,16 @@ jobs:
       - name: Go Build
         run: make -C lambdas/
 
-      - name: Setup Serverless
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-        run: |
-          npm install serverless
-          npm install serverless-domain-manager
-          npm install serverless-ssm-fetch
-
       - name: Serverless.yml deploy
-        needs: Setup Serverless
         if: steps.filter.outputs.serverless == 'true'
+        steps: ${{ matrix.common_steps }}
         run: |
           npx serverless deploy
           npx serverless create_domain
 
       - name: Serverless Deploy Lambdas
-        needs: Setup Serverless
         if: steps.filter.outputs.serverless != 'true'
+        steps: ${{ matrix.common_steps }}
         run: |
           if [ -n "$(ls -A lambdas/bin/)" ]; then
             for f in lambdas/bin/*; do
