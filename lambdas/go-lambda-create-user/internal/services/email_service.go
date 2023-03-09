@@ -33,7 +33,7 @@ type EmailSender interface {
 	SendEmail(
 		subject string,
 		body string,
-		to []string,
+		to string,
 		cc []string,
 	) error
 }
@@ -43,10 +43,10 @@ func newEmailService(config Config) EmailSender {
 	return &emailService{fromEmail: config.fromEmailAddress, auth: auth}
 }
 
-func (es *emailService) SendEmail(subject, body string, to, cc []string) error {
+func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
 	e := email.NewEmail()
 	e.From = es.fromEmail
-	e.To = to
+	e.To = []string{to}
 	e.Cc = cc
 	e.Subject = subject
 	e.Text = []byte(body)
