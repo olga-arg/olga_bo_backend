@@ -59,15 +59,19 @@ func (es *emailService) SendEmail(subject, body string, to, cc []string) error {
 
 func NewDefaultEmailService() EmailSender {
 	emailAddrB64 := os.Getenv("EMAIL_SENDER_ADDRESS")
-	emailPass := os.Getenv("EMAIL_SENDER_PASSWORD")
+	emailPassB64 := os.Getenv("EMAIL_SENDER_PASSWORD")
 	emailAddr, err := base64.StdEncoding.DecodeString(emailAddrB64)
-	if err != nil || emailPass == "" {
+	if err != nil {
 		panic("env variables must be set")
 	}
-	log.Println("emailAddr: ", string(emailAddr))
+	emailPass, err := base64.StdEncoding.DecodeString(emailPassB64)
+	if err != nil {
+		panic("env variables must be set")
+	}
+	log.Println("emailAddr: ", string(emailPass[0]), string(emailPass[11]))
 	config := Config{
 		fromEmailAddress:  string(emailAddr),
-		fromEmailPassword: emailPass,
+		fromEmailPassword: string(emailPass),
 	}
 
 	once.Do(func() {
