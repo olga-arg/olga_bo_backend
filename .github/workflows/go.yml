@@ -12,18 +12,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-    strategy:
-      matrix:
-        common_steps:
-          - name: Setup Serverless
-            run: |
-              npm install serverless
-              npm install serverless-domain-manager
-              npm install serverless-ssm-fetch
     outputs:
       output1: ${{ steps.filter.outputs.serverless }}
     steps:
@@ -35,7 +23,7 @@ jobs:
             serverless:
               - 'serverless.yml'
 
-      - name: Setup Go
+      - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: 1.19
@@ -45,15 +33,27 @@ jobs:
 
       - name: Serverless.yml deploy
         if: steps.filter.outputs.serverless == 'true'
-        steps: ${{ matrix.common_steps }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
+          npm install serverless
+          npm install serverless-domain-manager
+          npm install serverless-ssm-fetch
           npx serverless deploy
           npx serverless create_domain
 
       - name: Serverless Deploy Lambdas
         if: steps.filter.outputs.serverless != 'true'
-        steps: ${{ matrix.common_steps }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
+          npm install serverless
+          npm install serverless-domain-manager
+          npm install serverless-ssm-fetch
           if [ -n "$(ls -A lambdas/bin/)" ]; then
             for f in lambdas/bin/*; do
               if [ -f "$f" ]; then
