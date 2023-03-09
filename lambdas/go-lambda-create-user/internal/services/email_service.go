@@ -51,6 +51,7 @@ func (es *emailService) SendEmail(subject, body string, to, cc []string) error {
 	e.Subject = subject
 	e.Text = []byte(body)
 	err := e.Send(smtpServerAddress, es.auth)
+	log.Println("email sent: ", err)
 	if err != nil {
 		return err
 	}
