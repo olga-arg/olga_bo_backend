@@ -27,7 +27,7 @@ functions:
   go-lambda-create-user:
     handler: lambdas/bin/go-lambda-create-user
     ssmToEnvironment:
-      - EMAIL_SENDER_ADDRESS
+      - EMAIL_SENDER_ADDRESS~true
       - EMAIL_SENDER_PASSWORD
     events:
       - httpApi:
