@@ -82,7 +82,7 @@ plugins:
 custom:
   serverlessSsmFetch:
     EMAIL_SENDER_ADDRESS: /email_sender_address~true
-    EMAIL_SENDER_PASSWORD: /aws/ssm/email_sender_password~true
+    EMAIL_SENDER_PASSWORD: /email_sender_password~true
   customDomain:
     domainName: 'api.olga.lat'
     basePath: 'api'
