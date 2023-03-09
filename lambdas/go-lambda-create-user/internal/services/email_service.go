@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"github.com/jordan-wright/email"
 	"net/smtp"
 	"os"
@@ -60,6 +61,7 @@ func NewDefaultEmailService() EmailSender {
 		fromEmailAddress:  os.Getenv("EMAIL_SENDER_ADDRESS"),
 		fromEmailPassword: os.Getenv("EMAIL_SENDER_PASSWORD"),
 	}
+	fmt.Println(config.fromEmailAddress)
 	if config.fromEmailAddress == "" || config.fromEmailPassword == "" {
 		panic("env variables must be set")
 	}
