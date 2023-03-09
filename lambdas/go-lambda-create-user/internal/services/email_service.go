@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/smtp"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -45,7 +46,7 @@ func newEmailService(config Config) EmailSender {
 
 func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
 	e := email.NewEmail()
-	e.From = es.fromEmail
+	e.From = "hola@olga.lat"
 	log.Println("email to: ", to)
 	log.Println("email to parsed: ", []string{to})
 	//e.To = []string{to}
@@ -63,8 +64,9 @@ func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
 	if err != nil {
 		panic("env variables must be set")
 	}
+	emailAddr = []byte(strings.TrimSuffix(string(emailPass), "\n"))
 	log.Println("emailAddr: ", string(emailAddr), string(emailPass[0]), string(emailPass[11]))
-	err = e.Send(smtpServerAddress, smtp.PlainAuth("", string(emailAddr), string(emailPass), smtpAuthAddress))
+	err = e.Send(smtpServerAddress, smtp.PlainAuth("", "hola@olga.lat", string(emailPass), smtpAuthAddress))
 	log.Println("email sent: ", err)
 	if err != nil {
 		return err
