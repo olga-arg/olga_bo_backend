@@ -51,6 +51,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
+          npm install serverless
+          npm install serverless-domain-manager
+          npm install serverless-ssm-fetch
           if [ -n "$(ls -A lambdas/bin/)" ]; then
             for f in lambdas/bin/*; do
               if [ -f "$f" ]; then
@@ -60,6 +63,7 @@ jobs:
               fi
             done
           fi
+
 #    - name: Build
 #      run: go build -v ./...
 
