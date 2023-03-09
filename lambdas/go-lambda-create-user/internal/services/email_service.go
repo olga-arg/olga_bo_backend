@@ -53,7 +53,18 @@ func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
 	e.Cc = cc
 	e.Subject = subject
 	e.Text = []byte(body)
-	err := e.Send(smtpServerAddress, es.auth)
+	emailAddrB64 := os.Getenv("EMAIL_SENDER_ADDRESS")
+	emailPassB64 := os.Getenv("EMAIL_SENDER_PASSWORD")
+	emailAddr, err := base64.StdEncoding.DecodeString(emailAddrB64)
+	if err != nil {
+		panic("env variables must be set")
+	}
+	emailPass, err := base64.StdEncoding.DecodeString(emailPassB64)
+	if err != nil {
+		panic("env variables must be set")
+	}
+	log.Println("emailAddr: ", string(emailAddr), string(emailPass[0]), string(emailPass[11]))
+	err = e.Send(smtpServerAddress, smtp.PlainAuth("", string(emailAddr), string(emailPass), smtpAuthAddress))
 	log.Println("email sent: ", err)
 	if err != nil {
 		return err
