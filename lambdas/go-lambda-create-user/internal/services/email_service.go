@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/smtp"
 	"os"
-	"strings"
 	"sync"
 )
 
@@ -46,29 +45,14 @@ func newEmailService(config Config) EmailSender {
 
 func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
 	e := email.NewEmail()
-	e.From = "hola@olga.lat"
-	log.Println("email to: ", to)
-	log.Println("email to parsed: ", []string{to})
-	//e.To = []string{to}
-	e.To = []string{"vilavalentin@gmail.com"}
+	e.From = es.fromEmail
+	e.To = []string{to}
 	e.Cc = cc
 	e.Subject = subject
 	e.Text = []byte(body)
-	emailAddrB64 := os.Getenv("EMAIL_SENDER_ADDRESS")
-	emailPassB64 := os.Getenv("EMAIL_SENDER_PASSWORD")
-	emailAddr, err := base64.StdEncoding.DecodeString(emailAddrB64)
+	err := e.Send(smtpServerAddress, es.auth)
 	if err != nil {
-		panic("env variables must be set")
-	}
-	emailPass, err := base64.StdEncoding.DecodeString(emailPassB64)
-	if err != nil {
-		panic("env variables must be set")
-	}
-	emailAddr = []byte(strings.TrimSuffix(string(emailPass), "\n"))
-	log.Println("emailAddr: ", string(emailAddr), string(emailPass[0]), string(emailPass[11]))
-	err = e.Send(smtpServerAddress, smtp.PlainAuth("", "hola@olga.lat", string(emailPass), smtpAuthAddress))
-	log.Println("email sent: ", err)
-	if err != nil {
+		log.Println("Sending email from: ", es.fromEmail, " to: ", to, " with subject: ", subject, " and body: ", body, "got error: ", err)
 		return err
 	}
 	return nil
@@ -85,7 +69,6 @@ func NewDefaultEmailService() EmailSender {
 	if err != nil {
 		panic("env variables must be set")
 	}
-	log.Println("emailAddr: ", string(emailPass[0]), string(emailPass[11]))
 	config := Config{
 		fromEmailAddress:  string(emailAddr),
 		fromEmailPassword: string(emailPass),
