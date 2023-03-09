@@ -40,7 +40,7 @@ var validate = validator.New()
 
 func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	fromEmailAddressParam, err := h.ssmClient.GetParameter(&ssm.GetParameterInput{
-		Name:           aws.String("/olga-backend/EMAIL_SENDER_ADDRESS"),
+		Name:           aws.String("/EMAIL_SENDER_ADDRESS"),
 		WithDecryption: aws.Bool(true),
 	})
 	if err != nil {
@@ -50,7 +50,7 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		}, nil
 	}
 	fromEmailPasswordParam, err := h.ssmClient.GetParameter(&ssm.GetParameterInput{
-		Name:           aws.String("/olga-backend/EMAIL_SENDER_PASSWORD"),
+		Name:           aws.String("/EMAIL_SENDER_PASSWORD"),
 		WithDecryption: aws.Bool(true),
 	})
 	if err != nil {
