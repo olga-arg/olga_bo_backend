@@ -26,9 +26,6 @@ functions:
       - cloudwatchLog: '/aws/lambda/world'
   go-lambda-create-user:
     handler: lambdas/bin/go-lambda-create-user
-    environment:
-      EMAIL_SENDER_ADDRESS: '${ssm:/email_sender_address~true}'
-      EMAIL_SENDER_PASSWORD: '${ssm:/email_sender_password~true}'
     events:
       - httpApi:
           path: /create-user
