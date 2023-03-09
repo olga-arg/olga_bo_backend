@@ -48,7 +48,8 @@ func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
 	e.From = es.fromEmail
 	log.Println("email to: ", to)
 	log.Println("email to parsed: ", []string{to})
-	e.To = []string{to}
+	//e.To = []string{to}
+	e.To = []string{"vilavalentin@gmail.com"}
 	e.Cc = cc
 	e.Subject = subject
 	e.Text = []byte(body)
