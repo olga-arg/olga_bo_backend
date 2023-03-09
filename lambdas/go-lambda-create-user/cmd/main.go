@@ -9,10 +9,10 @@ import (
 )
 
 func main() {
+	application.SetupEmailService()
 	db := application.NewDynamoDBClient()
 	userRepo := storage.NewUserRepository(db)
 	userProcessor := processor.New(*userRepo)
 	createUserHandler := handler.NewCreateUserHandler(userProcessor)
-
 	lambda.Start(createUserHandler.Handle)
 }

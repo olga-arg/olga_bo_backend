@@ -1,15 +1,30 @@
 package services
 
 import (
-	"fmt"
-	"net/smtp"
-
 	"github.com/jordan-wright/email"
+	"net/smtp"
+	"os"
+	"sync"
 )
 
 const (
 	smtpAuthAddress   = "smtp.zoho.com"
 	smtpServerAddress = "smtp.zoho.com:587"
+)
+
+type Config struct {
+	fromEmailAddress  string
+	fromEmailPassword string
+}
+
+type emailService struct {
+	fromEmail string
+	auth      smtp.Auth
+}
+
+var (
+	es   *emailService
+	once sync.Once
 )
 
 type EmailSender interface {
@@ -18,39 +33,40 @@ type EmailSender interface {
 		body string,
 		to []string,
 		cc []string,
-		bcc []string,
-		attachFile []string,
 	) error
 }
 
-type emailSender struct {
-	fromEmailAddress  string
-	fromEmailPassword string
+func newEmailService(config Config) EmailSender {
+	auth := smtp.PlainAuth("", config.fromEmailPassword, config.fromEmailPassword, smtpAuthAddress)
+	return &emailService{fromEmail: config.fromEmailAddress, auth: auth}
 }
 
-func NewEmailSender(fromEmailAddress string, fromEmailPassword string) EmailSender {
-	return &emailSender{
-		fromEmailAddress:  fromEmailAddress,
-		fromEmailPassword: fromEmailPassword,
-	}
-}
-
-func (sender *emailSender) SendEmail(
-	subject string,
-	body string,
-	to []string,
-	cc []string,
-	bcc []string,
-	attachFile []string,
-) error {
+func (es *emailService) SendEmail(subject, body string, to, cc []string) error {
 	e := email.NewEmail()
-	e.From = fmt.Sprintf(sender.fromEmailAddress)
-	e.Subject = subject
-	e.HTML = []byte(body)
+	e.From = es.fromEmail
 	e.To = to
 	e.Cc = cc
-	e.Bcc = bcc
+	e.Subject = subject
+	e.Text = []byte(body)
+	err := e.Send(smtpServerAddress, es.auth)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-	smtpAuth := smtp.PlainAuth("", sender.fromEmailAddress, sender.fromEmailPassword, smtpAuthAddress)
-	return e.Send(smtpServerAddress, smtpAuth)
+func NewDefaultEmailService() EmailSender {
+	config := Config{
+		fromEmailAddress:  os.Getenv("EMAIL_SENDER_ADDRESS"),
+		fromEmailPassword: os.Getenv("EMAIL_SENDER_PASSWORD"),
+	}
+	if config.fromEmailAddress == "" || config.fromEmailPassword == "" {
+		panic("env variables must be set")
+	}
+
+	once.Do(func() {
+		es = newEmailService(config).(*emailService)
+	})
+
+	return es
 }

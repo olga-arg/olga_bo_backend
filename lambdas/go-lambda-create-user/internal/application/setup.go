@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"go-lambda-create-user/internal/services"
 )
 
 func NewDynamoDBClient() *dynamodb.DynamoDB {
@@ -12,4 +13,8 @@ func NewDynamoDBClient() *dynamodb.DynamoDB {
 	}))
 
 	return dynamodb.New(sess, aws.NewConfig().WithRegion("sa-east-1"))
+}
+
+func SetupEmailService() services.EmailSender {
+	return services.NewDefaultEmailService()
 }

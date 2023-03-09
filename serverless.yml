@@ -26,14 +26,16 @@ functions:
       - cloudwatchLog: '/aws/lambda/world'
   go-lambda-create-user:
     handler: lambdas/bin/go-lambda-create-user
+    environment:
+      EMAIL_SENDER_ADDRESS: '${ssm:EMAIL_SENDER_ADDRESS~true}'
+      EMAIL_SENDER_PASSWORD: '${ssm:EMAIL_SENDER_PASSWORD~true}'
     events:
       - httpApi:
           path: /create-user
           method: post
       - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
-    parameterOverrides:
-      EMAIL_SENDER_ADDRESS: ${ssm:/EMAIL_SENDER_ADDRESS}
-      EMAIL_SENDER_PASSWORD: ${ssm:/EMAIL_SENDER_PASSWORD}
+
+
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
