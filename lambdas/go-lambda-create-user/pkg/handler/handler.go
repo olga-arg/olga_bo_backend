@@ -52,7 +52,7 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	}
 
 	// Send email to user
-	err = godotenv.Load("../../../../.env")
+	err = godotenv.Load("../../../../../.env")
 	fromEmailAddress := os.Getenv("EMAIL_SENDER_ADDRESS")
 	fromEmailPassword := os.Getenv("EMAIL_SENDER_PASSWORD")
 	sender := services.NewEmailSender(fromEmailAddress, fromEmailPassword)
