@@ -31,9 +31,16 @@ functions:
       - EMAIL_SENDER_PASSWORD
     events:
       - httpApi:
-          path: /create-user
+          path: /users
           method: post
       - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
+  go-lambda-get-all-users:
+    handler: lambdas/bin/go-lambda-get-all-users
+    events:
+      - httpApi:
+          path: /users
+          method: get
+      - cloudwatchLog: '/aws/lambda/go-lambda-get-all-users'
 
 
 #    Define function environment variables here
