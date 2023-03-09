@@ -42,12 +42,14 @@ jobs:
           npm install serverless-ssm-fetch
 
       - name: Serverless.yml deploy
+        needs: Setup Serverless
         if: steps.filter.outputs.serverless == 'true'
         run: |
           npx serverless deploy
           npx serverless create_domain
 
       - name: Serverless Deploy Lambdas
+        needs: Setup Serverless
         if: steps.filter.outputs.serverless != 'true'
         run: |
           if [ -n "$(ls -A lambdas/bin/)" ]; then
