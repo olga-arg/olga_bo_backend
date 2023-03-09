@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/smtp"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -52,7 +53,7 @@ func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
 	e.Text = []byte(body)
 	err := e.Send(smtpServerAddress, es.auth)
 	if err != nil {
-		log.Println("Sending email from: ", es.fromEmail, " to: ", to, " with subject: ", subject, " and body: ", body, "got error: ", err)
+		log.Println("Sending email from: ", es.fromEmail, " to: ", to, " with subject: ", subject, "got error: ", err)
 		return err
 	}
 	return nil
@@ -69,6 +70,7 @@ func NewDefaultEmailService() EmailSender {
 	if err != nil {
 		panic("env variables must be set")
 	}
+	emailAddr = []byte(strings.TrimSuffix(string(emailAddr), "\n"))
 	config := Config{
 		fromEmailAddress:  string(emailAddr),
 		fromEmailPassword: string(emailPass),
