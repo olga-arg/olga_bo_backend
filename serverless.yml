@@ -31,7 +31,9 @@ functions:
           path: /create-user
           method: post
       - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
-
+    parameterOverrides:
+      EMAIL_SENDER_ADDRESS: ${ssm:/olga-backend/EMAIL_SENDER_ADDRESS}
+      EMAIL_SENDER_PASSWORD: ${ssm:/olga-backend/EMAIL_SENDER_PASSWORD}
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
