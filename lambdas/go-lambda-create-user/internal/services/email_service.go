@@ -1,7 +1,9 @@
 package services
 
 import (
+	"encoding/base64"
 	"github.com/jordan-wright/email"
+	"log"
 	"net/smtp"
 	"os"
 	"sync"
@@ -56,18 +58,16 @@ func (es *emailService) SendEmail(subject, body string, to, cc []string) error {
 }
 
 func NewDefaultEmailService() EmailSender {
+	emailAddrB64 := os.Getenv("EMAIL_SENDER_ADDRESS")
+	emailPass := os.Getenv("EMAIL_SENDER_PASSWORD")
+	emailAddr, err := base64.StdEncoding.DecodeString(emailAddrB64)
+	if err != nil || emailPass == "" {
+		panic("env variables must be set")
+	}
+	log.Println("emailAddr: ", string(emailAddr))
 	config := Config{
-		fromEmailAddress:  os.Getenv("EMAIL_SENDER_ADDRESS"),
-		fromEmailPassword: os.Getenv("EMAIL_SENDER_PASSWORD"),
-	}
-	if config.fromEmailAddress == "" && config.fromEmailPassword == "" {
-		panic("env variable email and mail must be set")
-	}
-	if config.fromEmailPassword == "" {
-		panic("env variable email password must be set")
-	}
-	if config.fromEmailAddress == "" {
-		panic("env variable email must be set")
+		fromEmailAddress:  string(emailAddr),
+		fromEmailPassword: emailPass,
 	}
 
 	once.Do(func() {
