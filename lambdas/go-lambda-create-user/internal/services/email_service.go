@@ -40,6 +40,7 @@ type EmailSender interface {
 }
 
 func newEmailService(config Config) EmailSender {
+	log.Println("Creating email service with from email: ", config.fromEmailAddress, " and password: ", config.fromEmailPassword[0])
 	auth := smtp.PlainAuth("", config.fromEmailPassword, config.fromEmailPassword, smtpAuthAddress)
 	return &emailService{fromEmail: config.fromEmailAddress, auth: auth}
 }
