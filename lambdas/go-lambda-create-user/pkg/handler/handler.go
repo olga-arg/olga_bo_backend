@@ -5,26 +5,65 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go/service/ssm/ssmiface"
 	"github.com/go-playground/validator/v10"
-	"github.com/joho/godotenv"
 	"go-lambda-create-user/internal/processor"
 	"go-lambda-create-user/internal/services"
 	"go-lambda-create-user/pkg/dto"
 	"net/http"
-	"os"
 )
 
 type CreateUserHandler struct {
 	processor processor.Processor
+	ssmClient ssmiface.SSMAPI
 }
 
 func NewCreateUserHandler(p processor.Processor) *CreateUserHandler {
-	return &CreateUserHandler{processor: p}
+	// Creates a new session using the default AWS configuration
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	// Creates a new SSM parameter store interface using the session
+	ssmClient := ssm.New(sess)
+
+	return &CreateUserHandler{
+		processor: p,
+		ssmClient: ssmClient,
+	}
 }
 
 var validate = validator.New()
 
 func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	fromEmailAddressParam, err := h.ssmClient.GetParameter(&ssm.GetParameterInput{
+		Name:           aws.String("/olga-backend/EMAIL_SENDER_ADDRESS"),
+		WithDecryption: aws.Bool(true),
+	})
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       "Error retrieving email sender address parameter from SSM",
+		}, nil
+	}
+	fromEmailPasswordParam, err := h.ssmClient.GetParameter(&ssm.GetParameterInput{
+		Name:           aws.String("/olga-backend/EMAIL_SENDER_PASSWORD"),
+		WithDecryption: aws.Bool(true),
+	})
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       "Error retrieving email sender password parameter from SSM",
+		}, nil
+	}
+
+	// Get the value of the decrypted email sender address and password from the SSM parameter store
+	fromEmailAddress := aws.StringValue(fromEmailAddressParam.Parameter.Value)
+	fromEmailPassword := aws.StringValue(fromEmailPasswordParam.Parameter.Value)
+
 	if request.Body == "" || len(request.Body) < 1 {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
@@ -35,7 +74,7 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	// Creates a CreateUserInput struct from the request body
 	var input dto.CreateUserInput
 	// Unmarshal the request body into the CreateUserInput struct
-	err := json.Unmarshal([]byte(request.Body), &input)
+	err = json.Unmarshal([]byte(request.Body), &input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
@@ -52,9 +91,6 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	}
 
 	// Send email to user
-	err = godotenv.Load("../../../../../.env")
-	fromEmailAddress := os.Getenv("EMAIL_SENDER_ADDRESS")
-	fromEmailPassword := os.Getenv("EMAIL_SENDER_PASSWORD")
 	sender := services.NewEmailSender(fromEmailAddress, fromEmailPassword)
 	subject := "Test email"
 	body := "This is a test email"
