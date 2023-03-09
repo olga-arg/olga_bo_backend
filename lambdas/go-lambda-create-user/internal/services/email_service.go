@@ -46,6 +46,8 @@ func newEmailService(config Config) EmailSender {
 func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
 	e := email.NewEmail()
 	e.From = es.fromEmail
+	log.Println("email to: ", to)
+	log.Println("email to parsed: ", []string{to})
 	e.To = []string{to}
 	e.Cc = cc
 	e.Subject = subject
