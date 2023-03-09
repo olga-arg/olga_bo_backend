@@ -27,7 +27,7 @@ functions:
   go-lambda-create-user:
     handler: lambdas/bin/go-lambda-create-user
     ssmToEnvironment:
-      - EMAIL_SENDER_ADDRESS~true
+      - EMAIL_SENDER_ADDRESS
       - EMAIL_SENDER_PASSWORD
     events:
       - httpApi:
@@ -81,8 +81,8 @@ plugins:
 
 custom:
   serverlessSsmFetch:
-    EMAIL_SENDER_ADDRESS: /email_sender_address~true
-    EMAIL_SENDER_PASSWORD: /email_sender_password~true
+    EMAIL_SENDER_ADDRESS: /email_sender_address
+    EMAIL_SENDER_PASSWORD: /email_sender_password
   customDomain:
     domainName: 'api.olga.lat'
     basePath: 'api'
