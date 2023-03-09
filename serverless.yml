@@ -27,8 +27,8 @@ functions:
   go-lambda-create-user:
     handler: lambdas/bin/go-lambda-create-user
     environment:
-      EMAIL_SENDER_ADDRESS: '${ssm:EMAIL_SENDER_ADDRESS~true}'
-      EMAIL_SENDER_PASSWORD: '${ssm:EMAIL_SENDER_PASSWORD~true}'
+      EMAIL_SENDER_ADDRESS: '${ssm:/EMAIL_SENDER_ADDRESS~true}'
+      EMAIL_SENDER_PASSWORD: '${ssm:/EMAIL_SENDER_PASSWORD~true}'
     events:
       - httpApi:
           path: /create-user
