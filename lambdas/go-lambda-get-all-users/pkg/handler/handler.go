@@ -34,7 +34,7 @@ func (h *GetAllUsersHandler) Handle(request events.APIGatewayProxyRequest) (even
 
 	response := map[string]interface{}{
 		"users":  users.Users,
-		"filter": filter,
+		"filter": filter_name,
 	}
 
 	body, err := json.Marshal(response)

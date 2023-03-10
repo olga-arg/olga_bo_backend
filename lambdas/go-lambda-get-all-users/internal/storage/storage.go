@@ -10,7 +10,6 @@ type UserRepository struct {
 	db *dynamodb.DynamoDB
 }
 
-// The repository is responsible for interacting with the database
 func NewUserRepository(db *dynamodb.DynamoDB) *UserRepository {
 	return &UserRepository{
 		db: db,
