@@ -17,11 +17,25 @@ func NewUserRepository(db *dynamodb.DynamoDB) *UserRepository {
 	}
 }
 
-func (r *UserRepository) GetAllUsers() ([]map[string]*dynamodb.AttributeValue, error) {
+func (r *UserRepository) GetAllUsers(filter string, limit int64, exclusiveStartKey map[string]*dynamodb.AttributeValue) ([]map[string]*dynamodb.AttributeValue, error) {
 	// Set up the initial ScanInput with the table name and any other necessary parameters
 	input := &dynamodb.ScanInput{
-		TableName: aws.String("users"),
-		Limit:     aws.Int64(100), // Limit to 100 items per page
+		TableName:         aws.String("users"),
+		Limit:             aws.Int64(limit), // Limit to specified number of items per page
+		ExclusiveStartKey: exclusiveStartKey,
+	}
+
+	// Add filter expression to input if a filter was specified
+	if filter != "" {
+		input.FilterExpression = aws.String("contains(#name, :filter)")
+		input.ExpressionAttributeNames = map[string]*string{
+			"#name": aws.String("name"),
+		}
+		input.ExpressionAttributeValues = map[string]*dynamodb.AttributeValue{
+			":filter": {
+				S: aws.String(filter),
+			},
+		}
 	}
 
 	// Create a slice to hold all items retrieved from the database
