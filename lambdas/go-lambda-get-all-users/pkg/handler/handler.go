@@ -17,21 +17,8 @@ func NewGetAllUsersHandler(p processor.Processor) *GetAllUsersHandler {
 }
 
 func (h *GetAllUsersHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	filter := make(map[string]string)
-	for key, value := range request.QueryStringParameters {
-		filter[key] = value
-	}
-
-	// Convert filter map to string
-	filterStr, err := json.Marshal(filter)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       err.Error(),
-		}, nil
-	}
-
-	users, err := h.processor.GetAllUsers(context.Background(), string(filterStr))
+	filter := request.QueryStringParameters["name"]
+	users, err := h.processor.GetAllUsers(context.Background(), filter)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
