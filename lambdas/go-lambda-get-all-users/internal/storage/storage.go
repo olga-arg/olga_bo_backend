@@ -17,7 +17,7 @@ func NewUserRepository(db *dynamodb.DynamoDB) *UserRepository {
 	}
 }
 
-func (r *UserRepository) GetAllUsers(filter string) ([]map[string]*dynamodb.AttributeValue, error) {
+func (r *UserRepository) GetAllUsers(filter string, attributeNames []string) ([]map[string]*dynamodb.AttributeValue, error) {
 	// Set up the initial ScanInput with the table name and any other necessary parameters
 	input := &dynamodb.ScanInput{
 		TableName: aws.String("users"),
@@ -25,15 +25,23 @@ func (r *UserRepository) GetAllUsers(filter string) ([]map[string]*dynamodb.Attr
 
 	// Add filter expression to input if a filter was specified
 	if filter != "" {
-		input.FilterExpression = aws.String("#name = :filter")
-		input.ExpressionAttributeNames = map[string]*string{
-			"#name": aws.String("name"),
+		filterExpression := ""
+		expressionAttributeValues := map[string]*dynamodb.AttributeValue{}
+		expressionAttributeNames := map[string]*string{}
+
+		// Build the filter expression dynamically using the attribute names and filter value
+		for i, attr := range attributeNames {
+			if i > 0 {
+				filterExpression += " OR "
+			}
+			filterExpression += "contains(#" + attr + ", :filter)"
+			expressionAttributeValues[":filter"] = &dynamodb.AttributeValue{S: aws.String(filter)}
+			expressionAttributeNames["#"+attr] = aws.String(attr)
 		}
-		input.ExpressionAttributeValues = map[string]*dynamodb.AttributeValue{
-			":filter": {
-				S: aws.String(filter),
-			},
-		}
+
+		input.FilterExpression = aws.String(filterExpression)
+		input.ExpressionAttributeValues = expressionAttributeValues
+		input.ExpressionAttributeNames = expressionAttributeNames
 	}
 
 	// Create a slice to hold all items retrieved from the database
