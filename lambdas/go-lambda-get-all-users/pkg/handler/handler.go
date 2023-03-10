@@ -17,7 +17,7 @@ func NewGetAllUsersHandler(p processor.Processor) *GetAllUsersHandler {
 }
 
 func (h *GetAllUsersHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	filter := request.QueryStringParameters[""]
+	filter := request.QueryStringParameters["name"]
 	users, err := h.processor.GetAllUsers(context.Background(), filter)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
