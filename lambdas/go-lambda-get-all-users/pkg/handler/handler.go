@@ -3,9 +3,10 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-get-all-users/internal/processor"
-	"net/http"
 )
 
 type GetAllUsersHandler struct {
@@ -17,6 +18,8 @@ func NewGetAllUsersHandler(p processor.Processor) *GetAllUsersHandler {
 }
 
 func (h *GetAllUsersHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	queryParams := request.QueryStringParameters
+
 	users, err := h.processor.GetAllUsers(context.Background())
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -25,7 +28,12 @@ func (h *GetAllUsersHandler) Handle(request events.APIGatewayProxyRequest) (even
 		}, nil
 	}
 
-	body, err := json.Marshal(users)
+	responseBody := map[string]interface{}{
+		"queryParams": queryParams,
+		"users":       users,
+	}
+
+	body, err := json.Marshal(responseBody)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
