@@ -17,12 +17,10 @@ func NewUserRepository(db *dynamodb.DynamoDB) *UserRepository {
 	}
 }
 
-func (r *UserRepository) GetAllUsers(filter string, limit int64, exclusiveStartKey map[string]*dynamodb.AttributeValue) ([]map[string]*dynamodb.AttributeValue, error) {
+func (r *UserRepository) GetAllUsers(filter string) ([]map[string]*dynamodb.AttributeValue, error) {
 	// Set up the initial ScanInput with the table name and any other necessary parameters
 	input := &dynamodb.ScanInput{
-		TableName:         aws.String("users"),
-		Limit:             aws.Int64(limit), // Limit to specified number of items per page
-		ExclusiveStartKey: exclusiveStartKey,
+		TableName: aws.String("users"),
 	}
 
 	// Add filter expression to input if a filter was specified
