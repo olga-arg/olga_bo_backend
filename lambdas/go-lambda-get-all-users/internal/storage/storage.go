@@ -25,7 +25,7 @@ func (r *UserRepository) GetAllUsers(filter string) ([]map[string]*dynamodb.Attr
 
 	// Add filter expression to input if a filter was specified
 	if filter != "" {
-		input.FilterExpression = aws.String("contains(#name, :filter)")
+		input.FilterExpression = aws.String("#name = :filter")
 		input.ExpressionAttributeNames = map[string]*string{
 			"#name": aws.String("name"),
 		}
