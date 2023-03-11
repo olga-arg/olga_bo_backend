@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"go-lambda-get-all-users/internal/storage"
 	"go-lambda-get-all-users/pkg/dto"
-	"strconv"
 )
 
 type Processor interface {
@@ -27,22 +26,7 @@ func (p *processor) GetAllUsers(ctx context.Context, filter map[string]interface
 	// Convert the input filter map to a filter map with string values
 	strFilter := make(map[string]string)
 	for k, v := range filter {
-		switch v := v.(type) {
-		case bool:
-			strFilter[k] = strconv.FormatBool(v)
-		case int:
-			strFilter[k] = strconv.Itoa(v)
-		default:
-			strFilter[k] = fmt.Sprint(v)
-		}
-	}
-
-	// Add isAdmin and status attributes to the strFilter map
-	if isAdmin, ok := filter["isAdmin"].(bool); ok {
-		strFilter["isAdmin"] = strconv.FormatBool(isAdmin)
-	}
-	if status, ok := filter["status"].(int); ok {
-		strFilter["status"] = strconv.Itoa(status)
+		strFilter[k] = fmt.Sprintf("%v", v)
 	}
 
 	// Use the GetAllUsers method of the UserRepository to retrieve all users with pagination and filtering
