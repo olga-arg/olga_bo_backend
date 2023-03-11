@@ -3,7 +3,7 @@ package processor
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"go-lambda-get-all-users/internal/storage"
 	"go-lambda-get-all-users/pkg/dto"
 	"strconv"
@@ -37,20 +37,32 @@ func (p *processor) GetAllUsers(ctx context.Context, filter map[string]interface
 		}
 	}
 
+	// Add isAdmin and status attributes to the strFilter map
+	if isAdmin, ok := filter["isAdmin"].(bool); ok {
+		strFilter["isAdmin"] = strconv.FormatBool(isAdmin)
+	}
+	if status, ok := filter["status"].(int); ok {
+		strFilter["status"] = strconv.Itoa(status)
+	}
+
 	// Use the GetAllUsers method of the UserRepository to retrieve all users with pagination and filtering
 	items, err := p.storage.GetAllUsers(strFilter, []string{"name", "surname", "email", "limit", "isAdmin", "team", "status"})
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert each item to a User object using the UnmarshalUser function from the dto package
-	var users []*dto.User
+	// Convert each item to a *dynamodb.AttributeValue object
+	attrValues := make([]*dynamodb.AttributeValue, 0, len(items))
 	for _, item := range items {
-		user := &dto.User{}
-		if err := dynamodbattribute.UnmarshalMap(item, user); err != nil {
-			return nil, err
-		}
-		users = append(users, user)
+		av := &dynamodb.AttributeValue{}
+		av.M = item
+		attrValues = append(attrValues, av)
+	}
+
+	// Convert each attribute value to a User object using the UnmarshalUsers function from the dto package
+	users, err := dto.UnmarshalUsers(attrValues)
+	if err != nil {
+		return nil, err
 	}
 
 	return &dto.Output{
