@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-get-all-users/internal/processor"
-	"log"
 	"net/http"
 )
 
@@ -18,13 +17,13 @@ func NewGetAllUsersHandler(p processor.Processor) *GetAllUsersHandler {
 }
 
 func (h *GetAllUsersHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	log.Println("Received request: ", request)
-	log.Println("Request QueryStringParameters: ", request.QueryStringParameters)
-	filter_name := request.QueryStringParameters["name"]
-	filter_surname := request.QueryStringParameters["surname"]
-	log.Println("Filter name: ", filter_name)
-	log.Println("Filter surname: ", filter_surname)
-	users, err := h.processor.GetAllUsers(context.Background(), filter_name)
+	queryParams := request.QueryStringParameters
+	filter := make(map[string]string)
+	for key, value := range queryParams {
+		filter[key] = value
+	}
+
+	users, err := h.processor.GetAllUsers(context.Background(), filter)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
@@ -34,7 +33,7 @@ func (h *GetAllUsersHandler) Handle(request events.APIGatewayProxyRequest) (even
 
 	response := map[string]interface{}{
 		"users":  users.Users,
-		"filter": filter_name,
+		"filter": filter,
 	}
 
 	body, err := json.Marshal(response)

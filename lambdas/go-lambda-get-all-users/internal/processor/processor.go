@@ -8,7 +8,7 @@ import (
 )
 
 type Processor interface {
-	GetAllUsers(ctx context.Context, filter string) (*dto.Output, error)
+	GetAllUsers(ctx context.Context, filter map[string]string) (*dto.Output, error)
 }
 
 type processor struct {
@@ -21,7 +21,7 @@ func NewProcessor(storage *storage.UserRepository) Processor {
 	}
 }
 
-func (p *processor) GetAllUsers(ctx context.Context, filter string) (*dto.Output, error) {
+func (p *processor) GetAllUsers(ctx context.Context, filter map[string]string) (*dto.Output, error) {
 	// Use the GetAllUsers method of the UserRepository to retrieve all users with pagination and filtering
 	items, err := p.storage.GetAllUsers(filter, []string{"name", "surname", "email", "limit", "isAdmin", "team", "status"})
 	if err != nil {
