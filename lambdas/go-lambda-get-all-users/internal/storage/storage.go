@@ -29,9 +29,9 @@ func (r *UserRepository) GetAllUsers(filter map[string]string, attributeNames []
 		expressionAttributeNames := map[string]*string{}
 
 		// Build the filter expression dynamically using the attribute names and filter value
-		for i, attr := range attributeNames {
+		for _, attr := range attributeNames {
 			if filterVal, ok := filter[attr]; ok {
-				if i > 0 {
+				if len(filterExpression) > 0 {
 					filterExpression += " OR "
 				}
 				filterExpression += "contains(#" + attr + ", :filter" + attr + ")"
