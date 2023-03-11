@@ -79,6 +79,20 @@ resources:
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0.5
           MaxCapacity: 4
+    auroraInstance:
+      Type: "AWS::RDS::DBInstance"
+      Properties:
+        PubliclyAccessible: true
+        Engine: aurora-postgresql
+        DBInstanceClass: db.serverless
+        DBClusterIdentifier: !Ref auroraCluster
+    auroraReadReplica:
+      Type: "AWS::RDS::DBInstance"
+      Properties:
+        PubliclyAccessible: true
+        Engine: aurora-postgresql
+        DBInstanceClass: db.serverless
+        DBClusterIdentifier: !Ref auroraCluster
 
     users:
       Type: AWS::DynamoDB::Table
