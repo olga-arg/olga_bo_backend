@@ -3,7 +3,7 @@ package processor
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"go-lambda-get-all-users/internal/storage"
 	"go-lambda-get-all-users/pkg/dto"
 	"strconv"
@@ -43,18 +43,14 @@ func (p *processor) GetAllUsers(ctx context.Context, filter map[string]interface
 		return nil, err
 	}
 
-	// Convert each item to a *dynamodb.AttributeValue object
-	attrValues := make([]*dynamodb.AttributeValue, 0, len(items))
+	// Convert each item to a User object using the UnmarshalUser function from the dto package
+	var users []*dto.User
 	for _, item := range items {
-		av := &dynamodb.AttributeValue{}
-		av.M = item
-		attrValues = append(attrValues, av)
-	}
-
-	// Convert each attribute value to a User object using the UnmarshalUsers function from the dto package
-	users, err := dto.UnmarshalUsers(attrValues)
-	if err != nil {
-		return nil, err
+		user := &dto.User{}
+		if err := dynamodbattribute.UnmarshalMap(item, user); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
 	}
 
 	return &dto.Output{
