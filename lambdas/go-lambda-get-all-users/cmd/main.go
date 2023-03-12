@@ -9,7 +9,11 @@ import (
 )
 
 func main() {
-	db := application.NewDynamoDBClient()
+	pgConnector := application.PostgresConnector{}
+	db, err := pgConnector.GetConnection()
+	if err != nil {
+		panic(err)
+	}
 	userRepo := storage.NewUserRepository(db)
 	userProcessor := processor.NewProcessor(userRepo)
 	getAllUsersHandler := handler.NewGetAllUsersHandler(userProcessor)

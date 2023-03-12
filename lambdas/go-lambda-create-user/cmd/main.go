@@ -10,7 +10,11 @@ import (
 
 func main() {
 	application.SetupEmailService()
-	db := application.NewDynamoDBClient()
+	pgConnector := application.PostgresConnector{}
+	db, err := pgConnector.GetConnection()
+	if err != nil {
+		panic(err)
+	}
 	userRepo := storage.NewUserRepository(db)
 	userProcessor := processor.New(*userRepo)
 	createUserHandler := handler.NewCreateUserHandler(userProcessor)

@@ -8,7 +8,6 @@ provider:
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
-        - dynamodb:*
         - s3:*
       Resource: '*'
 
@@ -17,25 +16,8 @@ provider:
 #    variable1: value1
 
 functions:
-  world:
-    handler: lambdas/bin/world
-    events:
-      - httpApi:
-          path: /world
-          method: get
-      - cloudwatchLog: '/aws/lambda/world'
   go-lambda-create-user:
     handler: lambdas/bin/go-lambda-create-user
-    ssmToEnvironment:
-      - EMAIL_SENDER_ADDRESS
-      - EMAIL_SENDER_PASSWORD
-    events:
-      - httpApi:
-          path: /users
-          method: post
-      - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
-  go-lambda-create-user-rds:
-    handler: lambdas/bin/go-lambda-create-user-rds
     ssmToEnvironment:
       - EMAIL_SENDER_ADDRESS
       - EMAIL_SENDER_PASSWORD
@@ -45,18 +27,11 @@ functions:
       - DB_HOST_WRITER
     events:
       - httpApi:
-          path: /users-rds
+          path: /users
           method: post
-      - cloudwatchLog: '/aws/lambda/go-lambda-create-user-rds'
+      - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
   go-lambda-get-all-users:
     handler: lambdas/bin/go-lambda-get-all-users
-    events:
-      - httpApi:
-          path: /users
-          method: get
-      - cloudwatchLog: '/aws/lambda/go-lambda-get-all-users'
-  go-lambda-get-all-users-rds:
-    handler: lambdas/bin/go-lambda-get-all-users-rds
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -64,9 +39,9 @@ functions:
       - DB_HOST_READER
     events:
       - httpApi:
-          path: /users-rds
+          path: /users
           method: get
-      - cloudwatchLog: '/aws/lambda/go-lambda-get-all-users-rds'
+      - cloudwatchLog: '/aws/lambda/go-lambda-get-all-users'
 
 
 #    Define function environment variables here
@@ -80,27 +55,6 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.stage}-${self:service}-receipts
-
-    WorldLambdaLogs:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: /aws/lambda/world
-    goLambdaCreateUserLogs:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: /aws/lambda/go-lambda-create-user
-    goLambdaCreateUserRdsLogs:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: /aws/lambda/go-lambda-create-user-rds
-    goLambdaGetAllUsersLogs:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: /aws/lambda/go-lambda-get-all-users
-    goLambdaGetAllUsersRdsLogs:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: /aws/lambda/go-lambda-get-all-users-rds
 
     ### Aurora Serverless Cluster and Instance ###
     auroraCluster:
@@ -128,27 +82,6 @@ resources:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref auroraCluster
-
-    users:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: users
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: email
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
-        GlobalSecondaryIndexes:
-          - IndexName: email-index
-            KeySchema:
-              - AttributeName: email
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
 
 plugins:
   - serverless-domain-manager

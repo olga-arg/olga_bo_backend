@@ -15,9 +15,10 @@ type User struct {
 	Email   string             `json:"email"`
 	Limit   int                `json:"limit" default:"0"`
 	IsAdmin bool               `json:"isAdmin" default:"false"`
-	Teams   []string           `json:"team" default:"[]"`
 	Status  ConfirmationStatus `json:"status" default:"Pending"`
 }
+
+type Users []User
 
 func ParseConfirmationStatus(s string) ConfirmationStatus {
 	switch s {

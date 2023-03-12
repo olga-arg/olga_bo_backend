@@ -63,13 +63,16 @@ func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
 func NewDefaultEmailService() EmailSender {
 	emailAddrB64 := os.Getenv("EMAIL_SENDER_ADDRESS")
 	emailPassB64 := os.Getenv("EMAIL_SENDER_PASSWORD")
+	if emailAddrB64 == "" || emailPassB64 == "" {
+		panic("env variables must be set")
+	}
 	emailAddr, err := base64.StdEncoding.DecodeString(emailAddrB64)
 	if err != nil {
-		panic("env variables must be set")
+		panic("failed to decode env variable")
 	}
 	emailPass, err := base64.StdEncoding.DecodeString(emailPassB64)
 	if err != nil {
-		panic("env variables must be set")
+		panic("failed to decode env variable")
 	}
 	emailAddr = []byte(strings.TrimSuffix(string(emailAddr), "\n"))
 	config := Config{

@@ -1,60 +1,37 @@
 package storage
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	"go-lambda-create-user/pkg/domain"
-	"log"
 )
 
 type UserRepository struct {
-	db *dynamodb.DynamoDB
+	db *gorm.DB
 }
 
-// The repository is responsible for interacting with the database
-func NewUserRepository(db *dynamodb.DynamoDB) *UserRepository {
+func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{
 		db: db,
 	}
 }
 
-func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
-	result, err := r.db.Query(&dynamodb.QueryInput{
-		TableName:              aws.String("users"),
-		IndexName:              aws.String("email-index"),
-		KeyConditionExpression: aws.String("email = :email"),
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":email": {
-				S: aws.String(email),
-			},
-		},
-	})
-	if err != nil {
-		log.Println("Error getting user: ", err)
-		return false, err
+func getUserTable(user *domain.User) func(tx *gorm.DB) *gorm.DB {
+	return func(tx *gorm.DB) *gorm.DB {
+		// TODO: Extract company name to specify the table name
+		return tx.Table("users")
 	}
-	// The query should return 0 or 1 items, instead of a list of all matching items
-	if len(result.Items) == 0 {
+}
+
+func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
+	err := r.db.Scopes(getUserTable(&domain.User{})).Where("email = ?", email).First(&domain.User{}).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil
 	}
 	return true, nil
 }
 
 func (r *UserRepository) Save(user *domain.User) error {
-	// First, the user struct is marshalled into a map that can be saved to the database
-	item, err := dynamodbattribute.MarshalMap(user)
-	if err != nil {
-		log.Println("Error marshalling user", err)
-		return err
-	}
-	// Then, the user is saved to the database using the PutItem method
-	_, err = r.db.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("users"),
-		Item:      item,
-	})
-	if err != nil {
-		log.Println("Error saving user: ", err)
-	}
-	return err
+	r.db.Scopes(getUserTable(user)).AutoMigrate(&domain.User{}).Create(user)
+	return nil
 }

@@ -40,13 +40,12 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 	}
 	// Returns the user
 	return &dto.CreateUserOutput{
-		ID:        user.ID,
-		Name:      user.Name,
-		Surname:   user.Surname,
-		Email:     user.Email,
-		Limit:     user.Limit,
-		IsAdmin:   user.IsAdmin,
-		Teams:     user.Teams,
-		Status: user.Status,
+		ID:      user.ID,
+		Name:    user.Name,
+		Surname: user.Surname,
+		Email:   user.Email,
+		Limit:   user.Limit,
+		IsAdmin: user.IsAdmin,
+		Status:  user.Status,
 	}, nil
 }

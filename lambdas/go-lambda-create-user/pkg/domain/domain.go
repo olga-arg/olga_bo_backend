@@ -15,14 +15,13 @@ const (
 )
 
 type User struct {
-	ID        string                 `json:"id"`
-	Name      string                 `json:"name"`
-	Surname   string                 `json:"surname"`
-	Email     string                 `json:"email"`
-	Limit     int                    `json:"limit" default:"0"`
-	IsAdmin   bool                   `json:"isAdmin" default:"false"`
-	Teams     []string               `json:"team" default:"[]"`
-	Status    ConfirmationStatus     `json:"status" default:"Pending"`
+	ID      string             `json:"id" gorm:"primary_key"`
+	Name    string             `json:"name"`
+	Surname string             `json:"surname"`
+	Email   string             `json:"email"`
+	Limit   int                `json:"limit" default:"0"`
+	IsAdmin bool               `json:"isAdmin" default:"false"`
+	Status  ConfirmationStatus `json:"status" default:"Pending"`
 }
 
 func NewUser(name, surname, email string) (*User, error) {
