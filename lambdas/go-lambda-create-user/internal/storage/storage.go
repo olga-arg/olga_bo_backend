@@ -4,6 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"go-lambda-create-user/pkg/domain"
+	"log"
 )
 
 type UserRepository struct {
@@ -32,6 +33,10 @@ func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
 }
 
 func (r *UserRepository) Save(user *domain.User) error {
-	r.db.Scopes(getUserTable(user)).AutoMigrate(&domain.User{}).Create(user)
+	err := r.db.Scopes(getUserTable(user)).AutoMigrate(&domain.User{}).Create(user).Error
+	if err != nil {
+		log.Println("Error saving user: ", err)
+		return err
+	}
 	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"go-lambda-create-user/internal/storage"
 	"go-lambda-create-user/pkg/domain"
 	"go-lambda-create-user/pkg/dto"
+	"log"
 )
 
 type Processor interface {
@@ -33,11 +34,16 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 	}
 
 	// Creates a new user. New user takes a name and email and returns a user struct
-	user, _ := domain.NewUser(input.Name, input.Surname, input.Email)
-	// Saves the user to the database if it doesn't already exist
-	if err := p.storage.Save(user); err != nil {
+	user, err := domain.NewUser(input.Name, input.Surname, input.Email)
+	if err != nil {
+		log.Println("Error creating user: ", err)
 		return err
 	}
-	// Returns the user
+	// Saves the user to the database if it doesn't already exist
+	if err := p.storage.Save(user); err != nil {
+		log.Println("Error saving user: ", err)
+		return err
+	}
+	// Returns
 	return nil
 }

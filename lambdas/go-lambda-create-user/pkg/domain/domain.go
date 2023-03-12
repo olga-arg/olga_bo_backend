@@ -2,7 +2,9 @@ package domain
 
 import (
 	"github.com/badoux/checkmail"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"log"
 	"time"
 )
 
@@ -32,9 +34,16 @@ type User struct {
 func NewUser(name, surname, email string) (*User, error) {
 	err := validateInput(name, surname, email)
 	if err != nil {
+		log.Println("error validating input: ", err)
 		return nil, err
 	}
 	var user User
+	id, err := uuid.NewUUID()
+	if err != nil {
+		log.Println("error generating uuid: ", err)
+		return nil, err
+	}
+	user.ID = id.String()
 	user.Name = name
 	user.Surname = surname
 	user.FullName = name + " " + surname
