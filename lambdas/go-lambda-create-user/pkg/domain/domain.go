@@ -2,8 +2,8 @@ package domain
 
 import (
 	"github.com/badoux/checkmail"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"time"
 )
 
 type ConfirmationStatus int
@@ -15,41 +15,47 @@ const (
 )
 
 type User struct {
-	ID      string             `json:"id" gorm:"primary_key"`
-	Name    string             `json:"name"`
-	Surname string             `json:"surname"`
-	Email   string             `json:"email"`
-	Limit   int                `json:"limit" default:"0"`
-	IsAdmin bool               `json:"isAdmin" default:"false"`
-	Status  ConfirmationStatus `json:"status" default:"Pending"`
+	ID              string             `json:"id"`
+	CompanyID       string             `json:"company"`
+	Name            string             `json:"name"`
+	Surname         string             `json:"surname"`
+	FullName        string             `json:"full_name"`
+	Email           string             `json:"email"`
+	PurchaseLimit   int                `json:"purchase_limit" default:"0"`
+	MonthlyLimit    int                `json:"monthly_limit" default:"0"`
+	MonthlySpending float32            `json:"monthly_spending" default:"0"`
+	IsAdmin         bool               `json:"isAdmin" default:"false"`
+	Status          ConfirmationStatus `json:"status" default:"Pending"`
+	CreatedDate     time.Time          `json:"created_date"`
 }
 
 func NewUser(name, surname, email string) (*User, error) {
-	user, err := validateInput(name, surname, email)
+	err := validateInput(name, surname, email)
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+	var user User
+	user.Name = name
+	user.Surname = surname
+	user.Email = email
+	user.Status = Pending
+	user.CreatedDate = time.Now()
+	return &user, nil
 }
 
-func validateInput(name, surname, email string) (*User, error) {
+func validateInput(name, surname, email string) error {
 	if len(email) > 50 {
-		return nil, errors.New("email must be less than 50 characters")
+		return errors.New("email must be less than 50 characters")
 	}
 	if len(name) > 50 {
-		return nil, errors.New("name must be less than 50 characters")
+		return errors.New("name must be less than 50 characters")
 	}
 	if len(surname) > 50 {
-		return nil, errors.New("surname must be less than 50 characters")
+		return errors.New("surname must be less than 50 characters")
 	}
 	err := checkmail.ValidateFormat(email)
 	if err != nil {
-		return nil, errors.New("invalid email format")
+		return errors.New("invalid email format")
 	}
-	return &User{
-		ID:      uuid.NewString(),
-		Name:    name,
-		Surname: surname,
-		Email:   email,
-	}, nil
+	return nil
 }

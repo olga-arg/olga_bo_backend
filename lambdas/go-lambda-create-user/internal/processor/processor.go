@@ -9,7 +9,7 @@ import (
 )
 
 type Processor interface {
-	CreateUser(ctx context.Context, input *dto.CreateUserInput) (*dto.CreateUserOutput, error)
+	CreateUser(ctx context.Context, input *dto.CreateUserInput) error
 }
 
 type processor struct {
@@ -22,30 +22,22 @@ func New(s storage.UserRepository) Processor {
 	}
 }
 
-func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) (*dto.CreateUserOutput, error) {
+func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) error {
 	// Checks if the email already exists
 	exists, err := p.storage.EmailAlreadyExists(input.Email)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if exists {
-		return nil, errors.New("email already exists")
+		return errors.New("email already exists")
 	}
 
 	// Creates a new user. New user takes a name and email and returns a user struct
 	user, _ := domain.NewUser(input.Name, input.Surname, input.Email)
 	// Saves the user to the database if it doesn't already exist
 	if err := p.storage.Save(user); err != nil {
-		return nil, err
+		return err
 	}
 	// Returns the user
-	return &dto.CreateUserOutput{
-		ID:      user.ID,
-		Name:    user.Name,
-		Surname: user.Surname,
-		Email:   user.Email,
-		Limit:   user.Limit,
-		IsAdmin: user.IsAdmin,
-		Status:  user.Status,
-	}, nil
+	return nil
 }
