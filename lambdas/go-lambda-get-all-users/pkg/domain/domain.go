@@ -15,7 +15,7 @@ type User struct {
 	Surname      string             `json:"surname"`
 	Email        string             `json:"email"`
 	AccountLimit int                `json:"limit" default:"0"`
-	Teams        []string           `json:"teams"`
+	Teams        []string           `json:"teams" default:"[]"`
 	IsAdmin      bool               `json:"isAdmin" default:"false"`
 	Status       ConfirmationStatus `json:"status" default:"Pending"`
 }

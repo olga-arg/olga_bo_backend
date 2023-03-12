@@ -2,9 +2,11 @@ package storage
 
 import (
 	"github.com/jinzhu/gorm"
+	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"go-lambda-get-all-users/pkg/domain"
 	"log"
+	"strings"
 )
 
 type UserRepository struct {
@@ -45,6 +47,10 @@ func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, 
 	}
 	if status, ok := filters["status"]; ok {
 		query = query.Where("status = ?", status)
+	}
+	if teams, ok := filters["teams"]; ok {
+		teamsSlice := strings.Split(teams, ",")
+		query = query.Where("teams && ?", pq.Array(teamsSlice))
 	}
 
 	// Execute the query
