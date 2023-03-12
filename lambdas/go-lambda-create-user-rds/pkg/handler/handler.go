@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
-	"go-lambda-create-user/internal/processor"
-	"go-lambda-create-user/internal/services"
-	"go-lambda-create-user/pkg/dto"
+	"go-lambda-create-user-rds/internal/processor"
+	"go-lambda-create-user-rds/internal/services"
+	"go-lambda-create-user-rds/pkg/dto"
 	"log"
 	"net/http"
 )

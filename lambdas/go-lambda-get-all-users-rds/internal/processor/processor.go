@@ -2,8 +2,8 @@ package processor
 
 import (
 	"context"
-	"go-lambda-get-all-users/internal/storage"
-	"go-lambda-get-all-users/pkg/dto"
+	"go-lambda-get-all-users-rds/internal/storage"
+	"go-lambda-get-all-users-rds/pkg/dto"
 )
 
 type Processor interface {

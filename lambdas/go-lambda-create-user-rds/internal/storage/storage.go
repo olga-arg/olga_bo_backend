@@ -3,7 +3,7 @@ package storage
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
-	"go-lambda-create-user/pkg/domain"
+	"go-lambda-create-user-rds/pkg/domain"
 )
 
 type UserRepository struct {

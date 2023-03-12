@@ -3,9 +3,9 @@ package processor
 import (
 	"context"
 	"github.com/pkg/errors"
-	"go-lambda-create-user/internal/storage"
-	"go-lambda-create-user/pkg/domain"
-	"go-lambda-create-user/pkg/dto"
+	"go-lambda-create-user-rds/internal/storage"
+	"go-lambda-create-user-rds/pkg/domain"
+	"go-lambda-create-user-rds/pkg/dto"
 )
 
 type Processor interface {

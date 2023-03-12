@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/aws/aws-lambda-go/lambda"
-	"go-lambda-create-user/internal/application"
-	"go-lambda-create-user/internal/processor"
-	"go-lambda-create-user/internal/storage"
-	"go-lambda-create-user/pkg/handler"
+	"go-lambda-create-user-rds/internal/application"
+	"go-lambda-create-user-rds/internal/processor"
+	"go-lambda-create-user-rds/internal/storage"
+	"go-lambda-create-user-rds/pkg/handler"
 )
 
 func main() {

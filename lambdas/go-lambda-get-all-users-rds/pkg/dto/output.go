@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"go-lambda-get-all-users/pkg/domain"
+	"go-lambda-get-all-users-rds/pkg/domain"
 )
 
 type User struct {

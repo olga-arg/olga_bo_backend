@@ -1,4 +1,4 @@
-module go-lambda-create-user
+module go-lambda-create-user-rds
 
 go 1.18
 
@@ -14,5 +14,4 @@ require (
 require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/lib/pq v1.1.1 // indirect
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 )

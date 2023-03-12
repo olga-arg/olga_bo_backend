@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"go-lambda-create-user/internal/services"
+	"go-lambda-create-user-rds/internal/services"
 	"os"
 )
 

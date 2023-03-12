@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/aws/aws-lambda-go/lambda"
-	"go-lambda-get-all-users/internal/application"
-	"go-lambda-get-all-users/internal/processor"
-	"go-lambda-get-all-users/internal/storage"
-	"go-lambda-get-all-users/pkg/handler"
+	"go-lambda-get-all-users-rds/internal/application"
+	"go-lambda-get-all-users-rds/internal/processor"
+	"go-lambda-get-all-users-rds/internal/storage"
+	"go-lambda-get-all-users-rds/pkg/handler"
 )
 
 func main() {
