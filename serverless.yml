@@ -105,9 +105,6 @@ resources:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref auroraCluster
-        ScalingConfiguration:
-          AutoPause: true
-          SecondsUntilAutoPause: 300
 
     auroraReadReplica:
       Type: "AWS::RDS::DBInstance"
@@ -116,9 +113,6 @@ resources:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref auroraCluster
-        ScalingConfiguration:
-          AutoPause: true
-          SecondsUntilAutoPause: 300
 
     users:
       Type: AWS::DynamoDB::Table
