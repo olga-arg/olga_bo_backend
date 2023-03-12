@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"log"
+	"strconv"
 )
 
 type UserRepository struct {
@@ -32,11 +33,18 @@ func (r *UserRepository) GetAllUsers(filter map[string]string, attributeNames []
 		for _, attr := range attributeNames {
 			if filterVal, ok := filter[attr]; ok {
 				if len(filterExpression) > 0 {
-					filterExpression += " OR "
+					filterExpression += " AND "
 				}
-				filterExpression += "contains(#" + attr + ", :filter" + attr + ")"
-				expressionAttributeValues[":filter"+attr] = &dynamodb.AttributeValue{S: aws.String(filterVal)}
+				filterExpression += "#" + attr + " = :" + attr
 				expressionAttributeNames["#"+attr] = aws.String(attr)
+
+				if b, err := strconv.ParseBool(filterVal); err == nil {
+					expressionAttributeValues[":"+attr] = &dynamodb.AttributeValue{BOOL: aws.Bool(b)}
+				} else if _, err := strconv.Atoi(filterVal); err == nil {
+					expressionAttributeValues[":"+attr] = &dynamodb.AttributeValue{N: aws.String(filterVal)}
+				} else {
+					expressionAttributeValues[":"+attr] = &dynamodb.AttributeValue{S: aws.String(filterVal)}
+				}
 			}
 		}
 
