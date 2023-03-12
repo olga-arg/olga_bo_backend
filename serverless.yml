@@ -55,6 +55,18 @@ functions:
           path: /users
           method: get
       - cloudwatchLog: '/aws/lambda/go-lambda-get-all-users'
+  go-lambda-get-all-users-rds:
+    handler: lambdas/bin/go-lambda-get-all-users-rds
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_READER
+    events:
+      - httpApi:
+          path: /users-rds
+          method: get
+      - cloudwatchLog: '/aws/lambda/go-lambda-get-all-users-rds'
 
 
 #    Define function environment variables here
@@ -85,7 +97,12 @@ resources:
       Type: AWS::Logs::LogGroup
       Properties:
         LogGroupName: /aws/lambda/go-lambda-get-all-users
+    goLambdaGetAllUsersRdsLogs:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/go-lambda-get-all-users-rds
 
+    ### Aurora Serverless Cluster and Instance ###
     auroraCluster:
       Type: AWS::RDS::DBCluster
       Properties:
@@ -97,7 +114,6 @@ resources:
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0.5
           MaxCapacity: 4
-
     auroraInstance:
       Type: "AWS::RDS::DBInstance"
       Properties:
@@ -105,7 +121,6 @@ resources:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref auroraCluster
-
     auroraReadReplica:
       Type: "AWS::RDS::DBInstance"
       Properties:
