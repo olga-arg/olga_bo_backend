@@ -64,7 +64,7 @@ functions:
       - DB_HOST_READER
     events:
       - httpApi:
-          path: /users
+          path: /users-rds
           method: get
       - cloudwatchLog: '/aws/lambda/go-lambda-get-all-users-rds'
 
