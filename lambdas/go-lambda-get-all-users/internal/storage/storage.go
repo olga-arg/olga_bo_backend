@@ -2,11 +2,9 @@ package storage
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"go-lambda-get-all-users/pkg/domain"
 	"log"
-	"strings"
 )
 
 type UserRepository struct {
@@ -29,28 +27,16 @@ func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, 
 	var users []domain.User
 	query := r.db.Scopes(getUserTable())
 
+	// TODO: Always filter by confirmed users
 	// Apply filters to the query
-	if name, ok := filters["name"]; ok {
-		query = query.Where("name LIKE ?", "%"+name+"%")
-	}
-	if surname, ok := filters["surname"]; ok {
-		query = query.Where("surname LIKE ?", "%"+surname+"%")
+	if fullName, ok := filters["full_name"]; ok {
+		query = query.Where("full_name LIKE ?", "%"+fullName+"%")
 	}
 	if email, ok := filters["email"]; ok {
 		query = query.Where("email LIKE ?", "%"+email+"%")
 	}
-	if accountLimit, ok := filters["accountLimit"]; ok {
-		query = query.Where("account_limit = ?", accountLimit)
-	}
 	if isAdmin, ok := filters["isAdmin"]; ok {
 		query = query.Where("is_admin = ?", isAdmin)
-	}
-	if status, ok := filters["status"]; ok {
-		query = query.Where("status = ?", status)
-	}
-	if teams, ok := filters["teams"]; ok {
-		teamsSlice := strings.Split(teams, ",")
-		query = query.Where("teams && ?", pq.Array(teamsSlice))
 	}
 
 	// Execute the query

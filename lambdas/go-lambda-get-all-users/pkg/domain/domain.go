@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type ConfirmationStatus int
 
 const (
@@ -9,15 +11,18 @@ const (
 )
 
 type User struct {
-	ID           string             `json:"id"`
-	Company      string             `json:"company"`
-	Name         string             `json:"name"`
-	Surname      string             `json:"surname"`
-	Email        string             `json:"email"`
-	AccountLimit int                `json:"limit" default:"0"`
-	Teams        []string           `json:"teams" default:"[]"`
-	IsAdmin      bool               `json:"isAdmin" default:"false"`
-	Status       ConfirmationStatus `json:"status" default:"Pending"`
+	ID              string             `json:"id"`
+	CompanyID       string             `json:"company"`
+	Name            string             `json:"name"`
+	Surname         string             `json:"surname"`
+	FullName        string             `json:"full_name"`
+	Email           string             `json:"email"`
+	PurchaseLimit   int                `json:"purchase_limit" default:"0"`
+	MonthlyLimit    int                `json:"monthly_limit" default:"0"`
+	MonthlySpending float32            `json:"monthly_spending" default:"0"`
+	IsAdmin         bool               `json:"isAdmin" default:"false"`
+	Status          ConfirmationStatus `json:"status" default:"Pending"`
+	CreatedDate     time.Time          `json:"created_date"`
 }
 
 type Users []User
