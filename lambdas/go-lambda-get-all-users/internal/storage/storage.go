@@ -30,10 +30,10 @@ func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, 
 	// TODO: Always filter by confirmed users
 	// Apply filters to the query
 	if fullName, ok := filters["name"]; ok {
-		query = query.Where("full_name LIKE ?", "%"+fullName+"%")
+		query = query.Where("full_name ILIKE ?", "%"+fullName+"%")
 	}
 	if email, ok := filters["email"]; ok {
-		query = query.Where("email LIKE ?", "%"+email+"%")
+		query = query.Where("email ILIKE ?", "%"+email+"%")
 	}
 	if isAdmin, ok := filters["isAdmin"]; ok {
 		query = query.Where("is_admin = ?", isAdmin)
