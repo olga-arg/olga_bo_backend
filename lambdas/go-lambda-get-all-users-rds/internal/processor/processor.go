@@ -25,5 +25,5 @@ func (p *processor) GetAllUsers(ctx context.Context, filter map[string]string) (
 	if err != nil {
 		return nil, err
 	}
-	return dto.NewOutput(*users), nil
+	return dto.NewOutput(users), nil
 }

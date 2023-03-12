@@ -26,7 +26,6 @@ func (h *GetAllUsersHandler) Handle(request events.APIGatewayProxyRequest) (even
 			Body:       err.Error(),
 		}, nil
 	}
-
 	body, err := json.Marshal(users)
 	if err != nil {
 		return events.APIGatewayProxyResponse{

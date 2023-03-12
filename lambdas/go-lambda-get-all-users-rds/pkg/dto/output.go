@@ -18,7 +18,7 @@ type Output struct {
 }
 
 // From domain.Users ([]User) to dto.Output (Output)
-func NewOutput(users domain.Users) *Output {
+func NewOutput(users []domain.User) *Output {
 	var dtoUsers []User
 	for _, user := range users {
 		dtoUsers = append(dtoUsers, User{

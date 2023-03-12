@@ -4,6 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"go-lambda-get-all-users-rds/pkg/domain"
+	"log"
 )
 
 type UserRepository struct {
@@ -22,12 +23,17 @@ func getUserTable() func(tx *gorm.DB) *gorm.DB {
 	}
 }
 
-func (r *UserRepository) GetAllUsers(filters map[string]string) (*domain.Users, error) {
+func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, error) {
 	// TODO: Implement filters
-	var users *domain.Users
-	err := r.db.Scopes(getUserTable()).AutoMigrate(&domain.User{}).Find(&users).Error
+	var users []domain.User
+	log.Println("Getting all users")
+	err := r.db.Scopes(getUserTable()).Find(&users).Error
+	log.Println("Users found: ", users)
+	log.Println("Error: ", err)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Println("No users found")
 		return nil, nil
 	}
+	log.Println("returning users")
 	return users, nil
 }
