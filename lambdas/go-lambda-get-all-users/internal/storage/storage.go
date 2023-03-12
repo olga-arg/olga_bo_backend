@@ -38,7 +38,7 @@ func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, 
 		query = query.Where("email LIKE ?", "%"+email+"%")
 	}
 	if accountLimit, ok := filters["accountLimit"]; ok {
-		query = query.Where("limit = ?", accountLimit)
+		query = query.Where("account_limit = ?", accountLimit)
 	}
 	if isAdmin, ok := filters["isAdmin"]; ok {
 		query = query.Where("is_admin = ?", isAdmin)

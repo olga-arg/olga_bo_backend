@@ -9,13 +9,15 @@ const (
 )
 
 type User struct {
-	ID      string             `json:"id"`
-	Name    string             `json:"name"`
-	Surname string             `json:"surname"`
-	Email   string             `json:"email"`
-	Limit   int                `json:"limit" default:"0"`
-	IsAdmin bool               `json:"isAdmin" default:"false"`
-	Status  ConfirmationStatus `json:"status" default:"Pending"`
+	ID           string             `json:"id"`
+	Company      string             `json:"company"`
+	Name         string             `json:"name"`
+	Surname      string             `json:"surname"`
+	Email        string             `json:"email"`
+	AccountLimit int                `json:"limit" default:"0"`
+	Teams        []string           `json:"teams"`
+	IsAdmin      bool               `json:"isAdmin" default:"false"`
+	Status       ConfirmationStatus `json:"status" default:"Pending"`
 }
 
 type Users []User
