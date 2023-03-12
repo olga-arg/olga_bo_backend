@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	//application.SetupEmailService()
+	application.SetupEmailService()
 	pgConnector := application.PostgresConnector{}
 	db, err := pgConnector.GetConnection()
 	if err != nil {

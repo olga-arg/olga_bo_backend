@@ -3,7 +3,6 @@ package domain
 import (
 	"github.com/badoux/checkmail"
 	"github.com/google/uuid"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 )
 
@@ -16,8 +15,7 @@ const (
 )
 
 type User struct {
-	gorm.Model
-	ID      string             `json:"id"`
+	ID      string             `json:"id" gorm:"primary_key"`
 	Name    string             `json:"name"`
 	Surname string             `json:"surname"`
 	Email   string             `json:"email"`

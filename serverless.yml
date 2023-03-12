@@ -37,6 +37,8 @@ functions:
   go-lambda-create-user-rds:
     handler: lambdas/bin/go-lambda-create-user-rds
     ssmToEnvironment:
+      - EMAIL_SENDER_ADDRESS
+      - EMAIL_SENDER_PASSWORD
       - DB_USER
       - DB_PASSWORD
       - DB_NAME

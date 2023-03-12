@@ -2,6 +2,7 @@ package processor
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"go-lambda-create-user/internal/storage"
 	"go-lambda-create-user/pkg/domain"
 	"go-lambda-create-user/pkg/dto"
@@ -23,13 +24,13 @@ func New(s storage.UserRepository) Processor {
 
 func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) (*dto.CreateUserOutput, error) {
 	// Checks if the email already exists
-	//exists, err := p.storage.EmailAlreadyExists(input.Email)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if exists {
-	//	return nil, errors.New("email already exists")
-	//}
+	exists, err := p.storage.EmailAlreadyExists(input.Email)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		return nil, errors.New("email already exists")
+	}
 
 	// Creates a new user. New user takes a name and email and returns a user struct
 	user, _ := domain.NewUser(input.Name, input.Surname, input.Email)
