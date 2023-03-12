@@ -95,6 +95,7 @@ resources:
         MasterUsername: ${ssm:/db_username}
         MasterUserPassword: ${ssm:/db_password}
         ServerlessV2ScalingConfiguration:
+          AutoPause: true
           MinCapacity: 0.5
           MaxCapacity: 4
           SecondsUntilAutoPause: 300
