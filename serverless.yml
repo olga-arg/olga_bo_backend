@@ -97,6 +97,8 @@ resources:
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0.5
           MaxCapacity: 4
+          SecondsUntilAutoPause: 300
+
     auroraInstance:
       Type: "AWS::RDS::DBInstance"
       Properties:
