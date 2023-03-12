@@ -34,6 +34,20 @@ functions:
           path: /users
           method: post
       - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
+  go-lambda-create-user-rds:
+    handler: lambdas/bin/go-lambda-create-user-rds
+    ssmToEnvironment:
+      - EMAIL_SENDER_ADDRESS
+      - EMAIL_SENDER_PASSWORD
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+    events:
+      - httpApi:
+          path: /users-rds
+          method: post
+      - cloudwatchLog: '/aws/lambda/go-lambda-create-user-rds'
   go-lambda-get-all-users:
     handler: lambdas/bin/go-lambda-get-all-users
     events:
@@ -63,6 +77,10 @@ resources:
       Type: AWS::Logs::LogGroup
       Properties:
         LogGroupName: /aws/lambda/go-lambda-create-user
+    goLambdaCreateUserRdsLogs:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/go-lambda-create-user-rds
     goLambdaGetAllUsersLogs:
       Type: AWS::Logs::LogGroup
       Properties:
@@ -79,6 +97,7 @@ resources:
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0.5
           MaxCapacity: 4
+
     auroraInstance:
       Type: "AWS::RDS::DBInstance"
       Properties:
@@ -86,6 +105,7 @@ resources:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref auroraCluster
+
     auroraReadReplica:
       Type: "AWS::RDS::DBInstance"
       Properties:
@@ -123,6 +143,11 @@ custom:
   serverlessSsmFetch:
     EMAIL_SENDER_ADDRESS: /email_sender_address
     EMAIL_SENDER_PASSWORD: /email_sender_password
+    DB_USER: /db_username
+    DB_PASSWORD: /db_password
+    DB_NAME: /db_name
+    DB_HOST_WRITER: /db_host_writer_instance
+    DB_HOST_READER: /db_host_reader_instance
   customDomain:
     domainName: 'api.olga.lat'
     basePath: 'api'
