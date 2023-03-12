@@ -29,16 +29,16 @@ func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, 
 
 	// Apply filters to the query
 	if name, ok := filters["name"]; ok {
-		query = query.Where("name = ?", name)
+		query = query.Where("name LIKE ?", "%"+name+"%")
 	}
 	if surname, ok := filters["surname"]; ok {
-		query = query.Where("surname = ?", surname)
+		query = query.Where("surname LIKE ?", "%"+surname+"%")
 	}
 	if email, ok := filters["email"]; ok {
-		query = query.Where("email = ?", email)
+		query = query.Where("email LIKE ?", "%"+email+"%")
 	}
-	if limit, ok := filters["limit"]; ok {
-		query = query.Where("limit = ?", limit)
+	if accountLimit, ok := filters["accountLimit"]; ok {
+		query = query.Where("limit = ?", accountLimit)
 	}
 	if isAdmin, ok := filters["isAdmin"]; ok {
 		query = query.Where("is_admin = ?", isAdmin)
