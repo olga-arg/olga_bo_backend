@@ -24,16 +24,39 @@ func getUserTable() func(tx *gorm.DB) *gorm.DB {
 }
 
 func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, error) {
-	// TODO: Implement filters
 	var users []domain.User
-	log.Println("Getting all users")
-	err := r.db.Scopes(getUserTable()).Find(&users).Error
-	log.Println("Users found: ", users)
-	log.Println("Error: ", err)
+	query := r.db.Scopes(getUserTable())
+
+	// Apply filters to the query
+	if name, ok := filters["name"]; ok {
+		query = query.Where("name = ?", name)
+	}
+	if surname, ok := filters["surname"]; ok {
+		query = query.Where("surname = ?", surname)
+	}
+	if email, ok := filters["email"]; ok {
+		query = query.Where("email = ?", email)
+	}
+	if limit, ok := filters["limit"]; ok {
+		query = query.Where("limit = ?", limit)
+	}
+	if isAdmin, ok := filters["isAdmin"]; ok {
+		query = query.Where("is_admin = ?", isAdmin)
+	}
+	if status, ok := filters["status"]; ok {
+		query = query.Where("status = ?", status)
+	}
+
+	// Execute the query
+	err := query.Find(&users).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		log.Println("No users found")
 		return nil, nil
 	}
-	log.Println("returning users")
+	if err != nil {
+		log.Println("Error getting users:", err)
+		return nil, err
+	}
+
 	return users, nil
 }
