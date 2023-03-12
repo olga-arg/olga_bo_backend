@@ -95,10 +95,8 @@ resources:
         MasterUsername: ${ssm:/db_username}
         MasterUserPassword: ${ssm:/db_password}
         ServerlessV2ScalingConfiguration:
-          AutoPause: true
           MinCapacity: 0.5
           MaxCapacity: 4
-          SecondsUntilAutoPause: 300
 
     auroraInstance:
       Type: "AWS::RDS::DBInstance"
@@ -107,6 +105,10 @@ resources:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref auroraCluster
+        ScalingConfiguration:
+          AutoPause: true
+          SecondsUntilAutoPause: 300
+
     auroraReadReplica:
       Type: "AWS::RDS::DBInstance"
       Properties:
@@ -114,6 +116,9 @@ resources:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref auroraCluster
+        ScalingConfiguration:
+          AutoPause: true
+          SecondsUntilAutoPause: 300
 
     users:
       Type: AWS::DynamoDB::Table
