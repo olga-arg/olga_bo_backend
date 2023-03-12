@@ -29,7 +29,7 @@ func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, 
 
 	// TODO: Always filter by confirmed users
 	// Apply filters to the query
-	if fullName, ok := filters["full_name"]; ok {
+	if fullName, ok := filters["name"]; ok {
 		query = query.Where("full_name LIKE ?", "%"+fullName+"%")
 	}
 	if email, ok := filters["email"]; ok {

@@ -37,6 +37,7 @@ func NewUser(name, surname, email string) (*User, error) {
 	var user User
 	user.Name = name
 	user.Surname = surname
+	user.FullName = name + " " + surname
 	user.Email = email
 	user.Status = Pending
 	user.CreatedDate = time.Now()
