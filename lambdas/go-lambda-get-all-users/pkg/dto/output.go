@@ -5,6 +5,7 @@ import (
 )
 
 type User struct {
+	ID              string                    `json:"id"`
 	Name            string                    `json:"name"`
 	Surname         string                    `json:"surname"`
 	Email           string                    `json:"email"`
@@ -24,6 +25,7 @@ func NewOutput(users []domain.User) *Output {
 	var dtoUsers []User
 	for _, user := range users {
 		dtoUsers = append(dtoUsers, User{
+			ID:              user.ID,
 			Name:            user.Name,
 			Surname:         user.Surname,
 			Email:           user.Email,
