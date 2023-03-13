@@ -25,7 +25,7 @@ func getUserTable(user *domain.User) func(tx *gorm.DB) *gorm.DB {
 }
 
 func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
-	err := r.db.Scopes(getUserTable(&domain.User{})).Where("email = ?", email).First(&domain.User{}).Error
+	err := r.db.Scopes(getUserTable(&domain.User{})).AutoMigrate(&domain.User{}).Where("email = ?", email).First(&domain.User{}).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil
 	}
