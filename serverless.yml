@@ -81,9 +81,16 @@ resources:
     postgresInstance:
       Type: "AWS::RDS::DBInstance"
       Properties:
+        DBInstanceIdentifier: ${self:provider.stage}-${self:service}-postgres
         PubliclyAccessible: true
         Engine: postgres
+        EngineVersion: "14.6"
         DBInstanceClass: db.t4g.micro
+        AllocatedStorage: 20
+        DBName: ${ssm:/db_name}
+        MasterUsername: ${ssm:/db_username}
+        MasterUserPassword: ${ssm:/db_password}
+
 #        DBClusterIdentifier: !Ref postgresCluster
 #    Add a read replica when need to scale up the database.
 #    auroraReadReplica:
