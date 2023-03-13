@@ -19,8 +19,8 @@ type User struct {
 	Email           string             `json:"email"`
 	PurchaseLimit   int                `json:"purchase_limit" default:"0"`
 	MonthlyLimit    int                `json:"monthly_limit" default:"0"`
-	LimitResetDate  time.Time          `json:"reset_date"`
 	MonthlySpending float32            `json:"monthly_spending" default:"0"`
+	LimitResetDate  time.Time          `json:"reset_date"`
 	IsAdmin         bool               `json:"isAdmin" default:"false"`
 	Status          ConfirmationStatus `json:"status" default:"Pending"`
 	CreatedDate     time.Time          `json:"created_date"`

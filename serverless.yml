@@ -42,6 +42,18 @@ functions:
           path: /users
           method: get
       - cloudwatchLog: '/aws/lambda/go-lambda-get-all-users'
+  go-lambda-update-card-limit:
+    handler: lambdas/bin/go-lambda-update-card-limit
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+    events:
+      - httpApi:
+          path: /users/{user_id}/card/limit
+          method: patch
+      - cloudwatchLog: '/aws/lambda/go-lambda-update-card-limit'
 
 
 #    Define function environment variables here
