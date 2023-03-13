@@ -46,3 +46,4 @@ func (p *processor) GetUser(ctx context.Context, userID string) (*domain.User, e
 	}
 	return user, nil
 }
+
