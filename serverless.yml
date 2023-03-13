@@ -84,7 +84,7 @@ resources:
         PubliclyAccessible: true
         Engine: postgres
         DBInstanceClass: db.t4g.micro
-        DBClusterIdentifier: !Ref postgresCluster
+#        DBClusterIdentifier: !Ref postgresCluster
 #    Add a read replica when need to scale up the database.
 #    auroraReadReplica:
 #      Type: "AWS::RDS::DBInstance"
