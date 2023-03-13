@@ -36,7 +36,7 @@ functions:
       - DB_USER
       - DB_PASSWORD
       - DB_NAME
-      - DB_HOST_WRITER # Change to DB_HOST_READER when using read replica.
+      - DB_HOST_READER
     events:
       - httpApi:
           path: /users
@@ -113,6 +113,7 @@ resources:
         Type: AWS::Logs::LogGroup
         Properties:
             LogGroupName: /aws/lambda/go-lambda-update-card-limit
+
 plugins:
   - serverless-domain-manager
   - serverless-ssm-fetch
