@@ -16,10 +16,11 @@ func (p *PostgresConnector) GetConnection() (db *gorm.DB, err error) {
 	password := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 	dbHost := os.Getenv("DB_HOST_WRITER")
-	if username == "" || password == "" || dbName == "" || dbHost == "" {
+	dbPort := os.Getenv("DB_PORT")
+	if username == "" || password == "" || dbName == "" || dbHost == "" || dbPort == "" {
 		return nil, fmt.Errorf("Missing environment variables for connecting to database")
 	}
-	dbURI := fmt.Sprintf("host=%s user=%s dbname=%s port=3306 sslmode=disable password=%s", dbHost, username, dbName, password)
+	dbURI := fmt.Sprintf("host=%s user=%s dbname=%s port=%s sslmode=disable password=%s", dbHost, username, dbName, dbPort, password)
 	return gorm.Open("postgres", dbURI)
 }
 

@@ -25,6 +25,7 @@ functions:
       - DB_PASSWORD
       - DB_NAME
       - DB_HOST_WRITER
+      - DB_PORT
     events:
       - httpApi:
           path: /users
@@ -37,6 +38,7 @@ functions:
       - DB_PASSWORD
       - DB_NAME
       - DB_HOST_READER
+      - DB_PORT
     events:
       - httpApi:
           path: /users
@@ -49,6 +51,7 @@ functions:
       - DB_PASSWORD
       - DB_NAME
       - DB_HOST_WRITER
+      - DB_PORT
     events:
       - httpApi:
           path: /users/{user_id}/card/limit
@@ -125,6 +128,7 @@ custom:
     DB_USER: /db_username
     DB_PASSWORD: /db_password
     DB_NAME: /db_name
+    DB_PORT: /db_port
     DB_HOST_WRITER: /db_host_writer_instance
     DB_HOST_READER: /db_host_reader_instance
   customDomain:
