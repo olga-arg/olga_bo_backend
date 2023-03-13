@@ -101,6 +101,18 @@ resources:
 #        DBInstanceClass: db.t4g.micro
 #        DBClusterIdentifier: !Ref postgresCluster
 
+    LambdaLogGroupCreateUser:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/go-lambda-create-user
+    LambdaLogGroupGetAllUsers:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/go-lambda-get-all-users
+    LambdaLogGroupUpdateCardLimit:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: /aws/lambda/go-lambda-update-card-limit
 plugins:
   - serverless-domain-manager
   - serverless-ssm-fetch
