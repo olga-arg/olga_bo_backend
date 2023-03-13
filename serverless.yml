@@ -53,6 +53,7 @@ functions:
       - httpApi:
           path: /users/{user_id}/card/limit
           method: patch
+      - cloudwatchLog: '/aws/lambda/go-lambda-update-card-limit'
 
 #    Define function environment variables here
 #    environment:
