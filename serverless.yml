@@ -75,6 +75,7 @@ resources:
         DatabaseName: prodOlgaBackend
         Engine: postgres
         EngineVersion: "14.6"
+        DBClusterInstanceClass: db.t4g.micro
         MasterUsername: ${ssm:/db_username}
         MasterUserPassword: ${ssm:/db_password}
     postgresInstance:
