@@ -24,7 +24,7 @@ func getUserTable(userID string) func(tx *gorm.DB) *gorm.DB {
 	}
 }
 
-func (r *UserRepository) UpdateUserCardLimit(userID string, purchaseLimit *int, monthlyLimit *int) (*domain.User, error) {
+func (r *UserRepository) UpdateUserCardLimit(userID string, purchaseLimit int, monthlyLimit int) (*domain.User, error) {
 	// Get the current user
 	user := &domain.User{}
 	err := r.db.Scopes(getUserTable(userID)).Where("id = ?", userID).First(user).Error
@@ -40,14 +40,14 @@ func (r *UserRepository) UpdateUserCardLimit(userID string, purchaseLimit *int, 
 	oldPurchaseLimit := user.PurchaseLimit
 	oldMonthlyLimit := user.MonthlyLimit
 
-	if purchaseLimit != nil {
-		user.PurchaseLimit = *purchaseLimit
+	if purchaseLimit != 0 {
+		user.PurchaseLimit = purchaseLimit
 	} else {
 		user.PurchaseLimit = oldPurchaseLimit
 	}
 
-	if monthlyLimit != nil {
-		user.MonthlyLimit = *monthlyLimit
+	if monthlyLimit != 0 {
+		user.MonthlyLimit = monthlyLimit
 	} else {
 		user.MonthlyLimit = oldMonthlyLimit
 	}
