@@ -34,7 +34,7 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 	}
 
 	// Update user in storage
-	updatedUser, err := h.processor.UpdateUserCardLimits(context.Background(), userID, input.PurchaseLimit, input.MonthlyLimit)
+	updatedUser, err := h.processor.UpdateUserCardLimits(context.Background(), userID, &input.PurchaseLimit, &input.MonthlyLimit)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,

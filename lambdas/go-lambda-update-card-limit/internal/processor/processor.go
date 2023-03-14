@@ -11,7 +11,7 @@ import (
 )
 
 type Processor interface {
-	UpdateUserCardLimits(ctx context.Context, userID string, purchaseLimit int, monthlyLimit int) (*domain.User, error)
+	UpdateUserCardLimits(ctx context.Context, userID string, purchaseLimit *int, monthlyLimit *int) (*domain.User, error)
 	GetUser(ctx context.Context, userID string) (*domain.User, error)
 	ValidateUserInput(ctx context.Context, input *dto.UpdateLimitInput, request events.APIGatewayProxyRequest) error
 }
@@ -26,7 +26,7 @@ func NewProcessor(storage *storage.UserRepository) Processor {
 	}
 }
 
-func (p *processor) UpdateUserCardLimits(ctx context.Context, userID string, purchaseLimit int, monthlyLimit int) (*domain.User, error) {
+func (p *processor) UpdateUserCardLimits(ctx context.Context, userID string, purchaseLimit *int, monthlyLimit *int) (*domain.User, error) {
 	user, err := p.storage.UpdateUserCardLimit(userID, purchaseLimit, monthlyLimit)
 	if err != nil {
 		return nil, err
@@ -48,10 +48,10 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateLimi
 	}
 
 	// Validate input
-	if input.PurchaseLimit < 0 {
+	if input.PurchaseLimit <= 0 {
 		return fmt.Errorf("invalid purchase limit")
 	}
-	if input.MonthlyLimit < 0 {
+	if input.MonthlyLimit <= 0 {
 		return fmt.Errorf("invalid monthly limit")
 	}
 
