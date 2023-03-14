@@ -2,7 +2,6 @@ package dto
 
 import (
 	"go-lambda-update-card-limit/pkg/domain"
-	"time"
 )
 
 type User struct {
@@ -12,7 +11,6 @@ type User struct {
 	PurchaseLimit   int                       `json:"purchase_limit" default:"0"`
 	MonthlyLimit    int                       `json:"monthly_limit" default:"0"`
 	MonthlySpending float32                   `json:"monthly_spending" default:"0"`
-	LimitResetDate  time.Time                 `json:"reset_date"`
 	IsAdmin         bool                      `json:"isAdmin" default:"false"`
 	Status          domain.ConfirmationStatus `json:"status" default:"Pending"`
 }
@@ -32,7 +30,6 @@ func NewOutput(users []domain.User) *Output {
 			PurchaseLimit:   user.PurchaseLimit,
 			MonthlyLimit:    user.MonthlyLimit,
 			MonthlySpending: user.MonthlySpending,
-			LimitResetDate:  user.LimitResetDate,
 			IsAdmin:         user.IsAdmin,
 			Status:          user.Status,
 		})

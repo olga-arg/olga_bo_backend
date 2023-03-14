@@ -54,7 +54,7 @@ functions:
       - DB_PORT
     events:
       - httpApi:
-          path: /users/{user_id}/card/limit
+          path: /users/{user_id}/limit
           method: patch
       - cloudwatchLog: '/aws/lambda/go-lambda-update-card-limit'
 

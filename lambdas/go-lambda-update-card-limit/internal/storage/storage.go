@@ -5,7 +5,6 @@ import (
 	"github.com/pkg/errors"
 	"go-lambda-update-card-limit/pkg/domain"
 	"log"
-	"time"
 )
 
 type UserRepository struct {
@@ -40,25 +39,6 @@ func (r *UserRepository) UpdateUserCardLimit(userID string, purchaseLimit int, m
 	if result.Error != nil {
 		log.Println("Error updating user card limit:", result.Error)
 		return errors.Wrap(result.Error, "failed to update user card limit")
-	}
-	if result.RowsAffected == 0 {
-		log.Println("No user card found for update")
-		return errors.New("no user card found for update")
-	}
-
-	return nil
-}
-
-func (r *UserRepository) UpdateUserResetDate(userID string, resetDate time.Time) error {
-	query := r.db.Scopes(getUserTable(userID)).Where("id = ?", userID)
-
-	data := make(map[string]interface{})
-	data["reset_date"] = resetDate
-
-	result := query.Updates(data)
-	if result.Error != nil {
-		log.Println("Error updating user card reset date:", result.Error)
-		return errors.Wrap(result.Error, "failed to update user card reset date")
 	}
 	if result.RowsAffected == 0 {
 		log.Println("No user card found for update")

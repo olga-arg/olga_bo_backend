@@ -8,7 +8,6 @@ import (
 	"go-lambda-update-card-limit/pkg/domain"
 	"go-lambda-update-card-limit/pkg/dto"
 	"net/http"
-	"time"
 )
 
 type UserCardLimitHandler struct {
@@ -25,9 +24,8 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 	userID := request.PathParameters["user_id"]
 
 	var input struct {
-		PurchaseLimit int       `json:"purchase_limit"`
-		MonthlyLimit  int       `json:"monthly_limit"`
-		ResetDate     time.Time `json:"reset_date"`
+		PurchaseLimit int `json:"purchase_limit"`
+		MonthlyLimit  int `json:"monthly_limit"`
 	}
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		return events.APIGatewayProxyResponse{
@@ -49,10 +47,11 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 			Body:       "invalid monthly limit",
 		}, nil
 	}
-	if input.ResetDate.IsZero() {
+
+	if input.MonthlyLimit < input.PurchaseLimit {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body:       "invalid reset date",
+			Body:       "monthly limit cannot be less than purchase limit",
 		}, nil
 	}
 
@@ -62,15 +61,6 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       "failed to update user in storage",
-		}, nil
-	}
-
-	// Update reset date in storage
-	err = h.processor.UpdateUserResetDate(context.Background(), userID, input.ResetDate)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "failed to update reset date in storage",
 		}, nil
 	}
 
