@@ -52,8 +52,16 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
+	response := map[string]interface{}{
+		"monthly_limit":  input.MonthlyLimit,
+		"purchase_limit": input.PurchaseLimit,
+		"user":           string(responseBody),
+	}
+
+	completeResponse, _ := json.Marshal(response)
+
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       string(responseBody),
+		Body:       string(completeResponse),
 	}, nil
 }
