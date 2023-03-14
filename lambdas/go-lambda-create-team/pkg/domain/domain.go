@@ -16,17 +16,17 @@ const (
 )
 
 type Team struct {
-	ID           string             `json:"id"`
-	CompanyID    string             `json:"company"`
-	TeamName     string             `json:"name"`
-	Employees    []string           `json:"employees"`
+	ID        string `json:"id"`
+	CompanyID string `json:"company"`
+	TeamName  string `json:"name"`
+	//Employees    []string           `json:"employees"`
 	ReviewerId   string             `json:"reviewer_id"`
 	AnnualBudget int                `json:"annual_budget"`
 	Status       ConfirmationStatus `json:"status" default:"Pending"`
 	CreatedDate  time.Time          `json:"created_date"`
 }
 
-func NewTeam(name, reviewer string, budget int, employees []string) (*Team, error) {
+func NewTeam(name, reviewer string, budget int) (*Team, error) {
 	err := validateInput(name)
 	if err != nil {
 		log.Println("error validating input: ", err)
@@ -40,7 +40,7 @@ func NewTeam(name, reviewer string, budget int, employees []string) (*Team, erro
 	}
 	team.ID = id.String()
 	team.TeamName = name
-	team.Employees = employees
+	//team.Employees = employees
 	team.ReviewerId = reviewer
 	team.AnnualBudget = budget
 	team.Status = Created
