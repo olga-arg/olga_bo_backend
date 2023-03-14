@@ -96,6 +96,19 @@ functions:
           path: /teams/{team_id}
           method: delete
       - cloudwatchLog: '/aws/lambda/go-lambda-delete-team'
+  go-lambda-update-team-annual-budget:
+    handler: lambdas/bin/go-lambda-update-team-annual-budget
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+      - DB_PORT
+    events:
+      - httpApi:
+          path: /teams/{team_id}
+          method: patch
+      - cloudwatchLog: '/aws/lambda/go-lambda-delete-team'
 
 #    Define function environment variables here
 #    environment:
@@ -167,6 +180,10 @@ resources:
         Type: AWS::Logs::LogGroup
         Properties:
             LogGroupName: /aws/lambda/go-lambda-delete-team
+    LambdaLogGroupUpdateTeamAnnualBudget:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: /aws/lambda/go-lambda-update-team-annual-budget
 
 plugins:
   - serverless-domain-manager
