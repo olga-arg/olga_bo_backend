@@ -37,10 +37,10 @@ func (r *UserRepository) UpdateUserCardLimit(userID string, purchaseLimit int, m
 	}
 
 	// Update only the specified field
-	if purchaseLimit != -1 {
+	if purchaseLimit >= 0 {
 		user.PurchaseLimit = purchaseLimit
 	}
-	if monthlyLimit != -1 {
+	if monthlyLimit >= 0 {
 		user.MonthlyLimit = monthlyLimit
 	}
 
