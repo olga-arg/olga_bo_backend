@@ -21,9 +21,9 @@ func NewProcessor(storage *storage.TeamRepository) Processor {
 }
 
 func (p *processor) GetAllTeams(ctx context.Context, filter map[string]string) (*dto.Output, error) {
-	users, err := p.storage.GetAllTeams(filter)
+	teams, err := p.storage.GetAllTeams(filter)
 	if err != nil {
 		return nil, err
 	}
-	return dto.NewOutput(users), nil
+	return dto.NewOutput(teams), nil
 }

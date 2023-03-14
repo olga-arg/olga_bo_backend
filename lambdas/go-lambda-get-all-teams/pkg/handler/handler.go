@@ -19,14 +19,14 @@ func NewGetAllTeamsHandler(p processor.Processor) *GetAllTeamsHandler {
 func (h *GetAllTeamsHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	filters := request.QueryStringParameters
 
-	users, err := h.processor.GetAllTeams(context.Background(), filters)
+	teams, err := h.processor.GetAllTeams(context.Background(), filters)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
 			Body:       err.Error(),
 		}, nil
 	}
-	body, err := json.Marshal(users)
+	body, err := json.Marshal(teams)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
