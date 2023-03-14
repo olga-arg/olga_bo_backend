@@ -25,7 +25,7 @@ func getTeamTable() func(tx *gorm.DB) *gorm.DB {
 
 func (r *TeamRepository) GetAllTeams(filters map[string]string) ([]domain.Team, error) {
 	var teams []domain.Team
-	query := r.db.Scopes(getTeamTable())
+	query := r.db.Scopes(getTeamTable()).Where("status = ?", 0)
 
 	// TODO: Always filter by confirmed teams
 	// Apply filters to the query
