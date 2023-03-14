@@ -2,6 +2,10 @@ package processor
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/badoux/checkmail"
 	"github.com/pkg/errors"
 	"go-lambda-create-user/internal/storage"
 	"go-lambda-create-user/pkg/domain"
@@ -11,6 +15,7 @@ import (
 
 type Processor interface {
 	CreateUser(ctx context.Context, input *dto.CreateUserInput) error
+	ValidateUserInput(ctx context.Context, input *dto.CreateUserInput, request events.APIGatewayProxyRequest) error
 }
 
 type processor struct {
@@ -45,5 +50,44 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 		return err
 	}
 	// Returns
+	return nil
+}
+
+func (p *processor) ValidateUserInput(ctx context.Context, input *dto.CreateUserInput, request events.APIGatewayProxyRequest) error {
+	log.Println("Validating input")
+	if request.Body == "" || len(request.Body) < 1 {
+		return fmt.Errorf("missing request body")
+	}
+	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
+		return fmt.Errorf("invalid request body: %s", err.Error())
+	}
+	if input.Name == "" {
+		return fmt.Errorf("name is required")
+	}
+	if input.Surname == "" {
+		return fmt.Errorf("surname is required")
+	}
+	if input.Email == "" {
+		return fmt.Errorf("email is required")
+	}
+	if request.Body == "" || len(request.Body) < 1 {
+		return fmt.Errorf("missing request body")
+	}
+	if len(input.Name) < 2 {
+		return fmt.Errorf("name must be at least 2 characters")
+	}
+	if len(input.Surname) < 2 {
+		return fmt.Errorf("surname must be at least 2 characters")
+	}
+	if len(input.Name) > 50 {
+		return fmt.Errorf("name must be less than 50 characters")
+	}
+	if len(input.Surname) > 50 {
+		return fmt.Errorf("surname must be less than 50 characters")
+	}
+	err := checkmail.ValidateFormat(input.Email)
+	if err != nil {
+		return fmt.Errorf("invalid email format")
+	}
 	return nil
 }

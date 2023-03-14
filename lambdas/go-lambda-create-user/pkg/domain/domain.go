@@ -1,9 +1,7 @@
 package domain
 
 import (
-	"github.com/badoux/checkmail"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"log"
 	"time"
 )
@@ -32,11 +30,6 @@ type User struct {
 }
 
 func NewUser(name, surname, email string) (*User, error) {
-	err := validateInput(name, surname, email)
-	if err != nil {
-		log.Println("error validating input: ", err)
-		return nil, err
-	}
 	var user User
 	id, err := uuid.NewUUID()
 	if err != nil {
@@ -51,21 +44,4 @@ func NewUser(name, surname, email string) (*User, error) {
 	user.Status = Pending
 	user.CreatedDate = time.Now()
 	return &user, nil
-}
-
-func validateInput(name, surname, email string) error {
-	if len(email) > 50 {
-		return errors.New("email must be less than 50 characters")
-	}
-	if len(name) > 50 {
-		return errors.New("name must be less than 50 characters")
-	}
-	if len(surname) > 50 {
-		return errors.New("surname must be less than 50 characters")
-	}
-	err := checkmail.ValidateFormat(email)
-	if err != nil {
-		return errors.New("invalid email format")
-	}
-	return nil
 }

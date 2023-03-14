@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-create-user/internal/processor"
 	"go-lambda-create-user/internal/services"
@@ -20,19 +19,15 @@ func NewCreateUserHandler(p processor.Processor) *CreateUserHandler {
 }
 
 func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	if request.Body == "" || len(request.Body) < 1 {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body:       "Missing request body",
-		}, nil
-	}
-
 	var input dto.CreateUserInput
-	err := json.Unmarshal([]byte(request.Body), &input)
+
+	// Validate input
+	log.Println("Validating input")
+	err := h.processor.ValidateUserInput(context.Background(), &input, request)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body:       "Invalid request body",
+			StatusCode: http.StatusBadRequest,
+			Body:       err.Error(),
 		}, nil
 	}
 
