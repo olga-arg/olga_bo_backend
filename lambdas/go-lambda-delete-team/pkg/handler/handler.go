@@ -54,7 +54,7 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body:       "failed to update team in storage",
+			Body:       err.Error(),
 		}, nil
 	}
 
