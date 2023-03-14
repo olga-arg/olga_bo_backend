@@ -51,17 +51,9 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 			Body:       "failed to encode response",
 		}, nil
 	}
-
-	response := map[string]interface{}{
-		"monthly_limit":  input.MonthlyLimit,
-		"purchase_limit": input.PurchaseLimit,
-		"user":           string(responseBody),
-	}
-
-	completeResponse, _ := json.Marshal(response)
-
+	
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       string(completeResponse),
+		Body:       string(responseBody),
 	}, nil
 }
