@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	teamRepo := storage.NewUserRepository(db)
+	teamRepo := storage.NewTeamRepository(db)
 	teamProcessor := processor.New(*teamRepo)
 	createTeamHandler := handler.NewCreateTeamHandler(teamProcessor)
 	lambda.Start(createTeamHandler.Handle)

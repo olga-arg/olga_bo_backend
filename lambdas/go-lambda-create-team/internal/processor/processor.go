@@ -23,15 +23,15 @@ func New(s storage.TeamRepository) Processor {
 }
 
 func (p *processor) CreateTeam(ctx context.Context, input *dto.CreateTeamInput) error {
-	// Creates a new user. New user takes a name and email and returns a user struct
-	user, err := domain.NewTeam(input.TeamName, input.ReviewerId, input.AnnualBudget, input.Employees)
+	// Creates a new team
+	team, err := domain.NewTeam(input.TeamName, input.ReviewerId, input.AnnualBudget, input.Employees)
 	if err != nil {
-		log.Println("Error creating user: ", err)
+		log.Println("Error creating team: ", err)
 		return err
 	}
-	// Saves the user to the database if it doesn't already exist
-	if err := p.storage.Save(user); err != nil {
-		log.Println("Error saving user: ", err)
+	// Saves the team to the database if it doesn't already exist
+	if err := p.storage.Save(team); err != nil {
+		log.Println("Error saving team: ", err)
 		return err
 	}
 	// Returns

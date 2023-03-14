@@ -10,13 +10,13 @@ type TeamRepository struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *TeamRepository {
+func NewTeamRepository(db *gorm.DB) *TeamRepository {
 	return &TeamRepository{
 		db: db,
 	}
 }
 
-func getTeamTable(user *domain.Team) func(tx *gorm.DB) *gorm.DB {
+func getTeamTable(team *domain.Team) func(tx *gorm.DB) *gorm.DB {
 	return func(tx *gorm.DB) *gorm.DB {
 		// TODO: Extract company name to specify the table name
 		return tx.Table("teams")
