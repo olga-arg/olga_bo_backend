@@ -70,6 +70,19 @@ functions:
           path: /teams
           method: post
       - cloudwatchLog: '/aws/lambda/go-lambda-create-team'
+  go-lambda-get-all-teams:
+    handler: lambdas/bin/go-lambda-get-all-teams
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_READER
+      - DB_PORT
+    events:
+      - httpApi:
+          path: /teams
+          method: get
+      - cloudwatchLog: '/aws/lambda/go-lambda-get-all-teams'
 
 #    Define function environment variables here
 #    environment:
@@ -133,6 +146,10 @@ resources:
         Type: AWS::Logs::LogGroup
         Properties:
             LogGroupName: /aws/lambda/go-lambda-create-team
+    LambdaLogGroupGetAllTeams:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: /aws/lambda/go-lambda-get-all-teams
 
 plugins:
   - serverless-domain-manager
