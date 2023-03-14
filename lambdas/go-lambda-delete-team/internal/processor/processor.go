@@ -2,6 +2,7 @@ package processor
 
 import (
 	"context"
+	"fmt"
 	"go-lambda-delete-team/internal/storage"
 	"go-lambda-delete-team/pkg/domain"
 	"log"
@@ -23,6 +24,12 @@ func NewProcessor(storage *storage.TeamRepository) Processor {
 }
 
 func (p *processor) DeleteTeam(ctx context.Context, newTeam *domain.Team) error {
+	// Validate that team isn't already deleted
+	if newTeam.Status == 1 {
+		log.Println("Team is already deleted")
+		return fmt.Errorf("team is already deleted")
+	}
+
 	err := p.storage.DeleteTeam(newTeam)
 	if err != nil {
 		return err
