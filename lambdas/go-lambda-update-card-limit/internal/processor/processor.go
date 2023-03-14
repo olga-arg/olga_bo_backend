@@ -55,8 +55,8 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateLimi
 		return fmt.Errorf("invalid monthly limit")
 	}
 
-	if input.MonthlyLimit < input.PurchaseLimit {
-		return fmt.Errorf("monthly limit cannot be less than purchase limit")
+	if input.MonthlyLimit > 0 && input.PurchaseLimit > input.MonthlyLimit {
+		return fmt.Errorf("purchase limit cannot be greater than monthly limit")
 	}
 
 	return nil
