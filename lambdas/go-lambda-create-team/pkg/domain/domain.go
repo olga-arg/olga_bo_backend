@@ -68,7 +68,7 @@ func validateInput(input *dto.CreateTeamInput, teamRepository *storage.TeamRepos
 		return errors.New("name must be less than 50 characters")
 	}
 	if input.TeamName == "" {
-		return errors.New("name is required")
+		return errors.New("team name is required")
 	}
 	return nil
 }
