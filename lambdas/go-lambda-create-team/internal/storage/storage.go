@@ -31,3 +31,17 @@ func (r *TeamRepository) Save(team *domain.Team) error {
 	}
 	return nil
 }
+
+func (r *TeamRepository) GetTeamByName(id string) (*domain.Team, error) {
+	var team domain.Team
+	query := r.Db.Scopes(getTeamTable(&team)).Where("team_name = ?", id)
+	err := query.First(&team).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, err
+		}
+		log.Println("Error getting team by name: ", err)
+		return nil, err
+	}
+	return &team, nil
+}

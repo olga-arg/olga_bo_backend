@@ -2,10 +2,10 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-create-team/internal/processor"
 	"go-lambda-create-team/pkg/dto"
+	"log"
 	"net/http"
 )
 
@@ -18,19 +18,15 @@ func NewCreateTeamHandler(p processor.Processor) *CreateTeamHandler {
 }
 
 func (h *CreateTeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	if request.Body == "" || len(request.Body) < 1 {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body:       "Missing request body",
-		}, nil
-	}
-
 	var input dto.CreateTeamInput
-	err := json.Unmarshal([]byte(request.Body), &input)
+
+	// Validate input
+	log.Println("Validating input")
+	err := h.processor.ValidateTeamInput(context.Background(), &input, request)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
-			StatusCode: 400,
-			Body:       "Invalid request body",
+			StatusCode: http.StatusBadRequest,
+			Body:       err.Error(),
 		}, nil
 	}
 
