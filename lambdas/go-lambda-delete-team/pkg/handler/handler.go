@@ -39,15 +39,7 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 			Body:       err.Error(),
 		}, err
 	}
-
-	if team == nil {
-		err := errors.New("team not found")
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusNotFound,
-			Body:       err.Error(),
-		}, err
-	}
-
+	
 	// Update team in storage
 	log.Println("Updating team in storage")
 	err = h.processor.DeleteTeam(context.Background(), team)
