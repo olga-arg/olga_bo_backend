@@ -43,10 +43,5 @@ func (p *processor) GetTeam(ctx context.Context, teamID string) (*domain.Team, e
 		log.Println("Error getting team by ID", err.Error())
 		return nil, err
 	}
-	// if team not found return error
-	if team == nil {
-		log.Println("Team not found")
-		return nil, fmt.Errorf("team not found")
-	}
 	return team, nil
 }

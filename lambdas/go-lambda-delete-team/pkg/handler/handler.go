@@ -32,14 +32,16 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 		}, err
 	}
 
+	log.Println("teamID:", teamID)
 	team, err := h.processor.GetTeam(context.Background(), teamID)
+	log.Println("error", err.Error())
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       err.Error(),
 		}, err
 	}
-	
+
 	// Update team in storage
 	log.Println("Updating team in storage")
 	err = h.processor.DeleteTeam(context.Background(), team)
