@@ -32,7 +32,7 @@ functions:
           method: post
       - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
   go-lambda-get-all-users:
-    handler: lambdas/bin/go-lambda-get-all-users
+    handler: lambdas/bin/go-lambda-get-all-users/go-lambda-get-all-users
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -45,7 +45,7 @@ functions:
           method: get
       - cloudwatchLog: '/aws/lambda/go-lambda-get-all-users'
   go-lambda-update-card-limit:
-    handler: lambdas/bin/go-lambda-update-card-limit
+    handler: lambdas/bin/go-lambda-update-card-limit/go-lambda-update-card-limit
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -58,7 +58,7 @@ functions:
           method: patch
       - cloudwatchLog: '/aws/lambda/go-lambda-update-card-limit'
   go-lambda-create-team:
-    handler: lambdas/bin/go-lambda-create-team
+    handler: lambdas/bin/go-lambda-create-team/go-lambda-create-team
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -71,7 +71,7 @@ functions:
           method: post
       - cloudwatchLog: '/aws/lambda/go-lambda-create-team'
   go-lambda-get-all-teams:
-    handler: lambdas/bin/go-lambda-get-all-teams
+    handler: lambdas/bin/go-lambda-get-all-teams/go-lambda-get-all-teams
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -84,7 +84,7 @@ functions:
           method: get
       - cloudwatchLog: '/aws/lambda/go-lambda-get-all-teams'
   go-lambda-delete-team:
-    handler: lambdas/bin/go-lambda-delete-team
+    handler: lambdas/bin/go-lambda-delete-team/go-lambda-delete-team
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -97,7 +97,7 @@ functions:
           method: delete
       - cloudwatchLog: '/aws/lambda/go-lambda-delete-team'
   go-lambda-update-team-annual-budget:
-    handler: lambdas/bin/go-lambda-update-team-annual-budget
+    handler: lambdas/bin/go-lambda-update-team-annual-budget/go-lambda-update-team-annual-budget
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
