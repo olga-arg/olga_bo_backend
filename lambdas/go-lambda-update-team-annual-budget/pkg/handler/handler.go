@@ -2,13 +2,17 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-update-team-annual-budget/internal/processor"
 	"net/http"
-	"strconv"
 )
+
+type UpdateTeamRequest struct {
+	AnnualBudget int `json:"annual_budget"`
+}
 
 type TeamHandler struct {
 	processor processor.Processor
@@ -31,14 +35,21 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 			Body:       err.Error(),
 		}, err
 	}
-	// Get the annual budget from the request body
-	fmt.Println("Extracting annual budget from request body")
-	annualBudget, ok := request.QueryStringParameters["annual_budget"]
-	annualBudgetInt, err := strconv.Atoi(annualBudget)
+
+	// Parse the request body into a struct
+	fmt.Println("Parsing request body")
+	var updateRequest UpdateTeamRequest
+	err := json.Unmarshal([]byte(request.Body), &updateRequest)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusBadRequest,
+			Body:       err.Error(),
+		}, err
+	}
 
 	// Update team in storage
 	fmt.Println("Updating team in storage")
-	err = h.processor.UpdateTeamBudget(context.Background(), teamID, annualBudgetInt)
+	err = h.processor.UpdateTeamBudget(context.Background(), teamID, updateRequest.AnnualBudget)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
