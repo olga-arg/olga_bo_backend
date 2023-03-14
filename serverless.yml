@@ -110,6 +110,7 @@ functions:
           method: patch
       - cloudwatchLog: '/aws/lambda/go-lambda-delete-team'
 
+
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
