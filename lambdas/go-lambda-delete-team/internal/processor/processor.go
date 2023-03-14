@@ -4,13 +4,10 @@ import (
 	"context"
 	"fmt"
 	"go-lambda-delete-team/internal/storage"
-	"go-lambda-delete-team/pkg/domain"
-	"log"
 )
 
 type Processor interface {
-	DeleteTeam(ctx context.Context, newTeam *domain.Team) error
-	GetTeam(ctx context.Context, teamID string) (*domain.Team, error)
+	DeleteTeam(ctx context.Context, teamID string) error
 }
 
 type processor struct {
@@ -23,25 +20,13 @@ func NewProcessor(storage *storage.TeamRepository) Processor {
 	}
 }
 
-func (p *processor) DeleteTeam(ctx context.Context, newTeam *domain.Team) error {
-	// Validate that team isn't already deleted
-	if newTeam.Status == 1 {
-		log.Println("Team is already deleted")
-		return fmt.Errorf("team is already deleted")
-	}
-
-	err := p.storage.DeleteTeam(newTeam)
+func (p *processor) DeleteTeam(ctx context.Context, teamID string) error {
+	fmt.Println("Deleting team in storage")
+	err := p.storage.DeleteTeam(teamID)
 	if err != nil {
+		fmt.Println("error", err.Error())
 		return err
 	}
+	fmt.Println("Team deleted proc")
 	return nil
-}
-
-func (p *processor) GetTeam(ctx context.Context, teamID string) (*domain.Team, error) {
-	team, err := p.storage.GetTeamByID(teamID)
-	if err != nil {
-		log.Println("Error getting team by ID", err.Error())
-		return nil, err
-	}
-	return team, nil
 }

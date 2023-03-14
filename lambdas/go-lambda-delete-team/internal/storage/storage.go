@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"go-lambda-delete-team/pkg/domain"
@@ -24,28 +25,29 @@ func getTeamTable(teamID string) func(tx *gorm.DB) *gorm.DB {
 	}
 }
 
-func (r *TeamRepository) DeleteTeam(newTeam *domain.Team) error {
+func (r *TeamRepository) DeleteTeam(teamID string) error {
+	var team domain.Team
+	fmt.Println("Getting team by ID in db")
+	err := r.db.Scopes(getTeamTable(teamID)).Where("id = ?", teamID).First(&team).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		fmt.Println("No team found")
+		return errors.Wrap(err, "No team with that ID found")
+	}
+	fmt.Println("Team found", team)
+	// Validate that team isn't already deleted
+	if team.Status == 1 {
+		log.Println("Team is already deleted")
+		return fmt.Errorf("team is already deleted")
+	}
+	fmt.Println("Team is not deleted")
 	// change the team status to deleted
-	newTeam.Status = 1
+	team.Status = 1
 	// Save the updated team
-	query := r.db.Save(newTeam)
+	query := r.db.Save(team)
 	if query.Error != nil {
 		log.Println("Error deleting team:", query.Error)
 		return errors.Wrap(query.Error, "failed to delete team")
 	}
+	fmt.Println("Team deleted")
 	return nil
-}
-
-func (r *TeamRepository) GetTeamByID(teamID string) (*domain.Team, error) {
-	var team domain.Team
-	query := r.db.Scopes(getTeamTable(teamID)).Where("id = ?", teamID)
-	err := query.First(&team).Error
-	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			return nil, errors.Wrap(err, "team not found")
-		}
-		log.Println("Error getting team by ID:", err)
-		return nil, errors.Wrap(err, "failed to get team by ID")
-	}
-	return &team, nil
 }
