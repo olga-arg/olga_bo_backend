@@ -48,10 +48,10 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateLimi
 	}
 
 	// Validate input
-	if input.PurchaseLimit <= 0 {
+	if input.PurchaseLimit < 0 {
 		return fmt.Errorf("invalid purchase limit")
 	}
-	if input.MonthlyLimit <= 0 {
+	if input.MonthlyLimit < 0 {
 		return fmt.Errorf("invalid monthly limit")
 	}
 
