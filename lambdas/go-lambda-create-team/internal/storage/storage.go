@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"go-lambda-create-team/pkg/domain"
-	"log"
 )
 
 type TeamRepository struct {
@@ -27,7 +26,7 @@ func getTeamTable(team *domain.Team) func(tx *gorm.DB) *gorm.DB {
 func (r *TeamRepository) Save(team *domain.Team) error {
 	err := r.Db.Scopes(getTeamTable(team)).AutoMigrate(&domain.Team{}).Create(team).Error
 	if err != nil {
-		log.Println("Error saving team: ", err)
+		fmt.Println("Error saving team: ", err)
 		return err
 	}
 	return nil
@@ -41,7 +40,7 @@ func (r *TeamRepository) GetTeamByName(teamName string) error {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil
 		}
-		log.Println("Error getting team by name: ", err)
+		fmt.Println("Error getting team by name: ", err)
 		return err
 	}
 	return fmt.Errorf("team already exists: %s", teamName)

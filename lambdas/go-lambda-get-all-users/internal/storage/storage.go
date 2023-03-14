@@ -1,10 +1,10 @@
 package storage
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"go-lambda-get-all-users/pkg/domain"
-	"log"
 )
 
 type UserRepository struct {
@@ -42,11 +42,11 @@ func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, 
 	// Execute the query
 	err := query.Find(&users).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Println("No users found")
+		fmt.Println("No users found")
 		return nil, nil
 	}
 	if err != nil {
-		log.Println("Error getting users:", err)
+		fmt.Println("Error getting users:", err)
 		return nil, err
 	}
 

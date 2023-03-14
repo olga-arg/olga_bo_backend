@@ -5,7 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"go-lambda-delete-team/pkg/domain"
-	"log"
+	
 )
 
 type TeamRepository struct {
@@ -36,7 +36,7 @@ func (r *TeamRepository) DeleteTeam(teamID string) error {
 	fmt.Println("Team found", team)
 	// Validate that team isn't already deleted
 	if team.Status == 1 {
-		log.Println("Team is already deleted")
+		fmt.Println("Team is already deleted")
 		return fmt.Errorf("team is already deleted")
 	}
 	fmt.Println("Team is not deleted")
@@ -45,7 +45,7 @@ func (r *TeamRepository) DeleteTeam(teamID string) error {
 	// Save the updated team
 	query := r.db.Save(team)
 	if query.Error != nil {
-		log.Println("Error deleting team:", query.Error)
+		fmt.Println("Error deleting team:", query.Error)
 		return errors.Wrap(query.Error, "failed to delete team")
 	}
 	fmt.Println("Team deleted")

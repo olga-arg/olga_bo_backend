@@ -1,10 +1,10 @@
 package storage
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"go-lambda-get-all-teams/pkg/domain"
-	"log"
 )
 
 type TeamRepository struct {
@@ -40,11 +40,11 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string) ([]domain.Team, 
 	// Execute the query
 	err := query.Find(&teams).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Println("No teams found")
+		fmt.Println("No teams found")
 		return nil, nil
 	}
 	if err != nil {
-		log.Println("Error getting teams:", err)
+		fmt.Println("Error getting teams:", err)
 		return nil, err
 	}
 

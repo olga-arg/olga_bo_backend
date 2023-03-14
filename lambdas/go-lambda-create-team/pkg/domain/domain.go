@@ -1,8 +1,9 @@
 package domain
 
 import (
+	"fmt"
 	"github.com/google/uuid"
-	"log"
+
 	"time"
 )
 
@@ -30,7 +31,7 @@ func NewTeam(name, reviewer string, budget int) (*Team, error) {
 	var team Team
 	id, err := uuid.NewUUID()
 	if err != nil {
-		log.Println("error generating uuid: ", err)
+		fmt.Println("error generating uuid: ", err)
 		return nil, err
 	}
 	team.ID = id.String()

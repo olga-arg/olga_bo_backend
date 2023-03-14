@@ -2,8 +2,9 @@ package services
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/jordan-wright/email"
-	"log"
+
 	"net/smtp"
 	"os"
 	"strings"
@@ -53,7 +54,7 @@ func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
 	e.Text = []byte(body)
 	err := e.Send(smtpServerAddress, es.auth)
 	if err != nil {
-		log.Println("Sending email from: ", es.fromEmail, " to: ", to, " with subject: ", subject, "got error: ", err)
+		fmt.Println("Sending email from: ", es.fromEmail, " to: ", to, " with subject: ", subject, "got error: ", err)
 		return err
 	}
 	return nil

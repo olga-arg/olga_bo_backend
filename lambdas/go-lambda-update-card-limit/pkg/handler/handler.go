@@ -3,10 +3,11 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-update-card-limit/internal/processor"
 	"go-lambda-update-card-limit/pkg/dto"
-	"log"
+
 	"net/http"
 )
 
@@ -24,7 +25,7 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 	var input dto.UpdateLimitInput
 
 	// Validate input
-	log.Println("Validating input")
+	fmt.Println("Validating input")
 	newUser, err := h.processor.ValidateUserInput(context.Background(), &input, request)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -33,7 +34,7 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 	// Update user in storage
-	log.Println("Updating user in storage")
+	fmt.Println("Updating user in storage")
 	err = h.processor.UpdateUserCardLimits(context.Background(), newUser)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -43,9 +44,9 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 	}
 
 	// Convert user to DTO and write response
-	log.Println("Converting user to DTO and writing response")
+	fmt.Println("Converting user to DTO and writing response")
 	output := dto.NewOutput(newUser)
-	log.Println("output:", output)
+	fmt.Println("output:", output)
 	responseBody, err := json.Marshal(output)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -53,7 +54,7 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 			Body:       "failed to encode response",
 		}, nil
 	}
-	log.Println("response:", string(responseBody))
+	fmt.Println("response:", string(responseBody))
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Body:       string(responseBody),

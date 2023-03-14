@@ -5,7 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"go-lambda-update-team-annual-budget/pkg/domain"
-	"log"
+	
 )
 
 type TeamRepository struct {
@@ -44,7 +44,7 @@ func (r *TeamRepository) UpdateTeamBudget(teamID string, annualBudget int) error
 	// Save the updated team
 	query := r.db.Save(team)
 	if query.Error != nil {
-		log.Println("Error updating team:", query.Error)
+		fmt.Println("Error updating team:", query.Error)
 		return errors.Wrap(query.Error, "failed to update team")
 	}
 	fmt.Println("Team updated")

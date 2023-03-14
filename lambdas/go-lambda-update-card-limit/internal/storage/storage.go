@@ -1,10 +1,10 @@
 package storage
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"go-lambda-update-card-limit/pkg/domain"
-	"log"
 )
 
 type UserRepository struct {
@@ -28,7 +28,7 @@ func (r *UserRepository) UpdateUserCardLimit(newUser *domain.User) error {
 	// Save the updated user
 	query := r.db.Save(newUser)
 	if query.Error != nil {
-		log.Println("Error updating user card limit:", query.Error)
+		fmt.Println("Error updating user card limit:", query.Error)
 		return errors.Wrap(query.Error, "failed to update user card limit")
 	}
 	return nil
@@ -42,7 +42,7 @@ func (r *UserRepository) GetUserByID(userID string) (*domain.User, error) {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil, errors.Wrap(err, "user not found")
 		}
-		log.Println("Error getting user by ID:", err)
+		fmt.Println("Error getting user by ID:", err)
 		return nil, errors.Wrap(err, "failed to get user by ID")
 	}
 	return &user, nil

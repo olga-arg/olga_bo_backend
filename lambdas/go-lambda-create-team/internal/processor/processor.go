@@ -8,7 +8,7 @@ import (
 	"go-lambda-create-team/internal/storage"
 	"go-lambda-create-team/pkg/domain"
 	"go-lambda-create-team/pkg/dto"
-	"log"
+	
 )
 
 type Processor interface {
@@ -30,12 +30,12 @@ func (p *processor) CreateTeam(ctx context.Context, input *dto.CreateTeamInput) 
 	// Creates a new team
 	team, err := domain.NewTeam(input.TeamName, input.ReviewerId, input.AnnualBudget) //input.Employees)
 	if err != nil {
-		log.Println("Error creating team: ", err)
+		fmt.Println("Error creating team: ", err)
 		return err
 	}
 	// Saves the team to the database if it doesn't already exist
 	if err := p.storage.Save(team); err != nil {
-		log.Println("Error saving team: ", err)
+		fmt.Println("Error saving team: ", err)
 		return err
 	}
 	// Returns
@@ -43,7 +43,7 @@ func (p *processor) CreateTeam(ctx context.Context, input *dto.CreateTeamInput) 
 }
 
 func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeamInput, request events.APIGatewayProxyRequest) error {
-	log.Println("Validating input")
+	fmt.Println("Validating input")
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		return fmt.Errorf("invalid request body: %s", err.Error())
 	}

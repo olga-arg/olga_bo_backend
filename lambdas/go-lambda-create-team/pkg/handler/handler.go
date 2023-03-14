@@ -2,10 +2,11 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-create-team/internal/processor"
 	"go-lambda-create-team/pkg/dto"
-	"log"
+
 	"net/http"
 )
 
@@ -21,7 +22,7 @@ func (h *CreateTeamHandler) Handle(request events.APIGatewayProxyRequest) (event
 	var input dto.CreateTeamInput
 
 	// Validate input
-	log.Println("Validating input")
+	fmt.Println("Validating input")
 	err := h.processor.ValidateTeamInput(context.Background(), &input, request)
 	if err != nil {
 		return events.APIGatewayProxyResponse{

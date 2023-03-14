@@ -10,7 +10,7 @@ import (
 	"go-lambda-create-user/internal/storage"
 	"go-lambda-create-user/pkg/domain"
 	"go-lambda-create-user/pkg/dto"
-	"log"
+	
 )
 
 type Processor interface {
@@ -41,12 +41,12 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 	// Creates a new user. New user takes a name and email and returns a user struct
 	user, err := domain.NewUser(input.Name, input.Surname, input.Email)
 	if err != nil {
-		log.Println("Error creating user: ", err)
+		fmt.Println("Error creating user: ", err)
 		return err
 	}
 	// Saves the user to the database if it doesn't already exist
 	if err := p.storage.Save(user); err != nil {
-		log.Println("Error saving user: ", err)
+		fmt.Println("Error saving user: ", err)
 		return err
 	}
 	// Returns
@@ -54,7 +54,7 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 }
 
 func (p *processor) ValidateUserInput(ctx context.Context, input *dto.CreateUserInput, request events.APIGatewayProxyRequest) error {
-	log.Println("Validating input")
+	fmt.Println("Validating input")
 	if request.Body == "" || len(request.Body) < 1 {
 		return fmt.Errorf("missing request body")
 	}

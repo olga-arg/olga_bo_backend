@@ -8,7 +8,7 @@ import (
 	"go-lambda-update-card-limit/internal/storage"
 	"go-lambda-update-card-limit/pkg/domain"
 	"go-lambda-update-card-limit/pkg/dto"
-	"log"
+	
 )
 
 type Processor interface {
@@ -38,14 +38,14 @@ func (p *processor) UpdateUserCardLimits(ctx context.Context, newUser *domain.Us
 func (p *processor) GetUser(ctx context.Context, userID string) (*domain.User, error) {
 	user, err := p.storage.GetUserByID(userID)
 	if err != nil {
-		log.Println("Error getting user by ID", err.Error())
+		fmt.Println("Error getting user by ID", err.Error())
 		return nil, err
 	}
 	return user, nil
 }
 
 func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateLimitInput, request events.APIGatewayProxyRequest) (*domain.User, error) {
-	log.Println("Validating input")
+	fmt.Println("Validating input")
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		return nil, fmt.Errorf("invalid request body: %s", err.Error())
 	}
@@ -57,12 +57,12 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateLimi
 	}
 	user, err := p.GetUser(ctx, request.PathParameters["user_id"])
 	if err != nil {
-		log.Println("error getting user", err.Error())
+		fmt.Println("error getting user", err.Error())
 		return nil, fmt.Errorf("failed to get user")
 	}
 	if input.PurchaseLimit > 0 && input.MonthlyLimit > 0 {
 		if input.PurchaseLimit > input.MonthlyLimit {
-			log.Println("purchase limit cannot be greater than monthly limit")
+			fmt.Println("purchase limit cannot be greater than monthly limit")
 			return nil, fmt.Errorf("purchase limit cannot be greater than monthly limit")
 		}
 		user.PurchaseLimit = input.PurchaseLimit
@@ -70,18 +70,18 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateLimi
 	} else if input.PurchaseLimit > 0 {
 		actualMonthlyLimit := user.MonthlyLimit
 		if input.PurchaseLimit > actualMonthlyLimit {
-			log.Println("purchase limit cannot be greater than monthly limit")
+			fmt.Println("purchase limit cannot be greater than monthly limit")
 			return nil, fmt.Errorf("purchase limit cannot be greater than monthly limit")
 		}
 		user.PurchaseLimit = input.PurchaseLimit
 	} else if input.MonthlyLimit > 0 {
 		actualPurchaseLimit := user.PurchaseLimit
 		if input.MonthlyLimit < actualPurchaseLimit {
-			log.Println("monthly limit cannot be less than purchase limit")
+			fmt.Println("monthly limit cannot be less than purchase limit")
 			return nil, fmt.Errorf("monthly limit cannot be less than purchase limit")
 		}
 		user.MonthlyLimit = input.MonthlyLimit
 	}
-	log.Println("Input validated successfully")
+	fmt.Println("Input validated successfully")
 	return user, nil
 }
