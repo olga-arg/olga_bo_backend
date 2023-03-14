@@ -6,7 +6,7 @@ import (
 
 type Team struct {
 	ID           string                    `json:"id"`
-	TeamName     string                    `json:"name"`
+	TeamName     string                    `json:"team_name"`
 	ReviewerId   string                    `json:"reviewer_id"`
 	AnnualBudget int                       `json:"annual_budget"`
 	Status       domain.ConfirmationStatus `json:"status" default:"Created"`

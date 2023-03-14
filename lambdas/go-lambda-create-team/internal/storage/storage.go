@@ -7,12 +7,12 @@ import (
 )
 
 type TeamRepository struct {
-	db *gorm.DB
+	Db *gorm.DB
 }
 
 func NewTeamRepository(db *gorm.DB) *TeamRepository {
 	return &TeamRepository{
-		db: db,
+		Db: db,
 	}
 }
 
@@ -24,7 +24,7 @@ func getTeamTable(team *domain.Team) func(tx *gorm.DB) *gorm.DB {
 }
 
 func (r *TeamRepository) Save(team *domain.Team) error {
-	err := r.db.Scopes(getTeamTable(team)).AutoMigrate(&domain.Team{}).Create(team).Error
+	err := r.Db.Scopes(getTeamTable(team)).AutoMigrate(&domain.Team{}).Create(team).Error
 	if err != nil {
 		log.Println("Error saving team: ", err)
 		return err

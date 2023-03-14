@@ -3,6 +3,7 @@ package domain
 import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"go-lambda-create-team/internal/storage"
 	"log"
 	"time"
 )
@@ -27,8 +28,8 @@ type Team struct {
 	CreatedDate  time.Time          `json:"created_date"`
 }
 
-func NewTeam(name, reviewer string, budget int) (*Team, error) {
-	err := validateInput(name)
+func NewTeam(name, reviewer string, budget int, teamRepository *storage.TeamRepository) (*Team, error) {
+	err := validateInput(name, teamRepository)
 	if err != nil {
 		log.Println("error validating input: ", err)
 		return nil, err
@@ -49,7 +50,12 @@ func NewTeam(name, reviewer string, budget int) (*Team, error) {
 	return &team, nil
 }
 
-func validateInput(name string) error {
+func validateInput(name string, teamRepository *storage.TeamRepository) error {
+	// Validate Team Name is unique
+	var existingTeam Team
+	if err := teamRepository.Db.Where("team_name = ?", name).First(&existingTeam).Error; err == nil {
+		return errors.New("team name already exists")
+	}
 	if len(name) > 50 {
 		return errors.New("name must be less than 50 characters")
 	}

@@ -24,7 +24,7 @@ func New(s storage.TeamRepository) Processor {
 
 func (p *processor) CreateTeam(ctx context.Context, input *dto.CreateTeamInput) error {
 	// Creates a new team
-	team, err := domain.NewTeam(input.TeamName, input.ReviewerId, input.AnnualBudget) //input.Employees)
+	team, err := domain.NewTeam(input.TeamName, input.ReviewerId, input.AnnualBudget, &p.storage) //input.Employees)
 	if err != nil {
 		log.Println("Error creating team: ", err)
 		return err
