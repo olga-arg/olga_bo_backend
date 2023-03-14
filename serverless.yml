@@ -83,6 +83,19 @@ functions:
           path: /teams
           method: get
       - cloudwatchLog: '/aws/lambda/go-lambda-get-all-teams'
+  go-lambda-delete-team:
+    handler: lambdas/bin/go-lambda-delete-team
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+      - DB_PORT
+    events:
+      - httpApi:
+          path: /teams
+          method: get
+      - cloudwatchLog: '/aws/lambda/go-lambda-delete-team'
 
 #    Define function environment variables here
 #    environment:
@@ -150,6 +163,10 @@ resources:
         Type: AWS::Logs::LogGroup
         Properties:
             LogGroupName: /aws/lambda/go-lambda-get-all-teams
+    LambdaLogGroupDeleteTeam:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: /aws/lambda/go-lambda-delete-team
 
 plugins:
   - serverless-domain-manager
