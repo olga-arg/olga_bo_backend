@@ -5,7 +5,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"go-lambda-update-team-annual-budget/pkg/domain"
-	
 )
 
 type TeamRepository struct {
@@ -33,11 +32,6 @@ func (r *TeamRepository) UpdateTeamBudget(teamID string, annualBudget int) error
 		return errors.Wrap(err, "No team with that ID found")
 	}
 	fmt.Println("Team found", team)
-
-	if team.AnnualBudget < 0 {
-		fmt.Println("Annual budget cannot be negative")
-		return errors.New("Annual budget cannot be negative")
-	}
 
 	// change the team annual budget
 	team.AnnualBudget = annualBudget

@@ -21,6 +21,9 @@ func NewProcessor(storage *storage.TeamRepository) Processor {
 }
 
 func (p *processor) UpdateTeamBudget(ctx context.Context, teamID string, annualBudget int) error {
+	if annualBudget < 0 {
+		return fmt.Errorf("annual budget must be greater than 0")
+	}
 	fmt.Println("Updating team in storage")
 	err := p.storage.UpdateTeamBudget(teamID, annualBudget)
 	if err != nil {
