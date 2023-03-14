@@ -59,5 +59,17 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateLimi
 		return fmt.Errorf("purchase limit cannot be greater than monthly limit")
 	}
 
+	// Get user "old" monthly limit
+	user, err := p.GetUser(ctx, request.PathParameters["user_id"])
+	if err != nil {
+		return fmt.Errorf("failed to get user")
+	}
+	oldMonthlyLimit := user.MonthlyLimit
+
+	// Validate new purchase limit is not greater than old monthly limit
+	if input.PurchaseLimit > oldMonthlyLimit {
+		return fmt.Errorf("purchase limit cannot be greater than monthly limit")
+	}
+
 	return nil
 }
