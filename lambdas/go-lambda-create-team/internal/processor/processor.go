@@ -59,13 +59,8 @@ func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeam
 	// TODO: Validate that reviewer exists in the user table
 
 	// Validate that the team doesn't already exist
-	team, err := p.storage.GetTeamByName(input.TeamName)
-	if err != nil {
-		log.Println("Error getting team: ", err)
+	if err := p.storage.GetTeamByName(input.TeamName); err != nil {
 		return err
-	}
-	if team != nil {
-		return fmt.Errorf("team already exists")
 	}
 	return nil
 }

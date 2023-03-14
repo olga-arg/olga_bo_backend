@@ -33,15 +33,16 @@ func (r *TeamRepository) Save(team *domain.Team) error {
 	return nil
 }
 
-func (r *TeamRepository) GetTeamByName(name string) (*domain.Team, error) {
+func (r *TeamRepository) GetTeamByName(teamName string) error {
 	var team domain.Team
-	err := r.Db.Scopes(getTeamTable(&team)).Where("team_name = ?", name).First(&team).Error
+	query := r.Db.Scopes(getTeamTable(&team)).Where("team_name = ?", teamName)
+	err := query.First(&team).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return nil, fmt.Errorf("team not found: %s", name)
+			return nil
 		}
 		log.Println("Error getting team by name: ", err)
-		return nil, err
+		return err
 	}
-	return &team, nil
+	return fmt.Errorf("team already exists: %s", teamName)
 }
