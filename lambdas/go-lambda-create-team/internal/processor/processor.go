@@ -47,6 +47,9 @@ func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeam
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		return fmt.Errorf("invalid request body: %s", err.Error())
 	}
+	log.Println(input.TeamName)
+	log.Println(input.ReviewerId)
+	log.Println(input.AnnualBudget)
 	if input.TeamName == "" {
 		return fmt.Errorf("team name is required")
 	}
@@ -60,6 +63,7 @@ func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeam
 
 	// Validate that the team doesn't already exist
 	team, err := p.storage.GetTeamByName(input.TeamName)
+	log.Println(team)
 	if err != nil {
 		log.Println("Error getting team: ", err)
 		return err
