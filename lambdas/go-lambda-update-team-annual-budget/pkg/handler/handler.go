@@ -24,6 +24,7 @@ func NewTeamHandler(processor processor.Processor) *TeamHandler {
 	}
 }
 
+// test
 func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// Extract team ID from URL path parameter
 	fmt.Println("Extracting team ID from URL path parameter")
