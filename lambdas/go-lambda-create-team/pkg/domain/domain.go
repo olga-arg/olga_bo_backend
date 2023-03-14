@@ -2,7 +2,6 @@ package domain
 
 import (
 	"github.com/google/uuid"
-	"go-lambda-create-team/internal/storage"
 	"log"
 	"time"
 )
@@ -27,7 +26,7 @@ type Team struct {
 	CreatedDate  time.Time          `json:"created_date"`
 }
 
-func NewTeam(name, reviewer string, budget int, teamRepository *storage.TeamRepository) (*Team, error) {
+func NewTeam(name, reviewer string, budget int) (*Team, error) {
 	var team Team
 	id, err := uuid.NewUUID()
 	if err != nil {
