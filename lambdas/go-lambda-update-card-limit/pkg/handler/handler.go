@@ -23,10 +23,8 @@ func NewUserCardLimitHandler(processor processor.Processor) *UserCardLimitHandle
 func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	userID := request.PathParameters["user_id"]
 
-	var input struct {
-		PurchaseLimit int `json:"purchase_limit"`
-		MonthlyLimit  int `json:"monthly_limit"`
-	}
+	var input dto.UpdateLimitInput
+
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
@@ -56,20 +54,11 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 	}
 
 	// Update user in storage
-	err := h.processor.UpdateUserCardLimits(context.Background(), userID, input.PurchaseLimit, input.MonthlyLimit)
+	updatedUser, err := h.processor.UpdateUserCardLimits(context.Background(), userID, input.PurchaseLimit, input.MonthlyLimit)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       "failed to update user in storage",
-		}, nil
-	}
-
-	// Get updated user from storage
-	updatedUser, err := h.processor.GetUser(context.Background(), userID)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "failed to get updated user from storage",
 		}, nil
 	}
 

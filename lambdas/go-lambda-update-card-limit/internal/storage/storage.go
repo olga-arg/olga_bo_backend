@@ -24,8 +24,8 @@ func getUserTable(userID string) func(tx *gorm.DB) *gorm.DB {
 	}
 }
 
-func (r *UserRepository) UpdateUserCardLimit(userID string, purchaseLimit int, monthlyLimit int) error {
-	query := r.db.Scopes(getUserTable(userID)).Where("id = ?", userID)
+func (r *UserRepository) UpdateUserCardLimit(userID string, purchaseLimit int, monthlyLimit int) (*domain.User, error) {
+	user := r.db.Scopes(getUserTable(userID)).Where("id = ?", userID)
 
 	data := make(map[string]interface{})
 	if purchaseLimit != -1 {
@@ -35,17 +35,22 @@ func (r *UserRepository) UpdateUserCardLimit(userID string, purchaseLimit int, m
 		data["monthly_limit"] = monthlyLimit
 	}
 
-	result := query.Updates(data)
+	var updatedUser domain.User
+	result := user.Updates(data)
 	if result.Error != nil {
 		log.Println("Error updating user card limit:", result.Error)
-		return errors.Wrap(result.Error, "failed to update user card limit")
+		return nil, errors.Wrap(result.Error, "failed to update user card limit")
 	}
 	if result.RowsAffected == 0 {
 		log.Println("No user card found for update")
-		return errors.New("no user card found for update")
+		return nil, errors.New("no user card found for update")
 	}
-
-	return nil
+	err := user.First(&updatedUser).Error
+	if err != nil {
+		log.Println("Error getting user after update:", err)
+		return nil, errors.Wrap(err, "failed to get user after update")
+	}
+	return &updatedUser, nil
 }
 
 func (r *UserRepository) GetUserByID(userID string) (*domain.User, error) {
