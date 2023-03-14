@@ -4,7 +4,7 @@ import (
 	"go-lambda-update-card-limit/pkg/domain"
 )
 
-type User struct {
+type Output struct {
 	Name            string                    `json:"name"`
 	Surname         string                    `json:"surname"`
 	Email           string                    `json:"email"`
@@ -15,26 +15,16 @@ type User struct {
 	Status          domain.ConfirmationStatus `json:"status" default:"Pending"`
 }
 
-type Output struct {
-	Users []User `json:"users"`
-}
-
-// From domain.Users ([]User) to dto.Output (Output)
-func NewOutput(users []domain.User) *Output {
-	var dtoUsers []User
-	for _, user := range users {
-		dtoUsers = append(dtoUsers, User{
-			Name:            user.Name,
-			Surname:         user.Surname,
-			Email:           user.Email,
-			PurchaseLimit:   user.PurchaseLimit,
-			MonthlyLimit:    user.MonthlyLimit,
-			MonthlySpending: user.MonthlySpending,
-			IsAdmin:         user.IsAdmin,
-			Status:          user.Status,
-		})
+func NewOutput(user *domain.User) *Output {
+	dtoUser := Output{
+		Name:            user.Name,
+		Surname:         user.Surname,
+		Email:           user.Email,
+		PurchaseLimit:   user.PurchaseLimit,
+		MonthlyLimit:    user.MonthlyLimit,
+		MonthlySpending: user.MonthlySpending,
+		IsAdmin:         user.IsAdmin,
+		Status:          user.Status,
 	}
-	return &Output{
-		Users: dtoUsers,
-	}
+	return &dtoUser
 }

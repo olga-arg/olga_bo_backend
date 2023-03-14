@@ -25,8 +25,6 @@ type User struct {
 	CreatedDate     time.Time          `json:"created_date"`
 }
 
-type Users []User
-
 func ParseConfirmationStatus(s string) ConfirmationStatus {
 	switch s {
 	case "Pending":
