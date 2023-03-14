@@ -57,6 +57,19 @@ functions:
           path: /users/{user_id}/limit
           method: patch
       - cloudwatchLog: '/aws/lambda/go-lambda-update-card-limit'
+  go-lambda-create-team:
+    handler: lambdas/bin/go-lambda-create-team
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+      - DB_PORT
+    events:
+      - httpApi:
+          path: /teams
+          method: post
+      - cloudwatchLog: '/aws/lambda/go-lambda-create-team'
 
 #    Define function environment variables here
 #    environment:
@@ -116,6 +129,10 @@ resources:
         Type: AWS::Logs::LogGroup
         Properties:
             LogGroupName: /aws/lambda/go-lambda-update-card-limit
+    LambdaLogGroupCreateTeam:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: /aws/lambda/go-lambda-create-team
 
 plugins:
   - serverless-domain-manager
