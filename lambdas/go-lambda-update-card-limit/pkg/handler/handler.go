@@ -25,31 +25,11 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 
 	var input dto.UpdateLimitInput
 
-	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusBadRequest,
-			Body:       "invalid request body",
-		}, nil
-	}
-
 	// Validate input
-	if input.PurchaseLimit < 0 {
+	if err := h.processor.ValidateUserInput(context.Background(), &input, request); err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body:       "invalid purchase limit",
-		}, nil
-	}
-	if input.MonthlyLimit < 0 {
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusBadRequest,
-			Body:       "invalid monthly limit",
-		}, nil
-	}
-
-	if input.MonthlyLimit < input.PurchaseLimit {
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusBadRequest,
-			Body:       "monthly limit cannot be less than purchase limit",
+			Body:       err.Error(),
 		}, nil
 	}
 
