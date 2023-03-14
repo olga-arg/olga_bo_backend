@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"go-lambda-create-team/internal/storage"
+	"go-lambda-create-team/pkg/dto"
 	"log"
 	"time"
 )
@@ -29,11 +30,18 @@ type Team struct {
 }
 
 func NewTeam(name, reviewer string, budget int, teamRepository *storage.TeamRepository) (*Team, error) {
-	err := validateInput(name, teamRepository)
+	input := &dto.CreateTeamInput{
+		TeamName:     name,
+		ReviewerId:   reviewer,
+		AnnualBudget: budget,
+	}
+
+	err := validateInput(input, teamRepository)
 	if err != nil {
 		log.Println("error validating input: ", err)
 		return nil, err
 	}
+
 	var team Team
 	id, err := uuid.NewUUID()
 	if err != nil {
@@ -50,14 +58,17 @@ func NewTeam(name, reviewer string, budget int, teamRepository *storage.TeamRepo
 	return &team, nil
 }
 
-func validateInput(name string, teamRepository *storage.TeamRepository) error {
+func validateInput(input *dto.CreateTeamInput, teamRepository *storage.TeamRepository) error {
 	// Validate Team Name is unique
 	var existingTeam Team
-	if err := teamRepository.Db.Where("team_name = ?", name).First(&existingTeam).Error; err == nil {
+	if err := teamRepository.Db.Where("team_name = ?", input.TeamName).First(&existingTeam).Error; err == nil {
 		return errors.New("team name already exists")
 	}
-	if len(name) > 50 {
+	if len(input.TeamName) > 50 {
 		return errors.New("name must be less than 50 characters")
+	}
+	if input.TeamName == "" {
+		return errors.New("name is required")
 	}
 	return nil
 }
