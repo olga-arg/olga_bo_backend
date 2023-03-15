@@ -16,10 +16,11 @@ type Team struct {
 	TeamName  string `json:"name"`
 	//TODO: Create Employees to Team relationship
 	//Employees    []string           `json:"employees"`
-	ReviewerId   string             `json:"reviewer_id"`
-	AnnualBudget int                `json:"annual_budget"`
-	Status       ConfirmationStatus `json:"status" default:"Pending"`
-	CreatedDate  time.Time          `json:"created_date"`
+	ReviewerId      string             `json:"reviewer_id"`
+	AnnualBudget    int                `json:"annual_budget"`
+	MonthlySpending float32            `json:"monthly_spending" default:"0"`
+	Status          ConfirmationStatus `json:"status" default:"Pending"`
+	CreatedDate     time.Time          `json:"created_date"`
 }
 
 type Teams []Team
