@@ -114,6 +114,18 @@ functions:
       - httpApi:
           path: /payments
           method: post
+  go-lambda-get-payments:
+    handler: lambdas/bin/go-lambda-get-payments/go-lambda-get-payments
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_READER
+      - DB_PORT
+    events:
+      - httpApi:
+          path: /payments
+          method: get
 
 #    Define function environment variables here
 #    environment:
