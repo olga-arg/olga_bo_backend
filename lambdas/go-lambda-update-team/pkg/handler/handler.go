@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
-	"go-lambda-update-team-annual-budget/internal/processor"
+	"go-lambda-update-team/internal/processor"
 	"net/http"
 )
 

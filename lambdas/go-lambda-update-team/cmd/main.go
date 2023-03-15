@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/aws/aws-lambda-go/lambda"
-	"go-lambda-update-team-annual-budget/internal/application"
-	"go-lambda-update-team-annual-budget/internal/processor"
-	"go-lambda-update-team-annual-budget/internal/storage"
-	"go-lambda-update-team-annual-budget/pkg/handler"
+	"go-lambda-update-team/internal/application"
+	"go-lambda-update-team/internal/processor"
+	"go-lambda-update-team/internal/storage"
+	"go-lambda-update-team/pkg/handler"
 )
 
 func main() {

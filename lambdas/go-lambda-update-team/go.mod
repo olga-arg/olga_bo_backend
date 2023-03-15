@@ -1,4 +1,4 @@
-module go-lambda-update-team-annual-budget
+module go-lambda-update-team
 
 go 1.20
 

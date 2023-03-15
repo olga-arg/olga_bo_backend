@@ -97,7 +97,7 @@ functions:
           method: delete
       - cloudwatchLog: '/aws/lambda/go-lambda-delete-team'
   go-lambda-update-team-annual-budget:
-    handler: lambdas/bin/go-lambda-update-team-annual-budget/go-lambda-update-team-annual-budget
+    handler: lambdas/bin/go-lambda-update-team/go-lambda-update-team
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -184,7 +184,7 @@ resources:
     LambdaLogGroupUpdateTeamAnnualBudget:
         Type: AWS::Logs::LogGroup
         Properties:
-            LogGroupName: /aws/lambda/go-lambda-update-team-annual-budget
+            LogGroupName: /aws/lambda/go-lambda-update-team
 
 plugins:
   - serverless-domain-manager

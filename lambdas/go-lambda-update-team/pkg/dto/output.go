@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"go-lambda-update-team-annual-budget/pkg/domain"
+	"go-lambda-update-team/pkg/domain"
 )
 
 type Team struct {

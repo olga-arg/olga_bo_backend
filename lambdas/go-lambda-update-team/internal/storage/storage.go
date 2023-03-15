@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
-	"go-lambda-update-team-annual-budget/pkg/domain"
+	"go-lambda-update-team/pkg/domain"
 )
 
 type TeamRepository struct {

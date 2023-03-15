@@ -3,7 +3,7 @@ package processor
 import (
 	"context"
 	"fmt"
-	"go-lambda-update-team-annual-budget/internal/storage"
+	"go-lambda-update-team/internal/storage"
 )
 
 type Processor interface {
