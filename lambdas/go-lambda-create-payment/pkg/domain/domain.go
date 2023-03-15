@@ -30,12 +30,13 @@ type Payment struct {
 	Type        PaymentType        `json:"payment_type"`
 	UserID      string             `json:"user_id"`
 	Category    string             `json:"category"`
+	Label       string             `json:"label"`
 	Status      ConfirmationStatus `json:"status" default:"Pending"`
 	Receipt     string             `json:"receipt"`
 	CreatedDate time.Time          `json:"created"`
 }
 
-func NewPayment(amount float32, shopName, cardID, userID, category, receipt string, paymentType PaymentType) (*Payment, error) {
+func NewPayment(amount float32, shopName, cardID, userID, category, receipt, label string, paymentType PaymentType) (*Payment, error) {
 	var payment Payment
 	id, err := uuid.NewUUID()
 	if err != nil {
@@ -48,6 +49,7 @@ func NewPayment(amount float32, shopName, cardID, userID, category, receipt stri
 	payment.CardId = cardID
 	payment.UserID = userID
 	payment.Category = category
+	payment.Label = label
 	payment.Receipt = receipt
 	payment.Type = paymentType
 	payment.Status = Pending

@@ -27,6 +27,7 @@ type Payment struct {
 	Type        PaymentType        `json:"payment_type"`
 	UserID      string             `json:"user_id"`
 	Category    string             `json:"category"`
+	Label       string             `json:"label"`
 	Status      ConfirmationStatus `json:"status" default:"Pending"`
 	Receipt     string             `json:"receipt"`
 	CreatedDate time.Time          `json:"created"`

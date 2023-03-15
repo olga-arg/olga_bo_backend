@@ -32,13 +32,15 @@ func (p *processor) CreatePayment(ctx context.Context) error {
 	userID = "1234567890"
 	var category string
 	category = "Groceries"
+	var label string
+	label = "a408bf50-c2cb-11ed-a27e-368de2526bc1"
 	var receipt string
 	receipt = "https://s3.amazonaws.com/your-bucket-name/receipt.jpg"
 	var paymentType domain.PaymentType
 	paymentType = domain.Card
 
 	// Creates a new payment
-	payment, err := domain.NewPayment(amount, shopName, cardID, userID, category, receipt, paymentType)
+	payment, err := domain.NewPayment(amount, shopName, cardID, userID, category, receipt, label, paymentType)
 	if err != nil {
 		fmt.Println("Error creating payment: ", err)
 		return err

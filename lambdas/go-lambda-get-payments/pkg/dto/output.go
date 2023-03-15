@@ -13,6 +13,7 @@ type Payment struct {
 	Type        domain.PaymentType        `json:"payment_type"`
 	UserID      string                    `json:"user_id"`
 	Category    string                    `json:"category"`
+	Label       string                    `json:"label"`
 	Status      domain.ConfirmationStatus `json:"status" default:"Pending"`
 	Receipt     string                    `json:"receipt"`
 	CreatedDate time.Time                 `json:"created"`
@@ -30,6 +31,7 @@ func NewOutput(payments []domain.Payment) *Output {
 			ShopName: payment.ShopName,
 			Type:     payment.Type,
 			Category: payment.Category,
+			Label:    payment.Label,
 			Status:   payment.Status,
 			Receipt:  payment.Receipt,
 		})
