@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/aws/aws-lambda-go/lambda"
-	"go-lambda-update-card-limit/internal/application"
-	"go-lambda-update-card-limit/internal/processor"
-	"go-lambda-update-card-limit/internal/storage"
-	"go-lambda-update-card-limit/pkg/handler"
+	"go-lambda-update-user/internal/application"
+	"go-lambda-update-user/internal/processor"
+	"go-lambda-update-user/internal/storage"
+	"go-lambda-update-user/pkg/handler"
 )
 
 func main() {

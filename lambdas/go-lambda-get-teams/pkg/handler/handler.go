@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
-	"go-lambda-get-all-teams/internal/processor"
+	"go-lambda-get-teams/internal/processor"
 	"net/http"
 )
 

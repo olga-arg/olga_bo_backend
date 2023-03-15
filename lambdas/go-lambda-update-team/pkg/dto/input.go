@@ -1,5 +1,7 @@
 package dto
 
-type UpdateLimitInput struct {
-	AnnualBudget int `json:"annual_budget"`
+type UpdateTeamRequest struct {
+	Name         string   `json:"name"`
+	AnnualBudget int      `json:"annual_budget"`
+	Users        []string `json:"users"`
 }

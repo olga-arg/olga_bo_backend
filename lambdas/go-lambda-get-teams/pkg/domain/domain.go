@@ -37,6 +37,8 @@ type User struct {
 	Teams           []Team             `gorm:"many2many:user_teams;"`
 }
 
+type Teams []Team
+
 func ParseConfirmationStatus(s string) ConfirmationStatus {
 	switch s {
 	case "Pending":

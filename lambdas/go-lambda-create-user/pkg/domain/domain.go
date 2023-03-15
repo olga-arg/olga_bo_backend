@@ -50,6 +50,7 @@ func NewUser(name, surname, email string) (*User, error) {
 		return nil, err
 	}
 	user.ID = id.String()
+	//user.CompanyID = ""
 	user.Name = name
 	user.Surname = surname
 	user.FullName = name + " " + surname

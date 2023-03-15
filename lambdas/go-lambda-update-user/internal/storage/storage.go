@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
-	"go-lambda-update-card-limit/pkg/domain"
+	"go-lambda-update-user/pkg/domain"
 )
 
 type UserRepository struct {

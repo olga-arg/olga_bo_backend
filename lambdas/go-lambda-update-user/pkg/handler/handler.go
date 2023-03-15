@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
-	"go-lambda-update-card-limit/internal/processor"
-	"go-lambda-update-card-limit/pkg/dto"
+	"go-lambda-update-user/internal/processor"
+	"go-lambda-update-user/pkg/dto"
 
 	"net/http"
 )

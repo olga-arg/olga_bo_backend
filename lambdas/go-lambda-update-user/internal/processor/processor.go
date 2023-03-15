@@ -5,10 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
-	"go-lambda-update-card-limit/internal/storage"
-	"go-lambda-update-card-limit/pkg/domain"
-	"go-lambda-update-card-limit/pkg/dto"
-	
+	"go-lambda-update-user/internal/storage"
+	"go-lambda-update-user/pkg/domain"
+	"go-lambda-update-user/pkg/dto"
 )
 
 type Processor interface {

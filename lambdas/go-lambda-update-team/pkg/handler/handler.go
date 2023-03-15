@@ -7,12 +7,9 @@ import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-update-team/internal/processor"
+	"go-lambda-update-team/pkg/dto"
 	"net/http"
 )
-
-type UpdateTeamRequest struct {
-	AnnualBudget int `json:"annual_budget"`
-}
 
 type TeamHandler struct {
 	processor processor.Processor
@@ -38,7 +35,7 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 
 	// Parse the request body into a struct
 	fmt.Println("Parsing request body")
-	var updateRequest UpdateTeamRequest
+	var updateRequest *dto.UpdateTeamRequest
 	err := json.Unmarshal([]byte(request.Body), &updateRequest)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -49,7 +46,7 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 
 	// Update team in storage
 	fmt.Println("Updating team in storage")
-	err = h.processor.UpdateTeamBudget(context.Background(), teamID, updateRequest.AnnualBudget)
+	err = h.processor.UpdateTeam(context.Background(), teamID, updateRequest)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,

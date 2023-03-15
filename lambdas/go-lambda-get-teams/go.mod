@@ -1,4 +1,4 @@
-module go-lambda-get-all-teams
+module go-lambda-get-teams
 
 go 1.20
 

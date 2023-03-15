@@ -17,7 +17,7 @@ provider:
 
 functions:
   go-lambda-create-user:
-    handler: lambdas/bin/go-lambda-create-user
+    handler: lambdas/bin/go-lambda-create-user/go-lambda-create-user
     ssmToEnvironment:
       - EMAIL_SENDER_ADDRESS
       - EMAIL_SENDER_PASSWORD
@@ -31,8 +31,8 @@ functions:
           path: /users
           method: post
       - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
-  go-lambda-get-all-users:
-    handler: lambdas/bin/go-lambda-get-all-users/go-lambda-get-all-users
+  go-lambda-get-users:
+    handler: lambdas/bin/go-lambda-get-users/go-lambda-get-users
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -43,9 +43,9 @@ functions:
       - httpApi:
           path: /users
           method: get
-      - cloudwatchLog: '/aws/lambda/go-lambda-get-all-users'
-  go-lambda-update-card-limit:
-    handler: lambdas/bin/go-lambda-update-card-limit/go-lambda-update-card-limit
+      - cloudwatchLog: '/aws/lambda/go-lambda-get-users'
+  go-lambda-update-user:
+    handler: lambdas/bin/go-lambda-update-user/go-lambda-update-user
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -54,9 +54,9 @@ functions:
       - DB_PORT
     events:
       - httpApi:
-          path: /users/{user_id}/limit
+          path: /users/{user_id}
           method: patch
-      - cloudwatchLog: '/aws/lambda/go-lambda-update-card-limit'
+      - cloudwatchLog: '/aws/lambda/go-lambda-update-user'
   go-lambda-create-team:
     handler: lambdas/bin/go-lambda-create-team/go-lambda-create-team
     ssmToEnvironment:
@@ -71,7 +71,7 @@ functions:
           method: post
       - cloudwatchLog: '/aws/lambda/go-lambda-create-team'
   go-lambda-get-all-teams:
-    handler: lambdas/bin/go-lambda-get-all-teams/go-lambda-get-all-teams
+    handler: lambdas/bin/go-lambda-get-teams/go-lambda-get-teams
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -82,7 +82,7 @@ functions:
       - httpApi:
           path: /teams
           method: get
-      - cloudwatchLog: '/aws/lambda/go-lambda-get-all-teams'
+      - cloudwatchLog: '/aws/lambda/go-lambda-get-teams'
   go-lambda-delete-team:
     handler: lambdas/bin/go-lambda-delete-team/go-lambda-delete-team
     ssmToEnvironment:
@@ -96,7 +96,7 @@ functions:
           path: /teams/{team_id}
           method: delete
       - cloudwatchLog: '/aws/lambda/go-lambda-delete-team'
-  go-lambda-update-team-annual-budget:
+  go-lambda-update-team:
     handler: lambdas/bin/go-lambda-update-team/go-lambda-update-team
     ssmToEnvironment:
       - DB_USER
@@ -108,7 +108,7 @@ functions:
       - httpApi:
           path: /teams/{team_id}
           method: patch
-      - cloudwatchLog: '/aws/lambda/go-lambda-delete-team'
+      - cloudwatchLog: '/aws/lambda/go-lambda-update-team'
 
 
 #    Define function environment variables here
@@ -161,27 +161,27 @@ resources:
       Type: AWS::Logs::LogGroup
       Properties:
         LogGroupName: /aws/lambda/go-lambda-create-user
-    LambdaLogGroupGetAllUsers:
+    LambdaLogGroupGetUsers:
       Type: AWS::Logs::LogGroup
       Properties:
-        LogGroupName: /aws/lambda/go-lambda-get-all-users
-    LambdaLogGroupUpdateCardLimit:
+        LogGroupName: /aws/lambda/go-lambda-get-users
+    LambdaLogGroupUpdateUser:
         Type: AWS::Logs::LogGroup
         Properties:
-            LogGroupName: /aws/lambda/go-lambda-update-card-limit
+            LogGroupName: /aws/lambda/go-lambda-update-user
     LambdaLogGroupCreateTeam:
         Type: AWS::Logs::LogGroup
         Properties:
             LogGroupName: /aws/lambda/go-lambda-create-team
-    LambdaLogGroupGetAllTeams:
+    LambdaLogGroupGetTeams:
         Type: AWS::Logs::LogGroup
         Properties:
-            LogGroupName: /aws/lambda/go-lambda-get-all-teams
+            LogGroupName: /aws/lambda/go-lambda-get-teams
     LambdaLogGroupDeleteTeam:
         Type: AWS::Logs::LogGroup
         Properties:
             LogGroupName: /aws/lambda/go-lambda-delete-team
-    LambdaLogGroupUpdateTeamAnnualBudget:
+    LambdaLogGroupUpdateTeam:
         Type: AWS::Logs::LogGroup
         Properties:
             LogGroupName: /aws/lambda/go-lambda-update-team

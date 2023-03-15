@@ -1,4 +1,4 @@
-module go-lambda-update-card-limit
+module go-lambda-update-user
 
 go 1.20
 

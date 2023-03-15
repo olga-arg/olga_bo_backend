@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"go-lambda-update-card-limit/pkg/domain"
+	"go-lambda-update-user/pkg/domain"
 )
 
 type Output struct {

@@ -2,8 +2,8 @@ package processor
 
 import (
 	"context"
-	"go-lambda-get-all-teams/internal/storage"
-	"go-lambda-get-all-teams/pkg/dto"
+	"go-lambda-get-teams/internal/storage"
+	"go-lambda-get-teams/pkg/dto"
 )
 
 type Processor interface {
