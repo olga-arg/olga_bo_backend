@@ -30,7 +30,7 @@ functions:
       - httpApi:
           path: /users
           method: post
-      - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
+#      - cloudwatchLog: '/aws/lambda/go-lambda-create-user'
   go-lambda-get-users:
     handler: lambdas/bin/go-lambda-get-users/go-lambda-get-users
     ssmToEnvironment:
@@ -43,7 +43,7 @@ functions:
       - httpApi:
           path: /users
           method: get
-      - cloudwatchLog: '/aws/lambda/go-lambda-get-users'
+#      - cloudwatchLog: '/aws/lambda/go-lambda-get-users'
   go-lambda-update-user:
     handler: lambdas/bin/go-lambda-update-user/go-lambda-update-user
     ssmToEnvironment:
@@ -56,7 +56,7 @@ functions:
       - httpApi:
           path: /users/{user_id}
           method: patch
-      - cloudwatchLog: '/aws/lambda/go-lambda-update-user'
+#      - cloudwatchLog: '/aws/lambda/go-lambda-update-user'
   go-lambda-create-team:
     handler: lambdas/bin/go-lambda-create-team/go-lambda-create-team
     ssmToEnvironment:
@@ -69,7 +69,7 @@ functions:
       - httpApi:
           path: /teams
           method: post
-      - cloudwatchLog: '/aws/lambda/go-lambda-create-team'
+#      - cloudwatchLog: '/aws/lambda/go-lambda-create-team'
   go-lambda-get-all-teams:
     handler: lambdas/bin/go-lambda-get-teams/go-lambda-get-teams
     ssmToEnvironment:
@@ -82,7 +82,7 @@ functions:
       - httpApi:
           path: /teams
           method: get
-      - cloudwatchLog: '/aws/lambda/go-lambda-get-teams'
+#      - cloudwatchLog: '/aws/lambda/go-lambda-get-teams'
   go-lambda-delete-team:
     handler: lambdas/bin/go-lambda-delete-team/go-lambda-delete-team
     ssmToEnvironment:
@@ -95,7 +95,7 @@ functions:
       - httpApi:
           path: /teams/{team_id}
           method: delete
-      - cloudwatchLog: '/aws/lambda/go-lambda-delete-team'
+#      - cloudwatchLog: '/aws/lambda/go-lambda-delete-team'
   go-lambda-update-team:
     handler: lambdas/bin/go-lambda-update-team/go-lambda-update-team
     ssmToEnvironment:
@@ -108,7 +108,7 @@ functions:
       - httpApi:
           path: /teams/{team_id}
           method: patch
-      - cloudwatchLog: '/aws/lambda/go-lambda-update-team'
+#      - cloudwatchLog: '/aws/lambda/go-lambda-update-team'
 
 
 #    Define function environment variables here
@@ -157,34 +157,34 @@ resources:
 #        DBInstanceClass: db.t4g.micro
 #        DBClusterIdentifier: !Ref postgresCluster
 
-    LambdaLogGroupCreateUser:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: /aws/lambda/go-lambda-create-user
-    LambdaLogGroupGetUsers:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: /aws/lambda/go-lambda-get-users
-    LambdaLogGroupUpdateUser:
-        Type: AWS::Logs::LogGroup
-        Properties:
-            LogGroupName: /aws/lambda/go-lambda-update-user
-    LambdaLogGroupCreateTeam:
-        Type: AWS::Logs::LogGroup
-        Properties:
-            LogGroupName: /aws/lambda/go-lambda-create-team
-    LambdaLogGroupGetTeams:
-        Type: AWS::Logs::LogGroup
-        Properties:
-            LogGroupName: /aws/lambda/go-lambda-get-teams
-    LambdaLogGroupDeleteTeam:
-        Type: AWS::Logs::LogGroup
-        Properties:
-            LogGroupName: /aws/lambda/go-lambda-delete-team
-    LambdaLogGroupUpdateTeam:
-        Type: AWS::Logs::LogGroup
-        Properties:
-            LogGroupName: /aws/lambda/go-lambda-update-team
+#    LambdaLogGroupCreateUser:
+#      Type: AWS::Logs::LogGroup
+#      Properties:
+#        LogGroupName: /aws/lambda/go-lambda-create-user
+#    LambdaLogGroupGetUsers:
+#      Type: AWS::Logs::LogGroup
+#      Properties:
+#        LogGroupName: /aws/lambda/go-lambda-get-users
+#    LambdaLogGroupUpdateUser:
+#        Type: AWS::Logs::LogGroup
+#        Properties:
+#            LogGroupName: /aws/lambda/go-lambda-update-user
+#    LambdaLogGroupCreateTeam:
+#        Type: AWS::Logs::LogGroup
+#        Properties:
+#            LogGroupName: /aws/lambda/go-lambda-create-team
+#    LambdaLogGroupGetTeams:
+#        Type: AWS::Logs::LogGroup
+#        Properties:
+#            LogGroupName: /aws/lambda/go-lambda-get-teams
+#    LambdaLogGroupDeleteTeam:
+#        Type: AWS::Logs::LogGroup
+#        Properties:
+#            LogGroupName: /aws/lambda/go-lambda-delete-team
+#    LambdaLogGroupUpdateTeam:
+#        Type: AWS::Logs::LogGroup
+#        Properties:
+#            LogGroupName: /aws/lambda/go-lambda-update-team
 
 plugins:
   - serverless-domain-manager
