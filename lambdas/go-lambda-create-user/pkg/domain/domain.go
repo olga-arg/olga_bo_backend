@@ -15,6 +15,17 @@ const (
 	Deleted
 )
 
+type Team struct {
+	ID           string             `json:"id"`
+	CompanyID    string             `json:"company"`
+	TeamName     string             `json:"name"`
+	Users        []*User            `gorm:"many2many:user_teams;"`
+	ReviewerId   string             `json:"reviewer_id"`
+	AnnualBudget int                `json:"annual_budget"`
+	Status       ConfirmationStatus `json:"status" default:"Pending"`
+	CreatedDate  time.Time          `json:"created_date"`
+}
+
 type User struct {
 	ID              string             `json:"id"`
 	CompanyID       string             `json:"company"`
@@ -28,6 +39,7 @@ type User struct {
 	IsAdmin         bool               `json:"isAdmin" default:"false"`
 	Status          ConfirmationStatus `json:"status" default:"Pending"`
 	CreatedDate     time.Time          `json:"created_date"`
+	Teams           []*Team            `gorm:"many2many:user_teams;"`
 }
 
 func NewUser(name, surname, email string) (*User, error) {

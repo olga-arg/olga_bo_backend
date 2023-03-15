@@ -34,8 +34,7 @@ func (r *TeamRepository) Save(team *domain.Team) error {
 
 func (r *TeamRepository) GetTeamByName(teamName string) error {
 	var team domain.Team
-	query := r.Db.Scopes(getTeamTable(&team)).Where("team_name = ?", teamName)
-	err := query.First(&team).Error
+	err := r.Db.Scopes(getTeamTable(&team)).Preload("Users").Where("team_name = ?", teamName).First(&team).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil
