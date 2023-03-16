@@ -15,7 +15,8 @@ func main() {
 		panic(err)
 	}
 	paymentRepo := storage.NewPaymentRepository(db)
-	paymentProcessor := processor.New(*paymentRepo)
+	teamRepo := storage.NewTeamRepository(db)
+	paymentProcessor := processor.New(*paymentRepo, *teamRepo)
 	createPaymentHandler := handler.NewCreatePaymentHandler(paymentProcessor)
 	lambda.Start(createPaymentHandler.Handle)
 }

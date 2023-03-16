@@ -2,8 +2,11 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-create-payment/internal/processor"
+	"go-lambda-create-payment/pkg/dto"
 	"net/http"
 )
 
@@ -16,7 +19,19 @@ func NewCreatePaymentHandler(p processor.Processor) *CreatePaymentHandler {
 }
 
 func (h *CreatePaymentHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	err := h.processor.CreatePayment(context.Background())
+	var input dto.CreatePaymentInput
+	fmt.Println("Request: ", request)
+
+	// Unmarshal the request body into the input struct
+	err := json.Unmarshal([]byte(request.Body), &input)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	err = h.processor.CreatePayment(context.Background(), &input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
