@@ -12,6 +12,7 @@ type UserRepository struct {
 }
 
 func NewUserRepository(db *gorm.DB) *UserRepository {
+	db.AutoMigrate(&domain.User{})
 	return &UserRepository{
 		db: db,
 	}
@@ -25,7 +26,7 @@ func getUserTable(user *domain.User) func(tx *gorm.DB) *gorm.DB {
 }
 
 func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
-	err := r.db.Scopes(getUserTable(&domain.User{})).Preload("Teams").AutoMigrate(&domain.User{}).Where("email = ?", email).First(&domain.User{}).Error
+	err := r.db.Scopes(getUserTable(&domain.User{})).Preload("Teams").Where("email = ?", email).First(&domain.User{}).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil
 	}
@@ -33,7 +34,7 @@ func (r *UserRepository) EmailAlreadyExists(email string) (bool, error) {
 }
 
 func (r *UserRepository) Save(user *domain.User) error {
-	err := r.db.Scopes(getUserTable(user)).AutoMigrate(&domain.User{}).Create(user).Error
+	err := r.db.Scopes(getUserTable(user)).Create(user).Error
 	if err != nil {
 		fmt.Println("Error saving user: ", err)
 		return err

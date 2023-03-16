@@ -11,6 +11,7 @@ type TeamRepository struct {
 }
 
 func NewTeamRepository(db *gorm.DB) *TeamRepository {
+	db.AutoMigrate(&domain.Team{})
 	return &TeamRepository{
 		Db: db,
 	}
@@ -24,7 +25,7 @@ func getTeamTable(team *domain.Team) func(tx *gorm.DB) *gorm.DB {
 }
 
 func (r *TeamRepository) Save(team *domain.Team) error {
-	err := r.Db.Scopes(getTeamTable(team)).AutoMigrate(&domain.Team{}).Create(team).Error
+	err := r.Db.Scopes(getTeamTable(team)).Create(team).Error
 	if err != nil {
 		fmt.Println("Error saving team: ", err)
 		return err

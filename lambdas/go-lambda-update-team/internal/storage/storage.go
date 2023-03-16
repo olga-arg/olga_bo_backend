@@ -13,6 +13,7 @@ type TeamRepository struct {
 }
 
 func NewTeamRepository(db *gorm.DB) *TeamRepository {
+	db.AutoMigrate(&domain.Team{})
 	return &TeamRepository{
 		db: db,
 	}

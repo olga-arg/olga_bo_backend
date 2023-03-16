@@ -43,7 +43,7 @@ func getTeamsTable(team *domain.Team) func(tx *gorm.DB) *gorm.DB {
 }
 
 func (r *PaymentRepository) Save(payment *domain.Payment) error {
-	err := r.Db.Scopes(getPaymentTable(payment)).AutoMigrate(&domain.Payment{}).Create(payment).Error
+	err := r.Db.Scopes(getPaymentTable(payment)).Create(payment).Error
 	if err != nil {
 		fmt.Println("Error saving Payment: ", err)
 		return err

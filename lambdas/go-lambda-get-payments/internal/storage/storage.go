@@ -12,6 +12,7 @@ type PaymentRepository struct {
 }
 
 func NewPaymentRepository(db *gorm.DB) *PaymentRepository {
+	db.AutoMigrate(&domain.Payment{})
 	return &PaymentRepository{
 		db: db,
 	}

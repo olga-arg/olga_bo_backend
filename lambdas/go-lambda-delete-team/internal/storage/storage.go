@@ -5,7 +5,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"go-lambda-delete-team/pkg/domain"
-	
 )
 
 type TeamRepository struct {
@@ -13,6 +12,7 @@ type TeamRepository struct {
 }
 
 func NewTeamRepository(db *gorm.DB) *TeamRepository {
+	db.AutoMigrate(&domain.Team{})
 	return &TeamRepository{
 		db: db,
 	}
