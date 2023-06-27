@@ -6,7 +6,7 @@ import (
 
 type Team struct {
 	ID           string                    `json:"id"`
-	TeamName     string                    `json:"team_name"`
+	Name         string                    `json:"name"`
 	ReviewerId   string                    `json:"reviewer_id"`
 	AnnualBudget int                       `json:"annual_budget"`
 	Status       domain.ConfirmationStatus `json:"status" default:"Created"`
@@ -21,7 +21,7 @@ func NewOutput(team *domain.Team) *Output {
 	return &Output{
 		Team: Team{
 			ID:           team.ID,
-			TeamName:     team.TeamName,
+			Name:         team.Name,
 			ReviewerId:   team.ReviewerId,
 			AnnualBudget: team.AnnualBudget,
 			Status:       team.Status,

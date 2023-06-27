@@ -33,9 +33,9 @@ func (r *TeamRepository) Save(team *domain.Team) error {
 	return nil
 }
 
-func (r *TeamRepository) GetTeamByName(teamName string) error {
+func (r *TeamRepository) GetTeamByName(name string) error {
 	var team domain.Team
-	err := r.Db.Scopes(getTeamTable(&team)).Preload("Users").Where("team_name = ?", teamName).First(&team).Error
+	err := r.Db.Scopes(getTeamTable(&team)).Preload("Users").Where("name = ?", name).First(&team).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil
@@ -43,5 +43,5 @@ func (r *TeamRepository) GetTeamByName(teamName string) error {
 		fmt.Println("Error getting team by name: ", err)
 		return err
 	}
-	return fmt.Errorf("team already exists: %s", teamName)
+	return fmt.Errorf("team already exists: %s", name)
 }

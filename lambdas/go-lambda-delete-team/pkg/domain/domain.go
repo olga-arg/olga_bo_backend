@@ -13,7 +13,7 @@ const (
 type Team struct {
 	ID        string `json:"id"`
 	CompanyID string `json:"company"`
-	TeamName  string `json:"name"`
+	Name      string `json:"name"`
 	//TODO: Create Employees to Team relationship
 	//Employees    []string           `json:"employees"`
 	ReviewerId      string             `json:"reviewer_id"`

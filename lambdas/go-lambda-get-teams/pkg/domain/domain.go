@@ -12,7 +12,7 @@ const (
 
 type Team struct {
 	ID              string             `json:"id"`
-	TeamName        string             `json:"team_name"`
+	Name            string             `json:"name"`
 	ReviewerId      string             `json:"reviewer_id"`
 	Reviewer        User               `json:"reviewer"`
 	AnnualBudget    int                `json:"annual_budget"`

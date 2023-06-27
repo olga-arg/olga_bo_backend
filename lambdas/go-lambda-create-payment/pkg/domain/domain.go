@@ -39,7 +39,7 @@ type Payment struct {
 type Team struct {
 	ID              string             `json:"id"`
 	CompanyID       string             `json:"company"`
-	TeamName        string             `json:"name"`
+	Name            string             `json:"name"`
 	Users           []*User            `gorm:"many2many:user_teams;"`
 	ReviewerId      string             `json:"reviewer_id"`
 	AnnualBudget    int                `json:"annual_budget"`
