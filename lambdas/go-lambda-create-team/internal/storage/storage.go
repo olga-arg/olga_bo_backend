@@ -24,6 +24,12 @@ func getTeamTable(team *domain.Team) func(tx *gorm.DB) *gorm.DB {
 	}
 }
 
+func getUserTable(user *domain.User) func(tx *gorm.DB) *gorm.DB {
+	return func(tx *gorm.DB) *gorm.DB {
+		return tx.Table("users")
+	}
+}
+
 func (r *TeamRepository) Save(team *domain.Team) error {
 	err := r.Db.Scopes(getTeamTable(team)).Create(team).Error
 	if err != nil {
@@ -34,8 +40,9 @@ func (r *TeamRepository) Save(team *domain.Team) error {
 }
 
 func (r *TeamRepository) GetTeamByName(name string) error {
+	// it should only return an error if the team already exists if it doesn't exist, it should return nil
 	var team domain.Team
-	err := r.Db.Scopes(getTeamTable(&team)).Preload("Users").Where("name = ?", name).First(&team).Error
+	err := r.Db.Scopes(getTeamTable(&team)).Where("name = ?", name).First(&team).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil
@@ -44,4 +51,17 @@ func (r *TeamRepository) GetTeamByName(name string) error {
 		return err
 	}
 	return fmt.Errorf("team already exists: %s", name)
+}
+
+func (r *TeamRepository) GetReviewerById(id string) error {
+	var user domain.User
+	err := r.Db.Scopes(getUserTable(&user)).Where("id = ?", id).First(&user).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return fmt.Errorf("user not found: %s", id)
+		}
+		fmt.Println("Error getting user by id: ", err)
+		return err
+	}
+	return nil
 }

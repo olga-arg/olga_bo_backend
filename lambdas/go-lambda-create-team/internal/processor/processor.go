@@ -27,7 +27,7 @@ func New(s storage.TeamRepository) Processor {
 
 func (p *processor) CreateTeam(ctx context.Context, input *dto.CreateTeamInput) error {
 	// Creates a new team
-	team, err := domain.NewTeam(input.TeamName, input.ReviewerId, input.AnnualBudget) //input.Employees)
+	team, err := domain.NewTeam(input.Name, input.ReviewerId, input.AnnualBudget) //input.Employees)
 	if err != nil {
 		fmt.Println("Error creating team: ", err)
 		return err
@@ -46,7 +46,7 @@ func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeam
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		return fmt.Errorf("invalid request body: %s", err.Error())
 	}
-	if input.TeamName == "" {
+	if input.Name == "" {
 		return fmt.Errorf("team name is required")
 	}
 	if input.AnnualBudget < 0 {
@@ -55,10 +55,12 @@ func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeam
 	if request.Body == "" || len(request.Body) < 1 {
 		return fmt.Errorf("missing request body")
 	}
-	// TODO: Validate that reviewer exists in the user table
-
 	// Validate that the team doesn't already exist
-	if err := p.storage.GetTeamByName(input.TeamName); err != nil {
+	if err := p.storage.GetTeamByName(input.Name); err != nil {
+		return err
+	}
+	// Validate that the reviewer exists
+	if err := p.storage.GetReviewerById(input.ReviewerId); err != nil {
 		return err
 	}
 	return nil
