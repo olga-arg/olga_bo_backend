@@ -12,13 +12,13 @@ const (
 
 type Team struct {
 	ID              string             `json:"id"`
-	CompanyID       string             `json:"company"`
-	TeamName        string             `json:"name"`
-	Users           []User             `gorm:"many2many:user_teams;"`
+	TeamName        string             `json:"team_name"`
+	ReviewerId      string             `json:"reviewer_id"`
 	Reviewer        User               `json:"reviewer"`
 	AnnualBudget    int                `json:"annual_budget"`
 	MonthlySpending float32            `json:"monthly_spending" default:"0"`
-	Status          ConfirmationStatus `json:"status" default:"Pending"`
+	Status          ConfirmationStatus `json:"status" default:"Created"`
+	Users           []User             `json:"users"`
 	CreatedDate     time.Time          `json:"created_date"`
 }
 

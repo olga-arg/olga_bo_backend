@@ -26,7 +26,7 @@ func getTeamTable() func(tx *gorm.DB) *gorm.DB {
 
 func (r *TeamRepository) GetAllTeams(filters map[string]string) ([]domain.Team, error) {
 	var teams []domain.Team
-	query := r.db.Scopes(getTeamTable()).Preload("Users").Where("status = ?", 0)
+	query := r.db.Scopes(getTeamTable()).Preload("Users").Preload("Reviewer").Where("status = ?", 0)
 	// Apply filters to the query
 	if teamName, ok := filters["team_name"]; ok {
 		query = query.Where("team_name ILIKE ?", "%"+teamName+"%")

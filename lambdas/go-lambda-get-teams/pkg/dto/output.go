@@ -37,9 +37,13 @@ func NewOutput(teams []domain.Team) *Output {
 			})
 		}
 		dtoTeams = append(dtoTeams, Team{
-			ID:              team.ID,
-			TeamName:        team.TeamName,
-			Reviewer:        User{ID: team.Reviewer.ID, Name: team.Reviewer.Name, Surname: team.Reviewer.Surname},
+			ID:       team.ID,
+			TeamName: team.TeamName,
+			Reviewer: User{
+				ID:      team.Reviewer.ID,
+				Name:    team.Reviewer.Name,
+				Surname: team.Reviewer.Surname,
+			},
 			AnnualBudget:    team.AnnualBudget,
 			MonthlySpending: team.MonthlySpending,
 			Status:          team.Status,
