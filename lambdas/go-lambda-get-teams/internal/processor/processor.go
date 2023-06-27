@@ -25,5 +25,6 @@ func (p *processor) GetAllTeams(ctx context.Context, filter map[string]string) (
 	if err != nil {
 		return nil, err
 	}
+	teams, err = p.storage.GetAllReviewers(teams)
 	return dto.NewOutput(teams), nil
 }

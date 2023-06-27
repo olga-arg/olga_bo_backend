@@ -18,7 +18,7 @@ type Team struct {
 	AnnualBudget    int                `json:"annual_budget"`
 	MonthlySpending float32            `json:"monthly_spending" default:"0"`
 	Status          ConfirmationStatus `json:"status" default:"Created"`
-	Users           []User             `json:"users"`
+	Users           []User             `json:"users" gorm:"many2many:user_teams;"`
 	CreatedDate     time.Time          `json:"created_date"`
 }
 
