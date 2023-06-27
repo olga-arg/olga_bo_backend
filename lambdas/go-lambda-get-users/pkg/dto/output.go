@@ -4,6 +4,11 @@ import (
 	"go-lambda-get-all-users/pkg/domain"
 )
 
+type Team struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type User struct {
 	ID              string                    `json:"id"`
 	Name            string                    `json:"name"`
@@ -14,6 +19,7 @@ type User struct {
 	MonthlySpending float32                   `json:"monthly_spending" default:"0"`
 	IsAdmin         bool                      `json:"isAdmin" default:"false"`
 	Status          domain.ConfirmationStatus `json:"status" default:"Pending"`
+	Teams           []Team                    `json:"teams"`
 }
 
 type Output struct {
@@ -24,6 +30,13 @@ type Output struct {
 func NewOutput(users []domain.User) *Output {
 	var dtoUsers []User
 	for _, user := range users {
+		var teams []Team
+		for _, team := range user.Teams {
+			teams = append(teams, Team{
+				ID:   team.ID,
+				Name: team.Name,
+			})
+		}
 		dtoUsers = append(dtoUsers, User{
 			ID:              user.ID,
 			Name:            user.Name,
@@ -34,6 +47,7 @@ func NewOutput(users []domain.User) *Output {
 			MonthlySpending: user.MonthlySpending,
 			IsAdmin:         user.IsAdmin,
 			Status:          user.Status,
+			Teams:           teams,
 		})
 	}
 	return &Output{

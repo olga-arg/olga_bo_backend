@@ -46,6 +46,10 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
-		Body:       "User created successfully",
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin":  "*",
+			"Access-Control-Allow-Headers": "*",
+		},
+		Body: "User created successfully",
 	}, nil
 }

@@ -18,7 +18,7 @@ const (
 type Team struct {
 	ID              string             `json:"id"`
 	CompanyID       string             `json:"company"`
-	TeamName        string             `json:"name"`
+	Name            string             `json:"name"`
 	Users           []*User            `gorm:"many2many:user_teams;"`
 	ReviewerId      string             `json:"reviewer_id"`
 	AnnualBudget    int                `json:"annual_budget"`
@@ -51,8 +51,7 @@ func NewTeam(name, reviewer string, budget int) (*Team, error) {
 		return nil, err
 	}
 	team.ID = id.String()
-	team.TeamName = name
-	//team.Employees = employees
+	team.Name = name
 	team.ReviewerId = reviewer
 	team.AnnualBudget = budget
 	team.Status = Created

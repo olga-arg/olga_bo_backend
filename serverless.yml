@@ -5,6 +5,8 @@ provider:
   runtime: go1.x
   stage: prod
   region: sa-east-1
+  httpApi:
+    cors: true
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
@@ -66,7 +68,7 @@ functions:
       - httpApi:
           path: /teams
           method: post
-  go-lambda-get-all-teams:
+  go-lambda-get-teams:
     handler: lambdas/bin/go-lambda-get-teams/go-lambda-get-teams
     ssmToEnvironment:
       - DB_USER

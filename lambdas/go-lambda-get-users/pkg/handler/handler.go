@@ -26,7 +26,7 @@ func (h *GetAllUsersHandler) Handle(request events.APIGatewayProxyRequest) (even
 			Body:       err.Error(),
 		}, nil
 	}
-	body, err := json.Marshal(users)
+	body, err := json.Marshal(users) // TODO: Pasar users a un Response DTO, por si quiero devolver menos cosas.
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,

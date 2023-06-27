@@ -26,7 +26,7 @@ func getUserTable() func(tx *gorm.DB) *gorm.DB {
 
 func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, error) {
 	var users []domain.User
-	query := r.db.Scopes(getUserTable())
+	query := r.db.Scopes(getUserTable()).Preload("Teams")
 
 	// TODO: Always filter by confirmed users
 	// Apply filters to the query
@@ -46,6 +46,7 @@ func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, 
 		fmt.Println("No users found")
 		return nil, nil
 	}
+	fmt.Println("Users found:", users)
 	if err != nil {
 		fmt.Println("Error getting users:", err)
 		return nil, err

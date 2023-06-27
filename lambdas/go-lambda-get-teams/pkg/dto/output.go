@@ -13,7 +13,7 @@ type User struct {
 type Team struct {
 	ID              string                    `json:"id"`
 	TeamName        string                    `json:"team_name"`
-	ReviewerId      string                    `json:"reviewer_id"`
+	Reviewer        User                      `json:"reviewer"`
 	AnnualBudget    int                       `json:"annual_budget"`
 	MonthlySpending float32                   `json:"monthly_spending" default:"0"`
 	Status          domain.ConfirmationStatus `json:"status" default:"Created"`
@@ -39,7 +39,7 @@ func NewOutput(teams []domain.Team) *Output {
 		dtoTeams = append(dtoTeams, Team{
 			ID:              team.ID,
 			TeamName:        team.TeamName,
-			ReviewerId:      team.ReviewerId,
+			Reviewer:        User{ID: team.Reviewer.ID, Name: team.Reviewer.Name, Surname: team.Reviewer.Surname},
 			AnnualBudget:    team.AnnualBudget,
 			MonthlySpending: team.MonthlySpending,
 			Status:          team.Status,
