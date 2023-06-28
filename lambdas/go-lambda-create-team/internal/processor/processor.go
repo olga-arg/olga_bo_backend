@@ -59,9 +59,12 @@ func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeam
 	if err := p.storage.GetTeamByName(input.Name); err != nil {
 		return err
 	}
-	// Validate that the reviewer exists
-	if err := p.storage.GetReviewerById(input.ReviewerId); err != nil {
-		return err
+	// Validate that the reviewer exists only if provided
+	if input.ReviewerId != "" {
+		err := p.storage.GetReviewerById(input.ReviewerId)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

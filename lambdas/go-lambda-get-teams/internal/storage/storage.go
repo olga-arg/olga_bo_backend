@@ -26,7 +26,7 @@ func getTeamTable() func(tx *gorm.DB) *gorm.DB {
 
 func (r *TeamRepository) GetAllTeams(filters map[string]string) ([]domain.Team, error) {
 	var teams []domain.Team
-	query := r.db.Scopes(getTeamTable()).Preload("Users").Joins("JOIN users ON teams.reviewer_id = users.id").Where("teams.status = ?", 0)
+	query := r.db.Scopes(getTeamTable()).Preload("Users").Joins("LEFT JOIN users ON teams.reviewer_id = users.id").Where("teams.status = ?", 0)
 	// Apply filters to the query
 	if teamName, ok := filters["team_name"]; ok {
 		query = query.Where("team_name ILIKE ?", "%"+teamName+"%")
@@ -53,14 +53,12 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string) ([]domain.Team, 
 func (r *TeamRepository) GetAllReviewers(teams []domain.Team) ([]domain.Team, error) {
 	for i, team := range teams {
 		var reviewer domain.User
-		err := r.db.Model(&team).Related(&reviewer, "ReviewerID").Error
+		err := r.db.Model(&reviewer).Where("id = ?", team.ReviewerId).Find(&reviewer).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			fmt.Println("No reviewer found")
-			return nil, nil
+			fmt.Println("No reviewer found for team:", team)
 		}
 		if err != nil {
 			fmt.Println("Error getting reviewer:", err)
-			return nil, err
 		}
 		teams[i].Reviewer = reviewer
 	}
