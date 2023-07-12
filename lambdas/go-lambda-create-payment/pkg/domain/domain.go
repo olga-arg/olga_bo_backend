@@ -64,7 +64,7 @@ type User struct {
 	Teams           []*Team            `gorm:"many2many:user_teams;"`
 }
 
-func NewPayment(amount float32, shopName, cardID, userID, category, receipt, label string, paymentType PaymentType) (*Payment, error) {
+func NewPayment(amount float32, shopName, cardID, userID, category, receipt string) (*Payment, error) {
 	var payment Payment
 	id, err := uuid.NewUUID()
 	if err != nil {
@@ -77,9 +77,7 @@ func NewPayment(amount float32, shopName, cardID, userID, category, receipt, lab
 	payment.CardId = cardID
 	payment.UserID = userID
 	payment.Category = category
-	payment.Label = label
 	payment.Receipt = receipt
-	payment.Type = paymentType
 	payment.Status = Pending
 	payment.CreatedDate = time.Now()
 	return &payment, nil

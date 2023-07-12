@@ -112,6 +112,8 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - S3_USER_AC
+      - S3_USER_SAC
     events:
       - httpApi:
           path: /payments
@@ -189,6 +191,8 @@ custom:
     DB_PORT: /db_port
     DB_HOST_WRITER: /db_host_writer_instance
     DB_HOST_READER: /db_host_reader_instance
+    S3_USER_AC: /s3userak
+    S3_USER_SAC: /s3usersak
   customDomain:
     domainName: 'api.olga.lat'
     basePath: 'api'
