@@ -23,7 +23,6 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	var input dto.CreateUserInput
 
 	// Validate input
-	fmt.Println("Validating input")
 	err := h.processor.ValidateUserInput(context.Background(), &input, request)
 	if err != nil {
 		return events.APIGatewayProxyResponse{

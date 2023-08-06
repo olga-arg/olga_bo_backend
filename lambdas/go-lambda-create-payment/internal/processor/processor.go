@@ -32,35 +32,6 @@ func New(paymentRepo storage.PaymentRepository, teamRepo storage.TeamRepository)
 }
 
 func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentInput) error {
-	//shopName := "Amazon"
-	//cardID := "1234567890"
-	//userID := "1234567890"
-	//category := "Groceries"
-	//receipt := "https://s3.amazonaws.com/your-bucket-name/receipt.jpg"
-	//paymentType := domain.Card
-
-	//if input.Amount < 0 {
-	//	fmt.Println("Error: amount cannot be less than 0")
-	//	return errors.New("amount cannot be less than 0")
-	//}
-
-	//// If there is an input.Label then it is a payment to a team
-	//if input.Label != "" {
-	//	// Find team by ID
-	//	team, err := p.teamStorage.FindTeamByID(input.Label)
-	//	if err != nil {
-	//		fmt.Println("Error finding team: ", err)
-	//		return err
-	//	}
-	//	// If the team exists then set the payment type to team
-	//	err = p.teamStorage.UpdateTeamMonthlySpending(team, input.Amount)
-	//	if err != nil {
-	//		fmt.Println("Error updating payment type to team: ", err)
-	//		return err
-	//	}
-	//}
-
-	// Creates a new payment - When receiving payments via Bank API, use the update payment function to upload the receipt from the app.
 	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.CardID, input.UserID, input.Category, input.Receipt)
 	if err != nil {
 		fmt.Println("Error creating payment: ", err)

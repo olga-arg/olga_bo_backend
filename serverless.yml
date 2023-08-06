@@ -12,6 +12,10 @@ provider:
       Action:
         - s3:*
       Resource: '*'
+    - Effect: 'Allow'
+      Action:
+          - cognito-idp:AdminGetUser
+      Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_wslTzuwWf
 
 # you can define service wide environment variables here
 #  environment:
@@ -130,7 +134,18 @@ functions:
       - httpApi:
           path: /payments
           method: get
-
+  go-lambda-me:
+    handler: lambdas/bin/go-lambda-me/go-lambda-me
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_READER
+      - DB_PORT
+    events:
+      - httpApi:
+          path: /me
+          method: get
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
