@@ -46,7 +46,6 @@ func (r *UserRepository) GetAllUsers(filters map[string]string) ([]domain.User, 
 		fmt.Println("No users found")
 		return nil, nil
 	}
-	fmt.Println("Users found:", users)
 	if err != nil {
 		fmt.Println("Error getting users:", err)
 		return nil, err

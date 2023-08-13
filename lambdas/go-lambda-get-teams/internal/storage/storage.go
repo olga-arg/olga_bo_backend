@@ -38,7 +38,6 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string) ([]domain.Team, 
 
 	// Execute the query
 	err := query.Find(&teams).Error
-	fmt.Println("teamssssssss: ", teams)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		fmt.Println("No teams found")
 		return nil, nil

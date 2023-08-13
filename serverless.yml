@@ -15,7 +15,7 @@ provider:
     - Effect: 'Allow'
       Action:
           - cognito-idp:AdminGetUser
-      Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_wslTzuwWf
+      Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_a3sLZtvFF
 
 # you can define service wide environment variables here
 #  environment:
@@ -142,6 +142,7 @@ functions:
       - DB_NAME
       - DB_HOST_READER
       - DB_PORT
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /me
@@ -208,6 +209,7 @@ custom:
     DB_HOST_READER: /db_host_reader_instance
     S3_USER_AC: /s3userak
     S3_USER_SAC: /s3usersak
+    USER_POOL_ID: /user_pool_id
   customDomain:
     domainName: 'api.olga.lat'
     basePath: 'api'

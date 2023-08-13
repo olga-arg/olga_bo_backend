@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -11,6 +12,7 @@ import (
 	"github.com/lestrrat-go/jwx/jwt"
 	"go-lambda-me/internal/processor"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -32,8 +34,8 @@ func (h *MeHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGat
 			Body:       "Missing or invalid authorization header, actual Header: " + authHeader,
 		}, nil
 	}
-
-	pubKeyUrl := "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_wslTzuwWf/.well-known/jwks.json"
+	userPoolId := os.Getenv("USER_POOL_ID")
+	pubKeyUrl := fmt.Sprintf("https://cognito-idp.us-east-1.amazonaws.com/%s/.well-known/jwks.json", userPoolId)
 	keySet, err := jwk.Fetch(context.Background(), pubKeyUrl)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -49,7 +51,6 @@ func (h *MeHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGat
 		}, nil
 	}
 	username, _ := token.Get("username")
-
 	sess := session.Must(session.NewSession(&aws.Config{Region: aws.String("us-east-1")}))
 
 	// Create a new Cognito Identity Provider client
@@ -57,7 +58,7 @@ func (h *MeHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGat
 
 	// Prepare the input for the AdminGetUser call
 	input := &cognitoidentityprovider.AdminGetUserInput{
-		UserPoolId: aws.String("us-east-1_wslTzuwWf"),
+		UserPoolId: aws.String(userPoolId),
 		Username:   aws.String(username.(string)),
 	}
 
@@ -69,12 +70,10 @@ func (h *MeHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGat
 			Body:       err.Error(),
 		}, nil
 	}
-
 	// access the user attributes using result.UserAttributes
 	// Get the email attribute:
 	email := ""
 	for _, attr := range result.UserAttributes {
-		println("attr: ", attr.String())
 		if *attr.Name == "email" {
 			email = *attr.Value
 			break

@@ -45,7 +45,6 @@ func (r *PaymentRepository) GetAllPayments(filters map[string]string) ([]domain.
 
 	// Execute the query
 	err := query.Find(&payments).Error
-	fmt.Println("Payments found:", payments)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		fmt.Println("No payments found")
 		return nil, nil
