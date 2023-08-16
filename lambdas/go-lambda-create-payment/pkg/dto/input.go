@@ -1,10 +1,13 @@
 package dto
 
 type CreatePaymentInput struct {
-	ShopName string  `json:"shopName"`
-	Amount   float32 `json:"amount"`
-	CardID   string  `json:"cardID"`
-	UserID   string  `json:"userID"`
-	Category string  `json:"category"`
-	Receipt  string  `json:"receipt"`
+	ShopName        string  `json:"shopName"`
+	Category        string  `json:"category"`
+	Cuit            string  `json:"cuit"`
+	Date            string  `json:"date"`
+	Time            string  `json:"time"`
+	ReceiptNumber   string  `json:"receiptNumber"`
+	ReceiptType     string  `json:"receiptType"`
+	Amount          float32 `json:"amount"`
+	ReceiptImageKey string  `json:"receiptImageKey"`
 }

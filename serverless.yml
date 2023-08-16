@@ -116,6 +116,7 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
       - S3_USER_AC
       - S3_USER_SAC
     events:

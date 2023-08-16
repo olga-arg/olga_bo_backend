@@ -1,80 +1,58 @@
 package processor
 
 import (
-	"bytes"
 	"context"
-	"encoding/base64"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"go-lambda-create-payment/internal/storage"
 	"go-lambda-create-payment/pkg/domain"
 	"go-lambda-create-payment/pkg/dto"
-	"os"
 )
 
 type Processor interface {
-	CreatePayment(ctx context.Context, input *dto.CreatePaymentInput) error
+	CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email string) error
 }
 
 type processor struct {
-	storage     storage.PaymentRepository
-	teamStorage storage.TeamRepository
+	storage storage.PaymentRepository
 }
 
-func New(paymentRepo storage.PaymentRepository, teamRepo storage.TeamRepository) Processor {
+func New(paymentRepo storage.PaymentRepository) Processor {
 	return &processor{
-		storage:     paymentRepo,
-		teamStorage: teamRepo,
+		storage: paymentRepo,
 	}
 }
 
-func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentInput) error {
-	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.CardID, input.UserID, input.Category, input.Receipt)
+func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email string) error {
+	// Validate the status of the user (active or not)
+	user, err := p.storage.GetUserIdByEmail(email)
+	if err != nil {
+		fmt.Println("Error getting user: ", err)
+		return err
+	}
+
+	// Validate the purchase limit
+	purchaseLimit := user.PurchaseLimit
+	if float32(purchaseLimit) < input.Amount {
+		return fmt.Errorf("the amount is greater than the purchase limit")
+	}
+	// Validate the monthly limit
+	monthlyLimit := user.MonthlyLimit
+	remainingMonthlyLimit := float32(monthlyLimit) - user.MonthlySpending
+	if remainingMonthlyLimit < input.Amount {
+		return fmt.Errorf("Error: The amount is greater than the monthly limit")
+	}
+	// Create payment
+	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.Cuit, input.Date, input.Time, input.Category, input.ReceiptNumber, input.ReceiptType, input.ReceiptImageKey, user.ID)
 	if err != nil {
 		fmt.Println("Error creating payment: ", err)
 		return err
 	}
-	if input.Receipt != "" {
-		// base64 decode the receipt
-		file, err := base64.StdEncoding.DecodeString(input.Receipt)
-		if err != nil {
-			fmt.Println("Error decoding receipt: ", err)
-		}
-		// Upload the receipt to S3
-		// obtain the KeyID and SecretKey from the environment variables
-		ac := os.Getenv("S3_USER_AC")
-		sac := os.Getenv("S3_USER_SAC")
-		s3Config := &aws.Config{
-			Region:      aws.String("sa-east-1"),
-			Credentials: credentials.NewStaticCredentials(ac, sac, ""),
-		}
-		s3Session, err := session.NewSession(s3Config)
-		if err != nil {
-			fmt.Println("Error creating session: ", err)
-		}
-		uploader := s3manager.NewUploader(s3Session)
-		inputAws := &s3manager.UploadInput{
-			Bucket:      aws.String("prod-olga-backend-receipts"), // bucket's name
-			Key:         aws.String(payment.ID),                   // files destination location
-			Body:        bytes.NewReader(file),                    // content of the file
-			ContentType: aws.String("image/jpg"),                  // content type
-			ACL:         aws.String("public-read"),
-		}
-		output, err := uploader.UploadWithContext(context.Background(), inputAws)
-		if err != nil {
-			fmt.Println("Error uploading file: ", err)
-		} else {
-			payment.Receipt = output.Location
-		}
-	}
-	// Saves the payment to the database if it doesn't already exist
+	// Save to db
 	if err := p.storage.Save(payment); err != nil {
 		fmt.Println("Error saving payment: ", err)
 		return err
 	}
 	// Returns
+
 	return nil
 }
