@@ -25,7 +25,7 @@ func getPaymentTable() func(tx *gorm.DB) *gorm.DB {
 }
 
 func (r *PaymentRepository) GetAllPayments(filters map[string]string) ([]domain.Payment, error) {
-	var payments []domain.Payment
+	var payments domain.Payments
 	query := r.db.Scopes(getPaymentTable())
 
 	// TODO: Always filter by confirmed users
@@ -35,9 +35,9 @@ func (r *PaymentRepository) GetAllPayments(filters map[string]string) ([]domain.
 	}
 	if hasReceipt, ok := filters["receipt"]; ok {
 		if hasReceipt == "true" {
-			query = query.Where("receipt <> ''")
+			query = query.Where("receipt_image_key <> ''")
 		} else if hasReceipt == "false" {
-			query = query.Where("receipt = '' OR receipt IS NULL")
+			query = query.Where("receipt_image_key = '' OR receipt IS NULL")
 		}
 	}
 
