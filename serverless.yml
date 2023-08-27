@@ -2,7 +2,7 @@ service: olga-backend
 
 provider:
   name: aws
-  runtime: go1.x
+  runtime: provided.al2
   stage: prod
   region: sa-east-1
   httpApi:
@@ -14,16 +14,20 @@ provider:
       Resource: '*'
     - Effect: 'Allow'
       Action:
-          - cognito-idp:AdminGetUser
+        - cognito-idp:AdminGetUser
       Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_a3sLZtvFF
 
 # you can define service wide environment variables here
 #  environment:
 #    variable1: value1
-
+package:
+  individually: true
+  
 functions:
   go-lambda-create-user:
-    handler: lambdas/bin/go-lambda-create-user/go-lambda-create-user
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-create-user/go-lambda-create-user.zip
     ssmToEnvironment:
       - EMAIL_SENDER_ADDRESS
       - EMAIL_SENDER_PASSWORD
@@ -37,7 +41,9 @@ functions:
           path: /users
           method: post
   go-lambda-get-users:
-    handler: lambdas/bin/go-lambda-get-users/go-lambda-get-users
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-get-users/go-lambda-get-users.zip
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -49,7 +55,9 @@ functions:
           path: /users
           method: get
   go-lambda-update-user:
-    handler: lambdas/bin/go-lambda-update-user/go-lambda-update-user
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-update-user/go-lambda-update-user.zip
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -61,7 +69,9 @@ functions:
           path: /users/{user_id}
           method: patch
   go-lambda-create-team:
-    handler: lambdas/bin/go-lambda-create-team/go-lambda-create-team
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-create-team/go-lambda-create-team.zip
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -73,7 +83,9 @@ functions:
           path: /teams
           method: post
   go-lambda-get-teams:
-    handler: lambdas/bin/go-lambda-get-teams/go-lambda-get-teams
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-get-teams/go-lambda-get-teams.zip
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -85,7 +97,9 @@ functions:
           path: /teams
           method: get
   go-lambda-delete-team:
-    handler: lambdas/bin/go-lambda-delete-team/go-lambda-delete-team
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-delete-team/go-lambda-delete-team.zip
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -97,7 +111,9 @@ functions:
           path: /teams/{team_id}
           method: delete
   go-lambda-update-team:
-    handler: lambdas/bin/go-lambda-update-team/go-lambda-update-team
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-update-team/go-lambda-update-team.zip
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -109,7 +125,9 @@ functions:
           path: /teams/{team_id}
           method: patch
   go-lambda-create-payment:
-    handler: lambdas/bin/go-lambda-create-payment/go-lambda-create-payment
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-create-payment/go-lambda-create-payment.zip
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -124,7 +142,9 @@ functions:
           path: /payments
           method: post
   go-lambda-get-payments:
-    handler: lambdas/bin/go-lambda-get-payments/go-lambda-get-payments
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-get-payments/go-lambda-get-payments.zip
     ssmToEnvironment:
       - DB_USER
       - DB_PASSWORD
@@ -135,36 +155,36 @@ functions:
       - httpApi:
           path: /payments
           method: get
+
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
 
 resources:
   Resources:
-
     ReceiptsBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.stage}-${self:service}-receipts
 
     ### Aurora Serverless Cluster and Instance ###
-#    postgresCluster:
-#      Type: AWS::RDS::DBCluster
-#      Properties:
-#        AllocatedStorage: 20
-#        DatabaseName: prodOlgaBackend
-#        Engine: postgres
-#        EngineVersion: "14.6"
-#        DBClusterInstanceClass: db.t4g.micro
-#        MasterUsername: ${ssm:/db_username}
-#        MasterUserPassword: ${ssm:/db_password}
+    #    postgresCluster:
+    #      Type: AWS::RDS::DBCluster
+    #      Properties:
+    #        AllocatedStorage: 20
+    #        DatabaseName: prodOlgaBackend
+    #        Engine: postgres
+    #        EngineVersion: "14.6"
+    #        DBClusterInstanceClass: db.t4g.micro
+    #        MasterUsername: ${ssm:/db_username}
+    #        MasterUserPassword: ${ssm:/db_password}
     postgresInstance:
-      Type: "AWS::RDS::DBInstance"
+      Type: 'AWS::RDS::DBInstance'
       Properties:
         DBInstanceIdentifier: ${self:provider.stage}-${self:service}-postgres
         PubliclyAccessible: true
         Engine: postgres
-        EngineVersion: "14.6"
+        EngineVersion: '14.6'
         DBInstanceClass: db.t4g.micro
         AllocatedStorage: 20
         DBName: ${ssm:/db_name}
