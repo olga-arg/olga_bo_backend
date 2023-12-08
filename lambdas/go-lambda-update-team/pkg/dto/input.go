@@ -3,5 +3,7 @@ package dto
 type UpdateTeamRequest struct {
 	Name         string   `json:"name"`
 	AnnualBudget int      `json:"annual_budget"`
-	Users        []string `json:"users"`
+	ReviewerId   string   `json:"reviewer_id"`
+	AddUsers     []string `json:"add_users"`
+	RemoveUsers  []string `json:"remove_users"`
 }

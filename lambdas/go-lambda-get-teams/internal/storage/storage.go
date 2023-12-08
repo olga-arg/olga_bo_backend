@@ -28,13 +28,15 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string) ([]domain.Team, 
 	var teams []domain.Team
 	query := r.db.Scopes(getTeamTable()).Preload("Users").Joins("LEFT JOIN users ON teams.reviewer_id = users.id").Where("teams.status = ?", 0)
 	// Apply filters to the query
-	if teamName, ok := filters["team_name"]; ok {
-		query = query.Where("team_name ILIKE ?", "%"+teamName+"%")
+	if teamName, ok := filters["name"]; ok {
+		query = query.Where("name ILIKE ?", "%"+teamName+"%")
 	}
 
 	if annualBudget, ok := filters["annual_budget"]; ok {
 		query = query.Where("annual_budget = ?", annualBudget)
 	}
+	// Order the results by team_name in ascending order
+	query = query.Order("name ASC")
 
 	// Execute the query
 	err := query.Find(&teams).Error

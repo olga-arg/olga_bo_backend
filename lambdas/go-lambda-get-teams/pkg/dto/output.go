@@ -8,6 +8,7 @@ type User struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
 	Surname string `json:"surname"`
+	Email   string `json:"email"`
 }
 
 type Team struct {
@@ -34,6 +35,7 @@ func NewOutput(teams []domain.Team) *Output {
 				ID:      user.ID,
 				Name:    user.Name,
 				Surname: user.Surname,
+				Email:   user.Email,
 			})
 		}
 		dtoTeams = append(dtoTeams, Team{
@@ -43,6 +45,7 @@ func NewOutput(teams []domain.Team) *Output {
 				ID:      team.Reviewer.ID,
 				Name:    team.Reviewer.Name,
 				Surname: team.Reviewer.Surname,
+				Email:   team.Reviewer.Email,
 			},
 			AnnualBudget:    team.AnnualBudget,
 			MonthlySpending: team.MonthlySpending,
