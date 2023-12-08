@@ -223,7 +223,7 @@ custom:
   customDomain:
     domainName: 'api.olga.lat'
     basePath: 'api'
-    stage: ${self:provider.stage}
+    stage: $default
     createRoute53Record: true
     endpointType: regional
     apiType: http
