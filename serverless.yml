@@ -7,15 +7,17 @@ provider:
   region: sa-east-1
   httpApi:
     cors: true
-  iamRoleStatements:
-    - Effect: 'Allow'
-      Action:
-        - s3:*
-      Resource: '*'
-    - Effect: 'Allow'
-      Action:
-        - cognito-idp:AdminGetUser
-      Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_a3sLZtvFF
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - s3:*
+          Resource: '*'
+        - Effect: 'Allow'
+          Action:
+            - cognito-idp:AdminGetUser
+          Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_a3sLZtvFF
 
 # you can define service wide environment variables here
 #  environment:
@@ -225,3 +227,5 @@ custom:
     createRoute53Record: true
     endpointType: regional
     apiType: http
+
+configValidationMode: error
