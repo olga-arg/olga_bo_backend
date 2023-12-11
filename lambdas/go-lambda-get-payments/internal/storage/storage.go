@@ -26,7 +26,7 @@ func getPaymentTable() func(tx *gorm.DB) *gorm.DB {
 
 func (r *PaymentRepository) GetAllPayments(filters map[string]string) ([]domain.Payment, error) {
 	var payments domain.Payments
-	query := r.db.Scopes(getPaymentTable())
+	query := r.db.Scopes(getPaymentTable()).Preload("User")
 
 	// TODO: Always filter by confirmed users
 	// Apply filters to the query

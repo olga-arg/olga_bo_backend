@@ -31,9 +31,23 @@ type Payment struct {
 	Status          ConfirmationStatus `json:"status" default:"Pending"`
 	ReceiptImageKey string             `json:"receipt_image_key"`
 	CreatedDate     time.Time          `json:"created"`
+	User            User               `gorm:"foreignKey:user_id"`
 }
 
 type Payments []Payment
+
+type User struct {
+	ID              string  `json:"id"`
+	CompanyID       string  `json:"company"`
+	Name            string  `json:"name"`
+	Surname         string  `json:"surname"`
+	FullName        string  `json:"full_name"`
+	Email           string  `json:"email"`
+	PurchaseLimit   int     `json:"purchase_limit" default:"0"`
+	MonthlyLimit    int     `json:"monthly_limit" default:"0"`
+	MonthlySpending float32 `json:"monthly_spending" default:"0"`
+	IsAdmin         bool    `json:"isAdmin" default:"false"`
+}
 
 func ParseConfirmationStatus(s string) ConfirmationStatus {
 	switch s {
