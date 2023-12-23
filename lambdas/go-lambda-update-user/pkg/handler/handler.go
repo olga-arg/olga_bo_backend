@@ -22,7 +22,7 @@ func NewUserCardLimitHandler(processor processor.Processor) *UserCardLimitHandle
 }
 
 func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var input dto.UpdateLimitInput
+	var input dto.UpdateUserInput
 
 	// Validate input
 	fmt.Println("Validating input")
@@ -35,7 +35,7 @@ func (h *UserCardLimitHandler) Handle(request events.APIGatewayProxyRequest) (ev
 	}
 	// Update user in storage
 	fmt.Println("Updating user in storage")
-	err = h.processor.UpdateUserCardLimits(context.Background(), newUser)
+	err = h.processor.UpdateUser(context.Background(), newUser)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,

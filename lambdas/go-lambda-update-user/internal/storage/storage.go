@@ -25,7 +25,7 @@ func getUserTable(userID string) func(tx *gorm.DB) *gorm.DB {
 	}
 }
 
-func (r *UserRepository) UpdateUserCardLimit(newUser *domain.User) error {
+func (r *UserRepository) UpdateUser(newUser *domain.User) error {
 	// Save the updated user
 	query := r.db.Save(newUser)
 	if query.Error != nil {

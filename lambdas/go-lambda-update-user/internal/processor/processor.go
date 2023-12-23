@@ -11,9 +11,9 @@ import (
 )
 
 type Processor interface {
-	UpdateUserCardLimits(ctx context.Context, newUser *domain.User) error
+	UpdateUser(ctx context.Context, newUser *domain.User) error
 	GetUser(ctx context.Context, userID string) (*domain.User, error)
-	ValidateUserInput(ctx context.Context, input *dto.UpdateLimitInput, request events.APIGatewayProxyRequest) (*domain.User, error)
+	ValidateUserInput(ctx context.Context, input *dto.UpdateUserInput, request events.APIGatewayProxyRequest) (*domain.User, error)
 }
 
 type processor struct {
@@ -26,8 +26,8 @@ func NewProcessor(storage *storage.UserRepository) Processor {
 	}
 }
 
-func (p *processor) UpdateUserCardLimits(ctx context.Context, newUser *domain.User) error {
-	err := p.storage.UpdateUserCardLimit(newUser)
+func (p *processor) UpdateUser(ctx context.Context, newUser *domain.User) error {
+	err := p.storage.UpdateUser(newUser)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func (p *processor) GetUser(ctx context.Context, userID string) (*domain.User, e
 	return user, nil
 }
 
-func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateLimitInput, request events.APIGatewayProxyRequest) (*domain.User, error) {
+func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateUserInput, request events.APIGatewayProxyRequest) (*domain.User, error) {
 	fmt.Println("Validating input")
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		return nil, fmt.Errorf("invalid request body: %s", err.Error())
@@ -80,6 +80,9 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateLimi
 			return nil, fmt.Errorf("monthly limit cannot be less than purchase limit")
 		}
 		user.MonthlyLimit = input.MonthlyLimit
+	}
+	if input.IsAdmin != nil {
+		user.IsAdmin = *input.IsAdmin
 	}
 	fmt.Println("Input validated successfully")
 	return user, nil
