@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/badoux/checkmail"
-	"github.com/pkg/errors"
 	"go-lambda-create-user/internal/storage"
 	"go-lambda-create-user/pkg/domain"
 	"go-lambda-create-user/pkg/dto"
-	
 )
 
 type Processor interface {
@@ -29,26 +30,56 @@ func New(s storage.UserRepository) Processor {
 }
 
 func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) error {
-	// Checks if the email already exists
-	exists, err := p.storage.EmailAlreadyExists(input.Email)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return errors.New("email already exists")
-	}
-
 	// Creates a new user. New user takes a name and email and returns a user struct
 	user, err := domain.NewUser(input.Name, input.Surname, input.Email)
 	if err != nil {
 		fmt.Println("Error creating user: ", err)
 		return err
 	}
+
+	// Creates the user in cognito
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1"),
+	})
+	if err != nil {
+		return err
+	}
+
+	// Create a new CognitoIdentityProvider client
+	cognitoClient := cognitoidentityprovider.New(sess)
+
+	// Specify the user pool ID
+	userPoolID := "us-east-1_a3sLZtvFF"
+
+	// Create a user in Cognito
+	createUserInput := &cognitoidentityprovider.AdminCreateUserInput{
+		Username:   aws.String(input.Email),
+		UserPoolId: aws.String(userPoolID),
+		UserAttributes: []*cognitoidentityprovider.AttributeType{
+			{
+				Name:  aws.String("email"),
+				Value: aws.String(input.Email),
+			},
+			{
+				Name:  aws.String("email_verified"),
+				Value: aws.String("True"),
+			},
+		},
+	}
+
+	// Call the AdminCreateUser API
+	_, err = cognitoClient.AdminCreateUser(createUserInput)
+	if err != nil {
+		return err
+	}
+	fmt.Println("User created successfully in Cognito")
+
 	// Saves the user to the database if it doesn't already exist
 	if err := p.storage.Save(user); err != nil {
 		fmt.Println("Error saving user: ", err)
 		return err
 	}
+	fmt.Println("User created successfully in Cognito and DynamoDB")
 	// Returns
 	return nil
 }
