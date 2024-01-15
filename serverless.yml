@@ -70,6 +70,20 @@ functions:
       - httpApi:
           path: /users/{user_id}
           method: patch
+  go-lambda-update-payment:
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-update-payment/go-lambda-update-payment.zip
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+      - DB_PORT
+    events:
+      - httpApi:
+          path: /payments/{payment_id}
+          method: patch
   go-lambda-create-team:
     handler: bootstrap
     package:

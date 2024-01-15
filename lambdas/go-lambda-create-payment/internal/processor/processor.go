@@ -41,18 +41,25 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 	if remainingMonthlyLimit < input.Amount {
 		return fmt.Errorf("Error: The amount is greater than the monthly limit")
 	}
+
 	// Create payment
 	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.Cuit, input.Date, input.Time, input.Category, input.ReceiptNumber, input.ReceiptType, input.ReceiptImageKey, user.ID)
 	if err != nil {
 		fmt.Println("Error creating payment: ", err)
 		return err
 	}
-	// Save to db
+
+	// Update the monthly spending of the user
+	user.MonthlySpending += input.Amount
+	if err := p.storage.UpdateUser(user); err != nil {
+		fmt.Println("Error updating user: ", err)
+		return err
+	}
+	// Save payment to db
 	if err := p.storage.Save(payment); err != nil {
 		fmt.Println("Error saving payment: ", err)
 		return err
 	}
-	// Returns
 
 	return nil
 }

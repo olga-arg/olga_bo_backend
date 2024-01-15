@@ -50,6 +50,16 @@ func (r *PaymentRepository) Save(payment *domain.Payment) error {
 	return nil
 }
 
+func (r *PaymentRepository) UpdateUser(newUser *domain.User) error {
+	// Save the updated user
+	query := r.Db.Save(newUser)
+	if query.Error != nil {
+		fmt.Println("Error updating user card limit:", query.Error)
+		return query.Error
+	}
+	return nil
+}
+
 //func (r *TeamRepository) FindTeamByID(id string) (*domain.Team, error) {
 //	var team domain.Team
 //	err := r.Db.Scopes(getTeamsTable(&team)).Where("id = ?", id).First(&team).Error
