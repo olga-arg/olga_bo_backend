@@ -1,10 +1,14 @@
 package services
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/jordan-wright/email"
-
+	"io/ioutil"
 	"net/smtp"
 	"os"
 	"strings"
@@ -14,6 +18,12 @@ import (
 const (
 	smtpAuthAddress   = "smtp.zoho.com"
 	smtpServerAddress = "smtp.zoho.com:587"
+)
+
+type EmailTemplate string
+
+const (
+	Welcome EmailTemplate = "welcome_email.html"
 )
 
 type Config struct {
@@ -33,9 +43,9 @@ var (
 
 type EmailSender interface {
 	SendEmail(
-		subject string,
-		body string,
 		to string,
+		template EmailTemplate,
+		variablesTemplate []string,
 		cc []string,
 	) error
 }
@@ -45,16 +55,43 @@ func newEmailService(config Config) EmailSender {
 	return &emailService{fromEmail: config.fromEmailAddress, auth: auth}
 }
 
-func (es *emailService) SendEmail(subject, body, to string, cc []string) error {
+func (es *emailService) SendEmail(to string, template EmailTemplate, variablesTemplate, cc []string) error {
 	e := email.NewEmail()
 	e.From = es.fromEmail
 	e.To = []string{to}
 	e.Cc = cc
-	e.Subject = subject
-	e.Text = []byte(body)
-	err := e.Send(smtpServerAddress, es.auth)
+	e.Subject = "Te damos la bienvenida a Olga :)"
+
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		fmt.Println("Sending email from: ", es.fromEmail, " to: ", to, " with subject: ", subject, "got error: ", err)
+		fmt.Println("Error loading AWS config:", err)
+		return err
+	}
+
+	client := s3.NewFromConfig(cfg)
+
+	input := &s3.GetObjectInput{
+		Bucket: aws.String("prod-olga-backend-assets"),
+		Key:    aws.String(string(template)),
+	}
+
+	resp, err := client.GetObject(context.TODO(), input)
+	if err != nil {
+		fmt.Println("Error fetching template from S3:", err)
+		return err
+	}
+
+	htmlContent, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading index.html:", err)
+		return err
+	}
+
+	body := strings.ReplaceAll(string(htmlContent), "{{name}}", variablesTemplate[0])
+	e.HTML = []byte(body)
+	err = e.Send(smtpServerAddress, es.auth)
+	if err != nil {
+		fmt.Println("Sending email from: ", es.fromEmail, " to: ", to, " with subject: ", e.Subject, "got error: ", err)
 		return err
 	}
 	return nil

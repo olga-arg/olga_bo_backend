@@ -179,10 +179,10 @@ functions:
 
 resources:
   Resources:
-    ReceiptsBucket:
+    Assets:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:provider.stage}-${self:service}-receipts
+        BucketName: ${self:provider.stage}-${self:service}-assets
 
     ### Aurora Serverless Cluster and Instance ###
     #    postgresCluster:
