@@ -18,14 +18,14 @@ provider:
           Action:
             - cognito-idp:AdminGetUser
             - cognito-idp:AdminCreateUser
-          Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_a3sLZtvFF
+          Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_C662eFRSU
 
 # you can define service wide environment variables here
 #  environment:
 #    variable1: value1
 package:
   individually: true
-  
+
 functions:
   go-lambda-create-user:
     handler: bootstrap
