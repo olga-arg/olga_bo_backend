@@ -39,6 +39,7 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /users

@@ -12,6 +12,7 @@ import (
 	"go-lambda-create-user/internal/storage"
 	"go-lambda-create-user/pkg/domain"
 	"go-lambda-create-user/pkg/dto"
+	"os"
 )
 
 type Processor interface {
@@ -49,7 +50,7 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 	cognitoClient := cognitoidentityprovider.New(sess)
 
 	// Specify the user pool ID
-	userPoolID := "us-east-1_a3sLZtvFF"
+	userPoolID := os.Getenv("USER_POOL_ID")
 
 	// Create a user in Cognito
 	createUserInput := &cognitoidentityprovider.AdminCreateUserInput{
