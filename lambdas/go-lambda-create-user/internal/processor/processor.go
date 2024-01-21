@@ -54,8 +54,9 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 
 	// Create a user in Cognito
 	createUserInput := &cognitoidentityprovider.AdminCreateUserInput{
-		Username:   aws.String(input.Email),
-		UserPoolId: aws.String(userPoolID),
+		MessageAction: aws.String("SUPPRESS"),
+		Username:      aws.String(input.Email),
+		UserPoolId:    aws.String(userPoolID),
 		UserAttributes: []*cognitoidentityprovider.AttributeType{
 			{
 				Name:  aws.String("email"),
