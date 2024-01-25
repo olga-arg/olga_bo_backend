@@ -22,11 +22,18 @@ func NewCreateUserHandler(p processor.Processor) *CreateUserHandler {
 func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var input dto.CreateUserInput
 
-	_, companyId, err := utils.ExtractEmailAndCompanyIdFromToken(request)
+	email, companyId, err := utils.ExtractEmailAndCompanyIdFromToken(request)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
 			Body:       err.Error(),
+		}, nil
+	}
+
+	if companyId == "" || email == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
 		}, nil
 	}
 

@@ -27,6 +27,14 @@ func (h *CreatePaymentHandler) Handle(request events.APIGatewayProxyRequest) (ev
 			Body:       err.Error(),
 		}, nil
 	}
+
+	if companyId == "" || email == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
 	// Unmarshal the request body into the input struct
 	err = json.Unmarshal([]byte(request.Body), &input)
 	if err != nil {

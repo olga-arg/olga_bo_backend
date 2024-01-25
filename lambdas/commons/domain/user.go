@@ -8,7 +8,6 @@ import (
 
 type User struct {
 	ID              string             `json:"id"`
-	CompanyID       string             `json:"company"`
 	Name            string             `json:"name"`
 	Surname         string             `json:"surname"`
 	FullName        string             `json:"full_name"`
