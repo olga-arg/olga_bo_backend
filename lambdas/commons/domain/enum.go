@@ -18,3 +18,16 @@ const (
 	Deleted
 	Awating
 )
+
+func ParseConfirmationStatus(s string) ConfirmationStatus {
+	switch s {
+	case "Pending":
+		return Pending
+	case "Created":
+		return Created
+	case "Deleted":
+		return Deleted
+	default:
+		return Created
+	}
+}

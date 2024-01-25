@@ -4,6 +4,7 @@ import (
 	"commons/domain"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 )
 
 type TeamRepository struct {
@@ -36,6 +37,33 @@ func (r *TeamRepository) GetTeamByName(name, companyId string) error {
 		return err
 	}
 	return fmt.Errorf("team already exists: %s", name)
+}
+
+func (r *TeamRepository) DeleteTeam(teamID, companyId string) error {
+	var team domain.Team
+	fmt.Println("Getting team by ID in db")
+	err := r.Db.Scopes(getTeamTable(companyId)).Where("id = ?", teamID).First(&team).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		fmt.Println("No team found")
+		return errors.Wrap(err, "No team with that ID found")
+	}
+	fmt.Println("Team found", team)
+	// Validate that team isn't already deleted
+	if team.Status == 1 {
+		fmt.Println("Team is already deleted")
+		return fmt.Errorf("team is already deleted")
+	}
+	fmt.Println("Team is not deleted")
+	// change the team status to deleted
+	team.Status = 1
+	// Save the updated team
+	query := r.Db.Scopes(getTeamTable(companyId)).Save(&team)
+	if query.Error != nil {
+		fmt.Println("Error deleting team:", query.Error)
+		return errors.Wrap(query.Error, "failed to delete team")
+	}
+	fmt.Println("Team deleted")
+	return nil
 }
 
 func (r *TeamRepository) Save(team *domain.Team, companyId string) error {
