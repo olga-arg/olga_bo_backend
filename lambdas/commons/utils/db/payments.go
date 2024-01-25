@@ -1,9 +1,9 @@
-package storage
+package db
 
 import (
+	"commons/domain"
 	"fmt"
 	"github.com/jinzhu/gorm"
-	"go-lambda-create-payment/pkg/domain"
 )
 
 type PaymentRepository struct {

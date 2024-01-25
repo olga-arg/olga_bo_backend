@@ -1,10 +1,10 @@
 package processor
 
 import (
+	"commons/domain"
+	"commons/utils/db"
 	"context"
 	"fmt"
-	"go-lambda-create-payment/internal/storage"
-	"go-lambda-create-payment/pkg/domain"
 	"go-lambda-create-payment/pkg/dto"
 )
 
@@ -12,11 +12,13 @@ type Processor interface {
 	CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email string) error
 }
 
+////// Remove storage and import it from commons
+
 type processor struct {
-	storage storage.PaymentRepository
+	storage db.PaymentRepository
 }
 
-func New(paymentRepo storage.PaymentRepository) Processor {
+func New(paymentRepo db.PaymentRepository) Processor {
 	return &processor{
 		storage: paymentRepo,
 	}

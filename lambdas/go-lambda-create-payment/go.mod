@@ -3,9 +3,10 @@ module go-lambda-create-payment
 go 1.18
 
 require (
+	commons v0.0.0-00010101000000-000000000000
 	github.com/aws/aws-lambda-go v1.38.0
 	github.com/aws/aws-sdk-go v1.44.299
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/lestrrat-go/jwx v1.2.26
 )
@@ -24,3 +25,5 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 )
+
+replace commons => ../commons
