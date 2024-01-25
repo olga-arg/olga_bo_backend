@@ -12,21 +12,20 @@ type Processor interface {
 	CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email, companyId string) error
 }
 
-////// Remove storage and import it from commons
-
 type processor struct {
-	storage db.PaymentRepository
+	paymentStorage db.PaymentRepository
+	userStorage    db.UserRepository
 }
 
 func New(paymentRepo db.PaymentRepository) Processor {
 	return &processor{
-		storage: paymentRepo,
+		paymentStorage: paymentRepo,
 	}
 }
 
 func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email, companyId string) error {
 	// Validate the status of the user (active or not)
-	user, err := p.storage.GetUserIdByEmail(email, companyId)
+	user, err := p.userStorage.GetUserIdByEmail(email, companyId)
 	if err != nil {
 		fmt.Println("Error getting user: ", err)
 		return err
@@ -53,12 +52,12 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 
 	// Update the monthly spending of the user
 	user.MonthlySpending += input.Amount
-	if err := p.storage.UpdateUser(user, companyId); err != nil {
+	if err := p.userStorage.UpdateUser(user, companyId); err != nil {
 		fmt.Println("Error updating user: ", err)
 		return err
 	}
 	// Save payment to db
-	if err := p.storage.Save(payment, companyId); err != nil {
+	if err := p.paymentStorage.Save(payment, companyId); err != nil {
 		fmt.Println("Error saving payment: ", err)
 		return err
 	}
