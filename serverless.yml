@@ -71,6 +71,7 @@ functions:
       - DB_NAME
       - DB_HOST_READER
       - DB_PORT
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /users
@@ -85,6 +86,7 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /users/{user_id}
@@ -99,6 +101,7 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /payments/{payment_id}
@@ -113,6 +116,7 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /teams
@@ -127,6 +131,7 @@ functions:
       - DB_NAME
       - DB_HOST_READER
       - DB_PORT
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /teams
@@ -141,6 +146,7 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /teams/{team_id}
@@ -155,6 +161,7 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /teams/{team_id}
@@ -172,6 +179,7 @@ functions:
       - USER_POOL_ID
       - S3_USER_AC
       - S3_USER_SAC
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /payments
@@ -186,6 +194,7 @@ functions:
       - DB_NAME
       - DB_HOST_READER
       - DB_PORT
+      - USER_POOL_ID
     events:
       - httpApi:
           path: /payments

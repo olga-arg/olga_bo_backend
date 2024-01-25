@@ -51,3 +51,16 @@ func (r *UserRepository) Save(user *domain.User, companyId string) error {
 	}
 	return nil
 }
+
+func (r *TeamRepository) GetReviewerById(id, companyId string) error {
+	var user domain.User
+	err := r.Db.Scopes(getUserTable(companyId)).Where("id = ?", id).First(&user).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return fmt.Errorf("user not found: %s", id)
+		}
+		fmt.Println("Error getting user by id: ", err)
+		return err
+	}
+	return nil
+}

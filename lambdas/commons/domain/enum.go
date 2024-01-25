@@ -12,3 +12,9 @@ const (
 	Canceled
 	Approved
 )
+
+const (
+	Created ConfirmationStatus = iota
+	Deleted
+	Awating
+)
