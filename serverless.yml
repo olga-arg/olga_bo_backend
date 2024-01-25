@@ -18,7 +18,7 @@ provider:
           Action:
             - cognito-idp:AdminGetUser
             - cognito-idp:AdminCreateUser
-          Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_C662eFRSU
+          Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_7Npn25c8F
 
 # you can define service wide environment variables here
 #  environment:
