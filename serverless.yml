@@ -27,6 +27,23 @@ package:
   individually: true
 
 functions:
+  go-lambda-create-company:
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-create-company/go-lambda-create-company.zip
+    ssmToEnvironment:
+      - EMAIL_SENDER_ADDRESS
+      - EMAIL_SENDER_PASSWORD
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+      - DB_PORT
+      - USER_POOL_ID
+    events:
+      - httpApi:
+          path: /company
+          method: post
   go-lambda-create-user:
     handler: bootstrap
     package:

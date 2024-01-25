@@ -37,7 +37,6 @@ func ExtractEmailAndCompanyIdFromToken(request events.APIGatewayProxyRequest) (s
 		return "", "", nil
 	}
 	username, _ := token.Get("username")
-	//print("username: ", username)
 	sess := session.Must(session.NewSession(&aws.Config{Region: aws.String("us-east-1")}))
 
 	// Create a new Cognito Identity Provider client
