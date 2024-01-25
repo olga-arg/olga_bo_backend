@@ -19,6 +19,7 @@ func NewTeamRepository(db *gorm.DB) *TeamRepository {
 }
 
 func getTeamTable(companyId string) func(tx *gorm.DB) *gorm.DB {
+	fmt.Println("Table name:", companyId)
 	return func(tx *gorm.DB) *gorm.DB {
 		tableName := fmt.Sprintf("%s_teams", companyId)
 		return tx.Table(tableName)
@@ -42,6 +43,7 @@ func (r *TeamRepository) GetTeamByName(name, companyId string) error {
 func (r *TeamRepository) DeleteTeam(teamID, companyId string) error {
 	var team domain.Team
 	fmt.Println("Getting team by ID in db")
+	fmt.Println("Team ID:", teamID)
 	err := r.Db.Scopes(getTeamTable(companyId)).Where("id = ?", teamID).First(&team).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		fmt.Println("No team found")
