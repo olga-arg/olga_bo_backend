@@ -1,9 +1,9 @@
 package processor
 
 import (
+	"commons/utils/db"
 	"context"
 	"go-lambda-get-teams/pkg/dto"
-	"commons/utils/db"
 )
 
 type Processor interface {
@@ -25,6 +25,6 @@ func (p *processor) GetAllTeams(ctx context.Context, filter map[string]string, c
 	if err != nil {
 		return nil, err
 	}
-	teams, err = p.teamStorage.GetAllReviewers(teams, companyId)
+	//teams, err = p.teamStorage.GetAllReviewers(teams, companyId)
 	return dto.NewOutput(teams), nil
 }

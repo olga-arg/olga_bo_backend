@@ -74,23 +74,29 @@ func (r *TeamRepository) DeleteTeam(teamID, companyId string) error {
 	return nil
 }
 
-func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string) ([]domain.Team, error) {
-	var teams []domain.Team
+func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string) (domain.DbTeams, error) {
+	var teams domain.DbTeams
 
 	usersTeamsTableName := fmt.Sprintf("%s_users_teams", companyId)
 	usersTableName := fmt.Sprintf("%s_users", companyId)
 	teamsTableName := fmt.Sprintf("%s_teams", companyId)
-
+	query := fmt.Sprintf(
+		"select * from \"%s\" as teams join \"%s\" as users_teams on teams.id = users_teams.team_id join \"%s\" as users on users.id = users_teams.user_id",
+		teamsTableName, usersTeamsTableName, usersTableName)
+	println("hola don", query)
 	// Construir la consulta con GORM
-	err := r.Db.Raw(
-		fmt.Sprintf(
-			"select * from %s as teams join %s as users_teams on teams.id = users_teams.team_id join %s as users on users.id = users_teams.user_id",
-			teamsTableName, usersTeamsTableName, usersTableName)).Scan(&teams).Error
+	err := r.Db.Raw(query).Scan(&teams).Error
 
+	println("adios don")
 	if err != nil {
 		fmt.Println("Error getting teams:", err)
 		return nil, err
 	}
+	if len(teams) > 0 {
+		println("teams user id:", teams[0].UserId)
+		println("teams email id:", teams[0].UserName)
+	}
+	println("hasta nunca don")
 
 	//// Aplicar filtros a la consulta
 	//if teamName, ok := filters["name"]; ok {
@@ -114,7 +120,7 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string
 	//	fmt.Println("Error getting teams:", err)
 	//	return nil, err
 	//}
-
+	println("email at storage: ", teams[0].UserEmail)
 	return teams, nil
 }
 
