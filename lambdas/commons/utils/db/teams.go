@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"strconv"
 )
 
 type TeamRepository struct {
@@ -80,52 +81,39 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string
 	usersTeamsTableName := fmt.Sprintf("%s_users_teams", companyId)
 	usersTableName := fmt.Sprintf("%s_users", companyId)
 	teamsTableName := fmt.Sprintf("%s_teams", companyId)
-	query := fmt.Sprintf(
-		`SELECT teams.id as "team_id", teams.name as "team_name", teams.monthly_spending as "team_monthly_spending", teams.annual_budget as "team_annual_budget", teams.status as "team_status", teams.created_date as "team_created_date", 
-            users.id as "user_id", users.name as "user_name", users.surname as "user_surname", users.email as "user_email", users.monthly_spending as "user_monthly_spending"
+	querySyntax := fmt.Sprintf(
+		`SELECT teams.id, teams.name, teams.monthly_spending as "team_monthly_spending", teams.annual_budget as "team_annual_budget", teams.status as "team_status", teams.created_date as "team_created_date", 
+	users.id as "user_id", users.name as "user_name", users.surname as "user_surname", users.email as "user_email", users.monthly_spending as "user_monthly_spending"
     FROM "%s" as teams 
     JOIN "%s" as users_teams ON teams.id = users_teams.team_id 
     JOIN "%s" as users ON users.id = users_teams.user_id`,
 		teamsTableName, usersTeamsTableName, usersTableName)
 
-	println("hola don", query)
-	// Construir la consulta con GORM
-	err := r.Db.Raw(query).Scan(&teams).Error
-
-	println("adios don")
+	if teamName, ok := filters["name"]; ok {
+		println("team name:", teamName)
+		querySyntax = querySyntax + fmt.Sprintf(" WHERE teams.name = '%s'", teamName)
+	} else if annualBudget, ok := filters["annual_budget"]; ok {
+		println("annual budget:", annualBudget)
+		Int, err := strconv.Atoi(annualBudget)
+		if err != nil {
+			fmt.Println("Error converting annual budget to int:", err)
+		} else {
+			querySyntax = querySyntax + fmt.Sprintf(" WHERE teams.annual_budget = %d", Int)
+		}
+	}
+	query := r.Db.Raw(querySyntax)
+	query = query.Order("teams.name ASC")
+	// Ejecutar la consulta
+	err := query.Scan(&teams).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		fmt.Println("No teams found")
+		return nil, nil
+	}
 	if err != nil {
 		fmt.Println("Error getting teams:", err)
 		return nil, err
 	}
-	if len(teams) > 0 {
-		println("teams user id:", teams[0].UserId)
-		println("teams email id:", teams[0].UserName)
-	}
-	println("hasta nunca don")
 
-	//// Aplicar filtros a la consulta
-	//if teamName, ok := filters["name"]; ok {
-	//	query = query.Where("teams.name ILIKE ?", "%"+teamName+"%")
-	//}
-	//
-	//if annualBudget, ok := filters["annual_budget"]; ok {
-	//	query = query.Where("teams.annual_budget = ?", annualBudget)
-	//}
-	//
-	//// Ordenar los resultados por team_name en orden ascendente
-	//query = query.Order("teams.name ASC")
-	//
-	//// Ejecutar la consulta
-	//err := query.Find(&teams).Error
-	//if errors.Is(err, gorm.ErrRecordNotFound) {
-	//	fmt.Println("No teams found")
-	//	return nil, nil
-	//}
-	//if err != nil {
-	//	fmt.Println("Error getting teams:", err)
-	//	return nil, err
-	//}
-	println("email at storage: ", teams[0].UserEmail)
 	return teams, nil
 }
 

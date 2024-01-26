@@ -12,7 +12,6 @@ type Output struct {
 func NewOutput(teams domain.DbTeams) *Output {
 	teamMap := make(map[string]*domain.Team)
 	var dtoTeams domain.Teams
-	println("users email at dto: ", teams[0].UserEmail)
 	//teamsAlreadyVisited := make(map[string]bool)
 	for _, team := range teams {
 		if existingTeam, ok := teamMap[team.ID]; ok {
