@@ -81,8 +81,13 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string
 	usersTableName := fmt.Sprintf("%s_users", companyId)
 	teamsTableName := fmt.Sprintf("%s_teams", companyId)
 	query := fmt.Sprintf(
-		"select * from \"%s\" as teams join \"%s\" as users_teams on teams.id = users_teams.team_id join \"%s\" as users on users.id = users_teams.user_id",
+		`SELECT teams.id as "team_id", teams.name as "team_name", teams.monthly_spending as "team_monthly_spending", teams.annual_budget as "team_annual_budget", teams.status as "team_status", teams.created_date as "team_created_date", 
+            users.id as "user_id", users.name as "user_name", users.surname as "user_surname", users.email as "user_email", users.monthly_spending as "user_monthly_spending"
+    FROM "%s" as teams 
+    JOIN "%s" as users_teams ON teams.id = users_teams.team_id 
+    JOIN "%s" as users ON users.id = users_teams.user_id`,
 		teamsTableName, usersTeamsTableName, usersTableName)
+
 	println("hola don", query)
 	// Construir la consulta con GORM
 	err := r.Db.Raw(query).Scan(&teams).Error
