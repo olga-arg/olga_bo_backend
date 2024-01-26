@@ -18,12 +18,15 @@ type Payment struct {
 	Time            string             `json:"time"`
 	UserID          string             `json:"user_id"`
 	Category        string             `json:"category"`
-	receiptNumber   string             `json:"receiptNumber"`
-	receiptType     string             `json:"receiptType"`
+	ReceiptNumber   string             `json:"receiptNumber"`
+	ReceiptType     string             `json:"receiptType"`
 	Status          ConfirmationStatus `json:"status" default:"Pending"`
 	ReceiptImageKey string             `json:"receiptImageKey"`
 	CreatedDate     time.Time          `json:"created"`
+	User            User               `gorm:"foreignKey:user_id"`
 }
+
+type Payments []Payment
 
 func NewPayment(amount float32, shopName, cuit, date, _time, category, receiptNumber, receiptType, receiptImageKey, userId string) (*Payment, error) {
 	var payment Payment
@@ -40,8 +43,8 @@ func NewPayment(amount float32, shopName, cuit, date, _time, category, receiptNu
 	payment.Time = _time
 	payment.UserID = userId
 	payment.Category = category
-	payment.receiptNumber = receiptNumber
-	payment.receiptType = receiptType
+	payment.ReceiptNumber = receiptNumber
+	payment.ReceiptType = receiptType
 	payment.Status = Pending
 	payment.ReceiptImageKey = receiptImageKey
 	payment.CreatedDate = time.Now()

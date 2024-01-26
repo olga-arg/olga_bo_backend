@@ -76,3 +76,31 @@ func (r *TeamRepository) Save(team *domain.Team, companyId string) error {
 	}
 	return nil
 }
+
+//func (r *TeamRepository) FindTeamByID(id string) (*domain.Team, error) {
+//	var team domain.Team
+//	err := r.Db.Scopes(getTeamsTable(&team)).Where("id = ?", id).First(&team).Error
+//	if err != nil {
+//		fmt.Println("Error finding team: ", err)
+//		return nil, err
+//	}
+//	return &team, nil
+//}
+
+//func (r *TeamRepository) UpdateTeamMonthlySpending(team *domain.Team, paymentAmount float32) error {
+//	// Get the current monthly spending of the team
+//	var currentMonthlySpending float32
+//	currentMonthlySpending = team.MonthlySpending
+//
+//	// Add the new payment amount to the current monthly spending
+//	var newMonthlySpending float32
+//	newMonthlySpending = currentMonthlySpending + paymentAmount
+//
+//	// Save the new monthly spending to the team
+//	err := r.Db.Scopes(getTeamsTable(team)).Model(&team).Update("monthly_spending", newMonthlySpending).Error
+//	if err != nil {
+//		fmt.Println("Error updating team: ", err)
+//		return err
+//	}
+//	return nil
+//}

@@ -4,6 +4,7 @@ import (
 	"commons/domain"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 )
 
 type PaymentRepository struct {
@@ -33,30 +34,35 @@ func (r *PaymentRepository) Save(payment *domain.Payment, companyId string) erro
 	return nil
 }
 
-//func (r *TeamRepository) FindTeamByID(id string) (*domain.Team, error) {
-//	var team domain.Team
-//	err := r.Db.Scopes(getTeamsTable(&team)).Where("id = ?", id).First(&team).Error
-//	if err != nil {
-//		fmt.Println("Error finding team: ", err)
-//		return nil, err
-//	}
-//	return &team, nil
-//}
+func (r *PaymentRepository) GetAllPayments(filters map[string]string, companyId string) ([]domain.Payment, error) {
+	var payments domain.Payments
+	query := r.Db.Scopes(getPaymentTable(companyId)).Preload("User")
 
-//func (r *TeamRepository) UpdateTeamMonthlySpending(team *domain.Team, paymentAmount float32) error {
-//	// Get the current monthly spending of the team
-//	var currentMonthlySpending float32
-//	currentMonthlySpending = team.MonthlySpending
-//
-//	// Add the new payment amount to the current monthly spending
-//	var newMonthlySpending float32
-//	newMonthlySpending = currentMonthlySpending + paymentAmount
-//
-//	// Save the new monthly spending to the team
-//	err := r.Db.Scopes(getTeamsTable(team)).Model(&team).Update("monthly_spending", newMonthlySpending).Error
-//	if err != nil {
-//		fmt.Println("Error updating team: ", err)
-//		return err
-//	}
-//	return nil
-//}
+	// TODO: Always filter by confirmed users
+	// Apply filters to the query
+	if paymentType, ok := filters["payment_type"]; ok {
+		query = query.Where("Type = ?", paymentType)
+	}
+	if hasReceipt, ok := filters["receipt"]; ok {
+		if hasReceipt == "true" {
+			query = query.Where("receipt_image_key <> ''")
+		} else if hasReceipt == "false" {
+			query = query.Where("receipt_image_key = '' OR receipt IS NULL")
+		}
+	}
+
+	query = query.Order("created_date")
+
+	// Execute the query
+	err := query.Find(&payments).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		fmt.Println("No payments found")
+		return nil, nil
+	}
+	if err != nil {
+		fmt.Println("Error getting payments:", err)
+		return nil, err
+	}
+
+	return payments, nil
+}
