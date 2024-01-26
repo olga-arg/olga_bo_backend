@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/lestrrat-go/jwx v1.2.28
+	github.com/pkg/errors v0.9.1
 )
 
 require (
@@ -20,6 +21,5 @@ require (
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 )

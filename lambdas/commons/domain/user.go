@@ -21,6 +21,8 @@ type User struct {
 	Teams           []*Team            `gorm:"many2many:user_teams;"`
 }
 
+type Users []User
+
 func NewUser(name, surname, email string) (*User, error) {
 	var user User
 	id, err := uuid.NewUUID()

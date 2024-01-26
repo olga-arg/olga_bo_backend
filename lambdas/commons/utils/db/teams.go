@@ -19,9 +19,15 @@ func NewTeamRepository(db *gorm.DB) *TeamRepository {
 }
 
 func getTeamTable(companyId string) func(tx *gorm.DB) *gorm.DB {
-	fmt.Println("Table name:", companyId)
 	return func(tx *gorm.DB) *gorm.DB {
 		tableName := fmt.Sprintf("%s_teams", companyId)
+		return tx.Table(tableName)
+	}
+}
+
+func getUserTeamTable(companyId string) func(tx *gorm.DB) *gorm.DB {
+	return func(tx *gorm.DB) *gorm.DB {
+		tableName := fmt.Sprintf("%s_users_teams", companyId)
 		return tx.Table(tableName)
 	}
 }
@@ -66,6 +72,65 @@ func (r *TeamRepository) DeleteTeam(teamID, companyId string) error {
 	}
 	fmt.Println("Team deleted")
 	return nil
+}
+
+func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string) ([]domain.Team, error) {
+	var teams []domain.Team
+
+	usersTeamsTableName := fmt.Sprintf("%s_users_teams", companyId)
+	usersTableName := fmt.Sprintf("%s_users", companyId)
+	teamsTableName := fmt.Sprintf("%s_teams", companyId)
+
+	// Construir la consulta con GORM
+	err := r.Db.Raw(
+		fmt.Sprintf(
+			"select * from %s as teams join %s as users_teams on teams.id = users_teams.team_id join %s as users on users.id = users_teams.user_id",
+			teamsTableName, usersTeamsTableName, usersTableName)).Scan(&teams).Error
+
+	if err != nil {
+		fmt.Println("Error getting teams:", err)
+		return nil, err
+	}
+
+	//// Aplicar filtros a la consulta
+	//if teamName, ok := filters["name"]; ok {
+	//	query = query.Where("teams.name ILIKE ?", "%"+teamName+"%")
+	//}
+	//
+	//if annualBudget, ok := filters["annual_budget"]; ok {
+	//	query = query.Where("teams.annual_budget = ?", annualBudget)
+	//}
+	//
+	//// Ordenar los resultados por team_name en orden ascendente
+	//query = query.Order("teams.name ASC")
+	//
+	//// Ejecutar la consulta
+	//err := query.Find(&teams).Error
+	//if errors.Is(err, gorm.ErrRecordNotFound) {
+	//	fmt.Println("No teams found")
+	//	return nil, nil
+	//}
+	//if err != nil {
+	//	fmt.Println("Error getting teams:", err)
+	//	return nil, err
+	//}
+
+	return teams, nil
+}
+
+func (r *TeamRepository) GetAllReviewers(teams []domain.Team, companyId string) ([]domain.Team, error) {
+	for i, team := range teams {
+		var reviewer domain.User
+		err := r.Db.Scopes(getUserTable(companyId)).Model(&reviewer).Where("id = ?", team.ReviewerId).Find(&reviewer).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			fmt.Println("No reviewer found for team:", team)
+		}
+		if err != nil {
+			fmt.Println("Error getting reviewer:", err)
+		}
+		teams[i].Reviewer = reviewer
+	}
+	return teams, nil
 }
 
 func (r *TeamRepository) Save(team *domain.Team, companyId string) error {

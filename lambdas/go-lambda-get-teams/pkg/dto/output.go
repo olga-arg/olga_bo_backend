@@ -1,47 +1,30 @@
 package dto
 
 import (
-	"go-lambda-get-teams/pkg/domain"
+	"commons/domain"
 )
 
-type User struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
-	Email   string `json:"email"`
-}
-
-type Team struct {
-	ID              string                    `json:"id"`
-	Name            string                    `json:"name"`
-	Reviewer        User                      `json:"reviewer"`
-	AnnualBudget    int                       `json:"annual_budget"`
-	MonthlySpending float32                   `json:"monthly_spending" default:"0"`
-	Status          domain.ConfirmationStatus `json:"status" default:"Created"`
-	Users           []User                    `json:"users"`
-}
-
 type Output struct {
-	Teams []Team `json:"teams"`
+	Teams domain.Teams `json:"teams"`
 }
 
 // From domain.Teams ([]Team) to dto.Output (Output)
 func NewOutput(teams []domain.Team) *Output {
-	var dtoTeams []Team
+	var dtoTeams domain.Teams
 	for _, team := range teams {
-		var users []User
+		var users domain.Users
 		for _, user := range team.Users {
-			users = append(users, User{
+			users = append(users, domain.User{
 				ID:      user.ID,
 				Name:    user.Name,
 				Surname: user.Surname,
 				Email:   user.Email,
 			})
 		}
-		dtoTeams = append(dtoTeams, Team{
+		dtoTeams = append(dtoTeams, domain.Team{
 			ID:   team.ID,
 			Name: team.Name,
-			Reviewer: User{
+			Reviewer: domain.User{
 				ID:      team.Reviewer.ID,
 				Name:    team.Reviewer.Name,
 				Surname: team.Reviewer.Surname,

@@ -49,5 +49,41 @@ func (r *CompanyRepository) CreateCompanySpecificTables(companyId string) error 
 		return err
 	}
 
+	// Crear la tabla users_teams para la empresa
+	usersTeamsTableName := fmt.Sprintf("%s_users_teams", companyId)
+	usersTableName := fmt.Sprintf("%s_users", companyId)
+	teamsTableName := fmt.Sprintf("%s_teams", companyId)
+
+	// Migrar la tabla users_teams
+	err = r.Db.Table(usersTeamsTableName).AutoMigrate(&domain.UserTeam{}).Error
+	if err != nil {
+	fmt.Println("Error creating users_teams table: ", err)
+	return err
+}
+
+	// Añadir foreign keys después de crear la tabla
+	// Añadir foreign keys después de crear la tabla
+	err = r.Db.Debug().Exec(fmt.Sprintf(`
+	ALTER TABLE %s
+	ADD CONSTRAINT fk_users
+	FOREIGN KEY (user_id) REFERENCES %s(id);
+`, r.Db.Dialect().Quote(usersTeamsTableName), r.Db.Dialect().Quote(usersTableName))).Error
+
+	if err != nil {
+		fmt.Println("Error adding foreign key for users: ", err)
+		return err
+	}
+
+	err = r.Db.Debug().Exec(fmt.Sprintf(`
+	ALTER TABLE %s
+	ADD CONSTRAINT fk_teams
+	FOREIGN KEY (team_id) REFERENCES %s(id);
+`, r.Db.Dialect().Quote(usersTeamsTableName), r.Db.Dialect().Quote(teamsTableName))).Error
+
+	if err != nil {
+		fmt.Println("Error adding foreign key for teams: ", err)
+		return err
+	}
+
 	return nil
 }

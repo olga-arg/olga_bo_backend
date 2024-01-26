@@ -35,25 +35,28 @@ func (r *PaymentRepository) Save(payment *domain.Payment, companyId string) erro
 }
 
 func (r *PaymentRepository) GetAllPayments(filters map[string]string, companyId string) ([]domain.Payment, error) {
-	var payments domain.Payments
-	query := r.Db.Scopes(getPaymentTable(companyId)).Preload("User")
+	var payments []domain.Payment
 
-	// TODO: Always filter by confirmed users
+	// Start building the query using GORM and the predefined scopes for dynamic table names
+	query := r.Db.Scopes(getPaymentTable(companyId)).
+		Preload("User", func(db *gorm.DB) *gorm.DB {
+			return db.Scopes(getUserTable(companyId))
+		})
+
 	// Apply filters to the query
 	if paymentType, ok := filters["payment_type"]; ok {
-		query = query.Where("Type = ?", paymentType)
+		query = query.Where("type = ?", paymentType)
 	}
 	if hasReceipt, ok := filters["receipt"]; ok {
 		if hasReceipt == "true" {
 			query = query.Where("receipt_image_key <> ''")
 		} else if hasReceipt == "false" {
-			query = query.Where("receipt_image_key = '' OR receipt IS NULL")
+			query = query.Where("receipt_image_key = '' OR receipt_image_key IS NULL")
 		}
 	}
 
+	// Order and execute the query
 	query = query.Order("created_date")
-
-	// Execute the query
 	err := query.Find(&payments).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		fmt.Println("No payments found")

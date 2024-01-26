@@ -12,7 +12,6 @@ require (
 	github.com/badoux/checkmail v1.2.1
 	github.com/jinzhu/gorm v1.9.16
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
-	github.com/pkg/errors v0.9.1
 )
 
 require (
@@ -43,6 +42,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.28 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/lib/pq v1.1.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 )
 
