@@ -1,40 +1,40 @@
 package processor
 
 import (
+	"commons/domain"
+	"commons/utils/db"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
-	"go-lambda-update-user/internal/storage"
-	"go-lambda-update-user/pkg/domain"
 	"go-lambda-update-user/pkg/dto"
 )
 
 type Processor interface {
-	UpdateUser(ctx context.Context, newUser *domain.User) error
-	GetUser(ctx context.Context, userID string) (*domain.User, error)
-	ValidateUserInput(ctx context.Context, input *dto.UpdateUserInput, request events.APIGatewayProxyRequest) (*domain.User, error)
+	UpdateUser(ctx context.Context, newUser *domain.User, companyId string) error
+	GetUser(ctx context.Context, userID, companyId string) (*domain.User, error)
+	ValidateUserInput(ctx context.Context, input *dto.UpdateUserInput, request events.APIGatewayProxyRequest, companyId string) (*domain.User, error)
 }
 
 type processor struct {
-	storage *storage.UserRepository
+	storage *db.UserRepository
 }
 
-func NewProcessor(storage *storage.UserRepository) Processor {
+func NewProcessor(storage *db.UserRepository) Processor {
 	return &processor{
 		storage: storage,
 	}
 }
 
-func (p *processor) UpdateUser(ctx context.Context, newUser *domain.User) error {
-	err := p.storage.UpdateUser(newUser)
+func (p *processor) UpdateUser(ctx context.Context, newUser *domain.User, companyId string) error {
+	err := p.storage.UpdateUser(newUser, companyId)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p *processor) GetUser(ctx context.Context, userID string) (*domain.User, error) {
+func (p *processor) GetUser(ctx context.Context, userID, companyId string) (*domain.User, error) {
 	user, err := p.storage.GetUserByID(userID)
 	if err != nil {
 		fmt.Println("Error getting user by ID", err.Error())
@@ -43,7 +43,7 @@ func (p *processor) GetUser(ctx context.Context, userID string) (*domain.User, e
 	return user, nil
 }
 
-func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateUserInput, request events.APIGatewayProxyRequest) (*domain.User, error) {
+func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateUserInput, request events.APIGatewayProxyRequest, companyId string) (*domain.User, error) {
 	fmt.Println("Validating input")
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		return nil, fmt.Errorf("invalid request body: %s", err.Error())
@@ -54,7 +54,7 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateUser
 	if input.MonthlyLimit < 0 {
 		return nil, fmt.Errorf("invalid monthly limit")
 	}
-	user, err := p.GetUser(ctx, request.PathParameters["user_id"])
+	user, err := p.GetUser(ctx, request.PathParameters["user_id"], companyId)
 	if err != nil {
 		fmt.Println("error getting user", err.Error())
 		return nil, fmt.Errorf("failed to get user")

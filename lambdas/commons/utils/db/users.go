@@ -35,15 +35,6 @@ func (r *UserRepository) GetUserIdByEmail(email string, companyID string) (*doma
 	return &user, nil
 }
 
-func (r *UserRepository) UpdateUser(newUser *domain.User, companyId string) error {
-	err := r.Db.Scopes(getUserTable(companyId)).Save(newUser).Error
-	if err != nil {
-		fmt.Println("Error updating user:", err)
-		return err
-	}
-	return nil
-}
-
 func (r *UserRepository) Save(user *domain.User, companyId string) error {
 	err := r.Db.Scopes(getUserTable(companyId)).Create(user).Error
 	if err != nil {
@@ -97,4 +88,28 @@ func (r *UserRepository) GetAllUsers(filters map[string]string, companyId string
 	}
 
 	return users, nil
+}
+
+func (r *UserRepository) UpdateUser(newUser *domain.User, companyId string) error {
+	// Save the updated user
+	err := r.Db.Scopes(getUserTable(companyId)).Save(newUser).Error
+	if err != nil {
+		fmt.Println("Error updating user:", err)
+		return errors.Wrap(err, "failed to update user")
+	}
+	return nil
+}
+
+func (r *UserRepository) GetUserByID(userID string) (*domain.User, error) {
+	var user domain.User
+	query := r.Db.Scopes(getUserTable(userID)).Where("id = ?", userID)
+	err := query.First(&user).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, errors.Wrap(err, "user not found")
+		}
+		fmt.Println("Error getting user by ID:", err)
+		return nil, errors.Wrap(err, "failed to get user by ID")
+	}
+	return &user, nil
 }
