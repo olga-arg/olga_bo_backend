@@ -4,6 +4,7 @@ import (
 	"commons/domain"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 )
 
 type UserRepository struct {
@@ -63,4 +64,37 @@ func (r *TeamRepository) GetReviewerById(id, companyId string) error {
 		return err
 	}
 	return nil
+}
+
+func (r *UserRepository) GetAllUsers(filters map[string]string, companyId string) ([]domain.User, error) {
+	var users []domain.User
+	query := r.Db.Scopes(getUserTable(companyId)).
+		Preload("Teams", func(db *gorm.DB) *gorm.DB {
+			return db.Scopes(getTeamTable(companyId))
+		})
+
+	// TODO: Always filter by confirmed users
+	// Apply filters to the query
+	if fullName, ok := filters["name"]; ok {
+		query = query.Where("full_name ILIKE ?", "%"+fullName+"%")
+	}
+	if email, ok := filters["email"]; ok {
+		query = query.Where("email ILIKE ?", "%"+email+"%")
+	}
+	if isAdmin, ok := filters["isAdmin"]; ok {
+		query = query.Where("is_admin = ?", isAdmin)
+	}
+
+	// Execute the query
+	err := query.Find(&users).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		fmt.Println("No users found")
+		return nil, nil
+	}
+	if err != nil {
+		fmt.Println("Error getting users:", err)
+		return nil, err
+	}
+
+	return users, nil
 }

@@ -1,27 +1,27 @@
 package processor
 
 import (
+	"commons/utils/db"
 	"context"
-	"go-lambda-get-all-users/internal/storage"
 	"go-lambda-get-all-users/pkg/dto"
 )
 
 type Processor interface {
-	GetAllUsers(ctx context.Context, filter map[string]string) (*dto.Output, error)
+	GetAllUsers(ctx context.Context, filter map[string]string, companyId string) (*dto.Output, error)
 }
 
 type processor struct {
-	storage *storage.UserRepository
+	userStorage *db.UserRepository
 }
 
-func NewProcessor(storage *storage.UserRepository) Processor {
+func NewProcessor(storage *db.UserRepository) Processor {
 	return &processor{
-		storage: storage,
+		userStorage: storage,
 	}
 }
 
-func (p *processor) GetAllUsers(ctx context.Context, filter map[string]string) (*dto.Output, error) {
-	users, err := p.storage.GetAllUsers(filter)
+func (p *processor) GetAllUsers(ctx context.Context, filter map[string]string, companyId string) (*dto.Output, error) {
+	users, err := p.userStorage.GetAllUsers(filter, companyId)
 	if err != nil {
 		return nil, err
 	}
