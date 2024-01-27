@@ -69,3 +69,26 @@ func (r *PaymentRepository) GetAllPayments(filters map[string]string, companyId 
 
 	return payments, nil
 }
+
+func (r *PaymentRepository) UpdatePayment(newPayment *domain.Payment, companyId string) error {
+	query := r.Db.Scopes(getPaymentTable(companyId)).Save(newPayment)
+	if query.Error != nil {
+		fmt.Println("Error updating payment:", query.Error)
+		return errors.Wrap(query.Error, "failed to update payment")
+	}
+	return nil
+}
+
+func (r *PaymentRepository) GetPaymentByID(paymentID string, companyId string) (*domain.Payment, error) {
+	var payment domain.Payment
+	query := r.Db.Scopes(getPaymentTable(companyId)).Where("id = ?", paymentID)
+	err := query.First(&payment).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, errors.Wrap(err, "payment not found")
+		}
+		fmt.Println("Error getting payment by ID:", err)
+		return nil, errors.Wrap(err, "failed to get payment by ID")
+	}
+	return &payment, nil
+}

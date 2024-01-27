@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"commons/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -22,11 +23,28 @@ func NewUpdatePaymentHandler(processor processor.Processor) *UpdatePaymentHandle
 }
 
 func (h *UpdatePaymentHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	email, companyId, err := utils.ExtractEmailAndCompanyIdFromToken(request)
+	if err != nil {
+		fmt.Println("Error extracting email and company id from token: ", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	if companyId == "" || email == "" {
+		println("companyId or email is empty", companyId, email)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
 	var input dto.UpdatePaymentInput
 
 	// Validate input
 	fmt.Println("Validating input")
-	newPayment, err := h.processor.ValidatePaymentInput(context.Background(), &input, request)
+	newPayment, err := h.processor.ValidatePaymentInput(context.Background(), &input, request, companyId)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
@@ -35,7 +53,7 @@ func (h *UpdatePaymentHandler) Handle(request events.APIGatewayProxyRequest) (ev
 	}
 	// Update user in storage
 	fmt.Println("Updating payment in storage")
-	err = h.processor.UpdatePayment(context.Background(), newPayment)
+	err = h.processor.UpdatePayment(context.Background(), newPayment, companyId)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
