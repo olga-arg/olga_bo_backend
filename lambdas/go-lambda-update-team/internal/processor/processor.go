@@ -26,7 +26,7 @@ func (p *processor) UpdateTeam(ctx context.Context, teamID string, newTeam *doma
 		return fmt.Errorf("annual budget must be greater than 0")
 	}
 	fmt.Println("Updating team in storage")
-	err := p.teamStorage.UpdateTeamBudget(teamID, newTeam, companyId)
+	err := p.teamStorage.UpdateTeam(teamID, newTeam, companyId)
 	if err != nil {
 		fmt.Println("error", err.Error())
 		return err

@@ -9,7 +9,7 @@ import (
 type Team struct {
 	ID              string             `json:"id"`
 	Name            string             `json:"name"`
-	Users           Users              `json:"users"`
+	Users           Users              `gorm:"many2many:user_teams;"`
 	Reviewer        User               `json:"reviewer"`
 	ReviewerId      string             `json:"reviewer_id"`
 	MonthlySpending int                `json:"monthly_spending"`

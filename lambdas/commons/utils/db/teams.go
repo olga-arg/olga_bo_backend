@@ -141,7 +141,7 @@ func (r *TeamRepository) Save(team *domain.Team, companyId string) error {
 	return nil
 }
 
-func (r *TeamRepository) UpdateTeamBudget(teamID string, newTeam *domain.UpdateTeamRequest, companyId string) error {
+func (r *TeamRepository) UpdateTeam(teamID string, newTeam *domain.UpdateTeamRequest, companyId string) error {
 	var team domain.Team
 	fmt.Println("Getting team by ID in db")
 	err := r.Db.Scopes(getTeamTable(companyId)).Where("id = ?", teamID).
@@ -152,6 +152,25 @@ func (r *TeamRepository) UpdateTeamBudget(teamID string, newTeam *domain.UpdateT
 		fmt.Println("No team found")
 		return errors.Wrap(err, "No team with that ID found")
 	}
+
+	// Update team fields
+	if newTeam.Name != "" && newTeam.Name != team.Name {
+		// validate that newTeam.Name is not already taken
+		err = r.GetTeamByName(newTeam.Name, companyId)
+		if err != nil {
+			fmt.Println("Error getting team by name:", err)
+			return errors.Wrap(err, "failed to get team by name")
+		}
+		team.Name = newTeam.Name
+	}
+
+	if newTeam.AnnualBudget != 0 && newTeam.AnnualBudget != team.AnnualBudget {
+		team.AnnualBudget = newTeam.AnnualBudget
+		if newTeam.AnnualBudget < 0 {
+			return fmt.Errorf("annual budget must be greater than 0")
+		}
+	}
+
 	var reviewer domain.User
 	if newTeam.ReviewerId != "" && newTeam.ReviewerId != team.ReviewerId {
 		println("Updating reviewer")
@@ -159,6 +178,10 @@ func (r *TeamRepository) UpdateTeamBudget(teamID string, newTeam *domain.UpdateT
 		err = r.Db.Scopes(getUserTable(companyId)).Where("id = ?", newTeam.ReviewerId).First(&reviewer).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			fmt.Println("No reviewer found")
+			return errors.Wrap(err, "Reviewer with given ID not found")
+		}
+		if err != nil {
+			return errors.Wrap(err, "Error while searching for reviewer")
 		}
 		team.ReviewerId = newTeam.ReviewerId
 	}
@@ -166,21 +189,37 @@ func (r *TeamRepository) UpdateTeamBudget(teamID string, newTeam *domain.UpdateT
 	var users []domain.User
 	// TODO: Protect against SQL Injection
 	if len(newTeam.AddUsers) > 0 {
+		// validate that newTeam.AddUsers are valid users
 		err = r.Db.Scopes(getUserTable(companyId)).Where("id IN (?)", newTeam.AddUsers).Find(&users).Error
 		if err != nil {
 			fmt.Println("Error getting users:", err)
 			return errors.Wrap(err, "failed to get users")
 		}
+
+		fmt.Println("Users found:", users)
+		fmt.Println("Team users:", team.Users)
+		fmt.Println("Team Id:", team.ID)
+
+		// Agregar los usuarios al equipo
 		for _, user := range users {
 			team.Users = append(team.Users, user)
 		}
-		// Actualizar la relación en la tabla intermedia
-		err = r.Db.Model(&team).Association("Users").Append(users).Error
-		if err != nil {
-			fmt.Println("Error adding users to team:", err)
-			return errors.Wrap(err, "failed to add users to team")
+
+		fmt.Println("No cree UserTeams")
+
+		// Crear las relaciones en la tabla intermedia
+		for _, userID := range newTeam.AddUsers {
+			userTeam := domain.UserTeam{UserID: userID, TeamID: team.ID}
+
+			err = r.Db.Exec(fmt.Sprintf("INSERT INTO %s_users_teams (user_id, team_id) VALUES (?, ?)", companyId), userTeam.UserID, userTeam.TeamID).Error
+			if err != nil {
+				fmt.Println("Error creating user team:", err)
+				return errors.Wrap(err, "failed to create user team")
+			}
 		}
+
 	}
+
 	if len(newTeam.RemoveUsers) > 0 {
 		var remainingUsers []domain.User
 		for _, teamUser := range team.Users {
@@ -207,7 +246,7 @@ func (r *TeamRepository) UpdateTeamBudget(teamID string, newTeam *domain.UpdateT
 		}
 		team.Users = remainingUsers
 		// Eliminar las relaciones en la tabla intermedia
-		err = r.Db.Model(&team).Association("Users").Replace(remainingUsers).Error
+		err = r.Db.Scopes(getUserTeamTable(companyId)).Model(&team).Association("Users").Replace(remainingUsers).Error
 		if err != nil {
 			fmt.Println("Error removing users from team:", err)
 			return errors.Wrap(err, "failed to remove users from team")
