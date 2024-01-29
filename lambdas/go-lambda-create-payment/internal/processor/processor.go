@@ -44,7 +44,7 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 	}
 
 	// Create payment
-	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.Cuit, input.Date, input.Time, input.Category, input.ReceiptNumber, input.ReceiptType, input.ReceiptImageKey, user.ID)
+	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.Cuit, input.Time, input.Category, input.ReceiptNumber, input.ReceiptType, input.ReceiptImageKey, user.ID, input.Date)
 	if err != nil {
 		fmt.Println("Error creating payment: ", err)
 		return err

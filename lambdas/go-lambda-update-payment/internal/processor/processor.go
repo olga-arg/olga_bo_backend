@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-update-payment/pkg/dto"
+	"time"
 )
 
 type Processor interface {
@@ -66,7 +67,7 @@ func (p *processor) ValidatePaymentInput(ctx context.Context, input *dto.UpdateP
 	if input.Category != "" {
 		payment.Category = input.Category
 	}
-	if input.Date != "" {
+	if input.Date != (time.Time{}) {
 		payment.Date = input.Date
 	}
 	fmt.Println("Input validated successfully")

@@ -14,7 +14,7 @@ type Payment struct {
 	Amount          float32            `json:"amount"`
 	ShopName        string             `json:"shop_name"`
 	Cuit            string             `json:"cuit"`
-	Date            string             `json:"date"`
+	Date            time.Time          `json:"date"`
 	Time            string             `json:"time"`
 	UserID          string             `json:"user_id"`
 	Category        string             `json:"category"`
@@ -28,7 +28,7 @@ type Payment struct {
 
 type Payments []Payment
 
-func NewPayment(amount float32, shopName, cuit, date, _time, category, receiptNumber, receiptType, receiptImageKey, userId string) (*Payment, error) {
+func NewPayment(amount float32, shopName, cuit, _time, category, receiptNumber, receiptType, receiptImageKey, userId string, date time.Time) (*Payment, error) {
 	var payment Payment
 	id, err := uuid.NewUUID()
 	if err != nil {
