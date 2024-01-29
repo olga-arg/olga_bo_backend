@@ -3,7 +3,7 @@ service: olga-backend
 provider:
   name: aws
   runtime: provided.al2
-  stage: prod
+  stage: ${opt:stage}
   region: sa-east-1
   httpApi:
     cors: true
@@ -18,7 +18,7 @@ provider:
           Action:
             - cognito-idp:AdminGetUser
             - cognito-idp:AdminCreateUser
-          Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_7Npn25c8F
+          Resource: ${self:custom.cognitoUserPoolArn.${self:provider.stage}}
 
 # you can define service wide environment variables here
 #  environment:
@@ -40,6 +40,8 @@ functions:
       - DB_HOST_WRITER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /company
@@ -57,6 +59,8 @@ functions:
       - DB_HOST_WRITER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /users
@@ -72,6 +76,8 @@ functions:
       - DB_HOST_READER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /users
@@ -87,6 +93,8 @@ functions:
       - DB_HOST_WRITER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /users/{user_id}
@@ -102,6 +110,8 @@ functions:
       - DB_HOST_WRITER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /payments/{payment_id}
@@ -117,6 +127,8 @@ functions:
       - DB_HOST_WRITER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /teams
@@ -132,6 +144,8 @@ functions:
       - DB_HOST_READER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /teams
@@ -147,6 +161,8 @@ functions:
       - DB_HOST_WRITER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /teams/{team_id}
@@ -162,6 +178,8 @@ functions:
       - DB_HOST_WRITER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /teams/{team_id}
@@ -177,9 +195,8 @@ functions:
       - DB_HOST_WRITER
       - DB_PORT
       - USER_POOL_ID
-      - S3_USER_AC
-      - S3_USER_SAC
-      - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /payments
@@ -195,6 +212,8 @@ functions:
       - DB_HOST_READER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - httpApi:
           path: /payments
@@ -231,9 +250,9 @@ resources:
         EngineVersion: '14.6'
         DBInstanceClass: db.t4g.micro
         AllocatedStorage: 20
-        DBName: ${ssm:/db_name}
-        MasterUsername: ${ssm:/db_username}
-        MasterUserPassword: ${ssm:/db_password}
+        DBName: ${ssm:/${self:provider.stage}/db_name}
+        MasterUsername: ${ssm:/${self:provider.stage}/db_username}
+        MasterUserPassword: ${ssm:/${self:provider.stage}/db_password}
 
 #        DBClusterIdentifier: !Ref postgresCluster
 #    Add a read replica when need to scale up the database.
@@ -253,21 +272,22 @@ custom:
   serverlessSsmFetch:
     EMAIL_SENDER_ADDRESS: /email_sender_address
     EMAIL_SENDER_PASSWORD: /email_sender_password
-    DB_USER: /db_username
-    DB_PASSWORD: /db_password
-    DB_NAME: /db_name
+    DB_USER: /${self:provider.stage}/db_username
+    DB_PASSWORD: /${self:provider.stage}/db_password
+    DB_NAME: /${self:provider.stage}/db_name
     DB_PORT: /db_port
-    DB_HOST_WRITER: /db_host_writer_instance
-    DB_HOST_READER: /db_host_reader_instance
-    S3_USER_AC: /s3userak
-    S3_USER_SAC: /s3usersak
-    USER_POOL_ID: /user_pool_id
+    DB_HOST_WRITER: /${self:provider.stage}/db_host_writer_instance
+    DB_HOST_READER: /${self:provider.stage}/db_host_reader_instance
+    USER_POOL_ID: /${self:provider.stage}/user_pool_id
   customDomain:
     domainName: 'api.olga.lat'
-    basePath: 'api'
+    basePath: '${self:provider.stage}'
     stage: $default
     createRoute53Record: true
     endpointType: regional
     apiType: http
+  cognitoUserPoolArn:
+    dev: 'arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_7Npn25c8F'
+    prod: 'arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_XL73TDAKs'
 
 configValidationMode: error
