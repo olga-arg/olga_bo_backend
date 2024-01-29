@@ -218,6 +218,44 @@ functions:
       - httpApi:
           path: /payments
           method: get
+  go-lambda-me:
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-me/go-lambda-me.zip
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_READER
+      - USER_POOL_ID
+    environment:
+      STAGE: ${self:provider.stage}
+    events:
+      - httpApi:
+          path: /me
+          method: get
+  python-lambda-scan-receipt:
+    handler: lambdas/python-lambda-scan-receipt/handler.main
+    package:
+      artifact: lambdas/bin/python-lambda-scan-receipt/python-lambda-scan-receipt.zip
+    environment:
+      STAGE: ${self:provider.stage}
+    timeout: 29
+    runtime: python3.9
+    events:
+      - httpApi:
+          path: /scan
+          method: post
+    layers:
+      - arn:aws:lambda:sa-east-1:588257415519:layer:bs4:1
+      - arn:aws:lambda:sa-east-1:034541671702:layer:openssl-lambda:1
+      - arn:aws:lambda:sa-east-1:588257415519:layer:httpx:1
+      - arn:aws:lambda:sa-east-1:588257415519:layer:aioboto3:1
+      - arn:aws:lambda:sa-east-1:588257415519:layer:aiofiles:1
+    role: PythonLambdaScanReceiptRole
+    ssmToEnvironment:
+      - S3_USER_AC
+      - S3_USER_SAC
 
 #    Define function environment variables here
 #    environment:
@@ -229,6 +267,39 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.stage}-${self:service}-assets
+    ReceiptsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.stage}-${self:service}-receipts
+    PythonLambdaScanReceiptRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        RoleName: 'PythonLambdaScanReceiptRole'
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Service:
+                  - 'lambda.amazonaws.com'
+              Action:
+                - 'sts:AssumeRole'
+        Policies:
+          - PolicyName: 'SSMAndLambdaExecution'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: 'Allow'
+                  Action:
+                    - 'logs:CreateLogGroup'
+                    - 'logs:CreateLogStream'
+                    - 'logs:PutLogEvents'
+                  Resource: 'arn:aws:logs:*:*:*'
+                - Effect: 'Allow'
+                  Action:
+                    - 'ssm:GetParameter'
+                    - 'ssm:PutParameter'
+                  Resource: '*'
 
     ### Aurora Serverless Cluster and Instance ###
     #    postgresCluster:

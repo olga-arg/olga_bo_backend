@@ -1,6 +1,7 @@
 .PHONY: build clean deploy
 
 LAMBDAS := $(shell ls -d go*)
+PYTHON_LAMBDAS := $(shell ls -d python-lambda-*/)
 
 build:
 	mkdir -p bin
@@ -13,6 +14,15 @@ build:
 		zip $$lambda_name.zip bootstrap; \
 		cd - ; \
 		cd ../ ; \
+	done
+
+	# Package Python Lambdas
+	for lambda in $(PYTHON_LAMBDAS) ; do \
+		lambda_name=$$(basename $$lambda); \
+		mkdir -p bin/$$lambda_name; \
+		cd $$lambda; \
+		zip -r ../bin/$$lambda_name/$$lambda_name.zip . ; \
+		cd ..; \
 	done
 
 clean:
