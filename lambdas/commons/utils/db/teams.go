@@ -186,71 +186,37 @@ func (r *TeamRepository) UpdateTeam(teamID string, newTeam *domain.UpdateTeamReq
 		team.ReviewerId = newTeam.ReviewerId
 	}
 
-	var users []domain.User
 	// TODO: Protect against SQL Injection
 	if len(newTeam.AddUsers) > 0 {
-		// validate that newTeam.AddUsers are valid users
-		err = r.Db.Scopes(getUserTable(companyId)).Where("id IN (?)", newTeam.AddUsers).Find(&users).Error
-		if err != nil {
-			fmt.Println("Error getting users:", err)
-			return errors.Wrap(err, "failed to get users")
-		}
-
-		fmt.Println("Users found:", users)
-		fmt.Println("Team users:", team.Users)
-		fmt.Println("Team Id:", team.ID)
-
 		// Agregar los usuarios al equipo
-		for _, user := range users {
-			team.Users = append(team.Users, user)
-		}
-
-		fmt.Println("No cree UserTeams")
-
-		// Crear las relaciones en la tabla intermedia
-		for _, userID := range newTeam.AddUsers {
-			userTeam := domain.UserTeam{UserID: userID, TeamID: team.ID}
-
-			err = r.Db.Exec(fmt.Sprintf("INSERT INTO %s_users_teams (user_id, team_id) VALUES (?, ?)", companyId), userTeam.UserID, userTeam.TeamID).Error
+		for _, userId := range newTeam.AddUsers {
+			query := fmt.Sprintf("INSERT INTO \"%s_users_teams\" (user_id, team_id) VALUES (?, ?)", companyId)
+			fmt.Println("Query:", query)
+			fmt.Println("User ID:", userId)
+			fmt.Println("Team ID:", team.ID)
+			err = r.Db.Exec(query, userId, team.ID).Error
 			if err != nil {
-				fmt.Println("Error creating user team:", err)
-				return errors.Wrap(err, "failed to create user team")
+				fmt.Println("Error creating user_team connection :", err)
+				return errors.Wrap(err, "failed to create user_team connection")
 			}
 		}
-
+		fmt.Println("Users added to team")
 	}
 
 	if len(newTeam.RemoveUsers) > 0 {
-		var remainingUsers []domain.User
-		for _, teamUser := range team.Users {
-			shouldKeep := true
-			for _, removeUserID := range newTeam.RemoveUsers {
-				if teamUser.ID == removeUserID {
-					shouldKeep = false
-					break
-				}
-			}
-			if shouldKeep {
-				remainingUsers = append(remainingUsers, teamUser)
+		// Eliminar los usuarios del equipo
+		for _, userId := range newTeam.RemoveUsers {
+			query := fmt.Sprintf("DELETE FROM \"%s_users_teams\" WHERE user_id = ? AND team_id = ?", companyId)
+			fmt.Println("Query:", query)
+			fmt.Println("User ID:", userId)
+			fmt.Println("Team ID:", team.ID)
+			err = r.Db.Exec(query, userId, team.ID).Error
+			if err != nil {
+				fmt.Println("Error deleting user_team connection :", err)
+				return errors.Wrap(err, "failed to delete user_team connection")
 			}
 		}
-		if reviewer.Email != "" {
-			remainingUsers = append(remainingUsers, reviewer)
-		} else {
-			// search in db the user with the reviewer id
-			err = r.Db.Scopes(getUserTable(companyId)).Where("id = ?", team.ReviewerId).First(&reviewer).Error
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				fmt.Println("No reviewer found")
-			}
-			remainingUsers = append(remainingUsers, reviewer)
-		}
-		team.Users = remainingUsers
-		// Eliminar las relaciones en la tabla intermedia
-		err = r.Db.Scopes(getUserTeamTable(companyId)).Model(&team).Association("Users").Replace(remainingUsers).Error
-		if err != nil {
-			fmt.Println("Error removing users from team:", err)
-			return errors.Wrap(err, "failed to remove users from team")
-		}
+		fmt.Println("Users removed from team")
 	}
 
 	// Actualizar el equipo en la base de datos
