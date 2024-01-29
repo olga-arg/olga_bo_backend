@@ -100,9 +100,9 @@ func (r *UserRepository) UpdateUser(newUser *domain.User, companyId string) erro
 	return nil
 }
 
-func (r *UserRepository) GetUserByID(userID string) (*domain.User, error) {
+func (r *UserRepository) GetUserByID(userID, companyId string) (*domain.User, error) {
 	var user domain.User
-	query := r.Db.Scopes(getUserTable(userID)).Where("id = ?", userID)
+	query := r.Db.Scopes(getUserTable(companyId)).Where("id = ?", userID)
 	err := query.First(&user).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {

@@ -35,7 +35,7 @@ func (p *processor) UpdateUser(ctx context.Context, newUser *domain.User, compan
 }
 
 func (p *processor) GetUser(ctx context.Context, userID, companyId string) (*domain.User, error) {
-	user, err := p.storage.GetUserByID(userID)
+	user, err := p.storage.GetUserByID(userID, companyId)
 	if err != nil {
 		fmt.Println("Error getting user by ID", err.Error())
 		return nil, err
@@ -54,6 +54,9 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateUser
 	if input.MonthlyLimit < 0 {
 		return nil, fmt.Errorf("invalid monthly limit")
 	}
+
+	fmt.Println("Getting user", request.PathParameters["user_id"])
+
 	user, err := p.GetUser(ctx, request.PathParameters["user_id"], companyId)
 	if err != nil {
 		fmt.Println("error getting user", err.Error())
