@@ -1,35 +1,36 @@
 package processor
 
 import (
+	"commons/domain"
+	"commons/utils/db"
 	"context"
 	"fmt"
-	"go-lambda-create-payment/internal/storage"
-	"go-lambda-create-payment/pkg/domain"
 	"go-lambda-create-payment/pkg/dto"
 )
 
 type Processor interface {
-	CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email string) error
+	CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email, companyId string) error
 }
 
 type processor struct {
-	storage storage.PaymentRepository
+	paymentStorage db.PaymentRepository
+	userStorage    db.UserRepository
 }
 
-func New(paymentRepo storage.PaymentRepository) Processor {
+func New(paymentRepo db.PaymentRepository, userRepo db.UserRepository) Processor {
 	return &processor{
-		storage: paymentRepo,
+		paymentStorage: paymentRepo,
+		userStorage:    userRepo,
 	}
 }
 
-func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email string) error {
+func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email, companyId string) error {
 	// Validate the status of the user (active or not)
-	user, err := p.storage.GetUserIdByEmail(email)
+	user, err := p.userStorage.GetUserIdByEmail(email, companyId)
 	if err != nil {
 		fmt.Println("Error getting user: ", err)
 		return err
 	}
-
 	// Validate the purchase limit
 	purchaseLimit := user.PurchaseLimit
 	if float32(purchaseLimit) < input.Amount {
@@ -43,7 +44,7 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 	}
 
 	// Create payment
-	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.Cuit, input.Date, input.Time, input.Category, input.ReceiptNumber, input.ReceiptType, input.ReceiptImageKey, user.ID)
+	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.Cuit, input.Time, input.Category, input.ReceiptNumber, input.ReceiptType, input.ReceiptImageKey, user.ID, input.Date)
 	if err != nil {
 		fmt.Println("Error creating payment: ", err)
 		return err
@@ -51,12 +52,12 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 
 	// Update the monthly spending of the user
 	user.MonthlySpending += input.Amount
-	if err := p.storage.UpdateUser(user); err != nil {
+	if err := p.userStorage.UpdateUser(user, companyId); err != nil {
 		fmt.Println("Error updating user: ", err)
 		return err
 	}
 	// Save payment to db
-	if err := p.storage.Save(payment); err != nil {
+	if err := p.paymentStorage.Save(payment, companyId); err != nil {
 		fmt.Println("Error saving payment: ", err)
 		return err
 	}

@@ -1,32 +1,32 @@
 package processor
 
 import (
+	"commons/domain"
+	"commons/utils/db"
 	"context"
 	"fmt"
-	"go-lambda-update-team/internal/storage"
-	"go-lambda-update-team/pkg/dto"
 )
 
 type Processor interface {
-	UpdateTeam(ctx context.Context, teamID string, newTeam *dto.UpdateTeamRequest) error
+	UpdateTeam(ctx context.Context, teamID string, newTeam *domain.UpdateTeamRequest, companyId string) error
 }
 
 type processor struct {
-	storage *storage.TeamRepository
+	teamStorage *db.TeamRepository
 }
 
-func NewProcessor(storage *storage.TeamRepository) Processor {
+func NewProcessor(storage *db.TeamRepository) Processor {
 	return &processor{
-		storage: storage,
+		teamStorage: storage,
 	}
 }
 
-func (p *processor) UpdateTeam(ctx context.Context, teamID string, newTeam *dto.UpdateTeamRequest) error {
+func (p *processor) UpdateTeam(ctx context.Context, teamID string, newTeam *domain.UpdateTeamRequest, companyId string) error {
 	if newTeam.AnnualBudget < 0 {
 		return fmt.Errorf("annual budget must be greater than 0")
 	}
 	fmt.Println("Updating team in storage")
-	err := p.storage.UpdateTeamBudget(teamID, newTeam)
+	err := p.teamStorage.UpdateTeam(teamID, newTeam, companyId)
 	if err != nil {
 		fmt.Println("error", err.Error())
 		return err

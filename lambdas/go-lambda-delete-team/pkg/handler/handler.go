@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"commons/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -20,6 +21,21 @@ func NewTeamHandler(processor processor.Processor) *TeamHandler {
 }
 
 func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	email, companyId, err := utils.ExtractEmailAndCompanyIdFromToken(request)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	if companyId == "" || email == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
 	// Extract team ID from URL path parameter
 	fmt.Println("Extracting team ID from URL path parameter")
 	teamID, ok := request.PathParameters["team_id"]
@@ -33,7 +49,7 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 
 	// Update team in storage
 	fmt.Println("Updating team in storage")
-	err := h.processor.DeleteTeam(context.Background(), teamID)
+	err = h.processor.DeleteTeam(context.Background(), teamID, companyId)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,

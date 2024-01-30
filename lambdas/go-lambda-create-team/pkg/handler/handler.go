@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"commons/utils"
 	"context"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
@@ -21,9 +22,25 @@ func NewCreateTeamHandler(p processor.Processor) *CreateTeamHandler {
 func (h *CreateTeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var input dto.CreateTeamInput
 
+	email, companyId, err := utils.ExtractEmailAndCompanyIdFromToken(request)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	if companyId == "" || email == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
 	// Validate input
 	fmt.Println("Validating input")
-	err := h.processor.ValidateTeamInput(context.Background(), &input, request)
+	err = h.processor.ValidateTeamInput(context.Background(), &input, request, companyId)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
@@ -31,7 +48,7 @@ func (h *CreateTeamHandler) Handle(request events.APIGatewayProxyRequest) (event
 		}, nil
 	}
 
-	err = h.processor.CreateTeam(context.Background(), &input)
+	err = h.processor.CreateTeam(context.Background(), &input, companyId)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,

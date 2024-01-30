@@ -1,13 +1,14 @@
 package handler
 
 import (
+	"commons/domain"
+	"commons/utils"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"go-lambda-update-team/internal/processor"
-	"go-lambda-update-team/pkg/dto"
 	"net/http"
 )
 
@@ -22,6 +23,23 @@ func NewTeamHandler(processor processor.Processor) *TeamHandler {
 }
 
 func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	email, companyId, err := utils.ExtractEmailAndCompanyIdFromToken(request)
+	if err != nil {
+		fmt.Println("Error extracting email and company id from token: ", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	if companyId == "" || email == "" {
+		println("companyId or email is empty", companyId, email)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
 	// Extract team ID from URL path parameter
 	fmt.Println("Extracting team ID from URL path parameter")
 	teamID, ok := request.PathParameters["team_id"]
@@ -35,8 +53,8 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 
 	// Parse the request body into a struct
 	fmt.Println("Parsing request body")
-	var updateRequest *dto.UpdateTeamRequest
-	err := json.Unmarshal([]byte(request.Body), &updateRequest)
+	var updateRequest *domain.UpdateTeamRequest
+	err = json.Unmarshal([]byte(request.Body), &updateRequest)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
@@ -46,7 +64,7 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 
 	// Update team in storage
 	fmt.Println("Updating team in storage")
-	err = h.processor.UpdateTeam(context.Background(), teamID, updateRequest)
+	err = h.processor.UpdateTeam(context.Background(), teamID, updateRequest, companyId)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,

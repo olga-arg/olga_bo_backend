@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"commons/utils"
 	"context"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
@@ -21,8 +22,23 @@ func NewCreateUserHandler(p processor.Processor) *CreateUserHandler {
 func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var input dto.CreateUserInput
 
+	email, companyId, err := utils.ExtractEmailAndCompanyIdFromToken(request)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	if companyId == "" || email == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
 	// Validate input
-	err := h.processor.ValidateUserInput(context.Background(), &input, request)
+	err = h.processor.ValidateUserInput(context.Background(), &input, request)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
@@ -30,7 +46,7 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		}, nil
 	}
 
-	err = h.processor.CreateUser(context.Background(), &input)
+	err = h.processor.CreateUser(context.Background(), &input, companyId)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,

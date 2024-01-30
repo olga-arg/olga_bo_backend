@@ -3,7 +3,6 @@ service: olga-backend
 provider:
   name: aws
   runtime: provided.al2
-  stage: prod
   region: sa-east-1
   httpApi:
     cors: true
@@ -18,7 +17,7 @@ provider:
           Action:
             - cognito-idp:AdminGetUser
             - cognito-idp:AdminCreateUser
-          Resource: arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_7Npn25c8F
+          Resource: ${self:custom.cognitoUserPoolArn.${sls:stage}}
 
 # you can define service wide environment variables here
 #  environment:
@@ -27,6 +26,25 @@ package:
   individually: true
 
 functions:
+  go-lambda-create-company:
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-create-company/go-lambda-create-company.zip
+    ssmToEnvironment:
+      - EMAIL_SENDER_ADDRESS
+      - EMAIL_SENDER_PASSWORD
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+      - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
+    events:
+      - httpApi:
+          path: /company
+          method: post
   go-lambda-create-user:
     handler: bootstrap
     package:
@@ -40,6 +58,8 @@ functions:
       - DB_HOST_WRITER
       - DB_PORT
       - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /users
@@ -54,6 +74,9 @@ functions:
       - DB_NAME
       - DB_HOST_READER
       - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /users
@@ -68,6 +91,9 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /users/{user_id}
@@ -82,6 +108,9 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /payments/{payment_id}
@@ -96,6 +125,9 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /teams
@@ -110,6 +142,9 @@ functions:
       - DB_NAME
       - DB_HOST_READER
       - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /teams
@@ -124,6 +159,9 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /teams/{team_id}
@@ -138,6 +176,9 @@ functions:
       - DB_NAME
       - DB_HOST_WRITER
       - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /teams/{team_id}
@@ -153,8 +194,8 @@ functions:
       - DB_HOST_WRITER
       - DB_PORT
       - USER_POOL_ID
-      - S3_USER_AC
-      - S3_USER_SAC
+    environment:
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /payments
@@ -169,10 +210,51 @@ functions:
       - DB_NAME
       - DB_HOST_READER
       - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /payments
           method: get
+  go-lambda-me:
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-me/go-lambda-me.zip
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_READER
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
+    events:
+      - httpApi:
+          path: /me
+          method: get
+  python-lambda-scan-receipt:
+    handler: lambdas/python-lambda-scan-receipt/handler.main
+    package:
+      artifact: lambdas/bin/python-lambda-scan-receipt/python-lambda-scan-receipt.zip
+    environment:
+      STAGE: ${sls:stage}
+    timeout: 29
+    runtime: python3.9
+    events:
+      - httpApi:
+          path: /scan
+          method: post
+    layers:
+      - arn:aws:lambda:sa-east-1:588257415519:layer:bs4:1
+      - arn:aws:lambda:sa-east-1:034541671702:layer:openssl-lambda:1
+      - arn:aws:lambda:sa-east-1:588257415519:layer:httpx:1
+      - arn:aws:lambda:sa-east-1:588257415519:layer:aioboto3:1
+      - arn:aws:lambda:sa-east-1:588257415519:layer:aiofiles:1
+    role: PythonLambdaScanReceiptRole
+    ssmToEnvironment:
+      - S3_USER_AC
+      - S3_USER_SAC
 
 #    Define function environment variables here
 #    environment:
@@ -183,7 +265,40 @@ resources:
     Assets:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:provider.stage}-${self:service}-assets
+        BucketName: ${sls:stage}-${self:service}-assets
+    ReceiptsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${sls:stage}-${self:service}-receipts
+    PythonLambdaScanReceiptRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        RoleName: 'PythonLambdaScanReceiptRole'
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Service:
+                  - 'lambda.amazonaws.com'
+              Action:
+                - 'sts:AssumeRole'
+        Policies:
+          - PolicyName: 'SSMAndLambdaExecution'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: 'Allow'
+                  Action:
+                    - 'logs:CreateLogGroup'
+                    - 'logs:CreateLogStream'
+                    - 'logs:PutLogEvents'
+                  Resource: 'arn:aws:logs:*:*:*'
+                - Effect: 'Allow'
+                  Action:
+                    - 'ssm:GetParameter'
+                    - 'ssm:PutParameter'
+                  Resource: '*'
 
     ### Aurora Serverless Cluster and Instance ###
     #    postgresCluster:
@@ -199,15 +314,15 @@ resources:
     postgresInstance:
       Type: 'AWS::RDS::DBInstance'
       Properties:
-        DBInstanceIdentifier: ${self:provider.stage}-${self:service}-postgres
+        DBInstanceIdentifier: ${sls:stage}-${self:service}-postgres
         PubliclyAccessible: true
         Engine: postgres
         EngineVersion: '14.6'
         DBInstanceClass: db.t4g.micro
         AllocatedStorage: 20
-        DBName: ${ssm:/db_name}
-        MasterUsername: ${ssm:/db_username}
-        MasterUserPassword: ${ssm:/db_password}
+        DBName: ${ssm:/${sls:stage}/db_name}
+        MasterUsername: ${ssm:/${sls:stage}/db_username}
+        MasterUserPassword: ${ssm:/${sls:stage}/db_password}
 
 #        DBClusterIdentifier: !Ref postgresCluster
 #    Add a read replica when need to scale up the database.
@@ -227,21 +342,22 @@ custom:
   serverlessSsmFetch:
     EMAIL_SENDER_ADDRESS: /email_sender_address
     EMAIL_SENDER_PASSWORD: /email_sender_password
-    DB_USER: /db_username
-    DB_PASSWORD: /db_password
-    DB_NAME: /db_name
+    DB_USER: /${sls:stage}/db_username
+    DB_PASSWORD: /${sls:stage}/db_password
+    DB_NAME: /${sls:stage}/db_name
     DB_PORT: /db_port
-    DB_HOST_WRITER: /db_host_writer_instance
-    DB_HOST_READER: /db_host_reader_instance
-    S3_USER_AC: /s3userak
-    S3_USER_SAC: /s3usersak
-    USER_POOL_ID: /user_pool_id
+    DB_HOST_WRITER: /${sls:stage}/db_host_writer_instance
+    DB_HOST_READER: /${sls:stage}/db_host_reader_instance
+    USER_POOL_ID: /${sls:stage}/user_pool_id
   customDomain:
     domainName: 'api.olga.lat'
-    basePath: 'api'
+    basePath: '${sls:stage}'
     stage: $default
     createRoute53Record: true
     endpointType: regional
     apiType: http
+  cognitoUserPoolArn:
+    dev: 'arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_7Npn25c8F'
+    prod: 'arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_XL73TDAKs'
 
 configValidationMode: error

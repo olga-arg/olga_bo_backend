@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"commons/utils"
 	"context"
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
@@ -17,9 +18,24 @@ func NewGetAllTeamsHandler(p processor.Processor) *GetAllTeamsHandler {
 }
 
 func (h *GetAllTeamsHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	email, companyId, err := utils.ExtractEmailAndCompanyIdFromToken(request)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	if companyId == "" || email == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
 	filters := request.QueryStringParameters
 
-	teams, err := h.processor.GetAllTeams(context.Background(), filters)
+	teams, err := h.processor.GetAllTeams(context.Background(), filters, companyId)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,

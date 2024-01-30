@@ -1,27 +1,27 @@
 package processor
 
 import (
+	"commons/utils/db"
 	"context"
-	"go-lambda-get-payments/internal/storage"
 	"go-lambda-get-payments/pkg/dto"
 )
 
 type Processor interface {
-	GetAllPayments(ctx context.Context, filter map[string]string) (*dto.Output, error)
+	GetAllPayments(ctx context.Context, filter map[string]string, companyId string) (*dto.Output, error)
 }
 
 type processor struct {
-	storage *storage.PaymentRepository
+	paymentStorage *db.PaymentRepository
 }
 
-func NewProcessor(storage *storage.PaymentRepository) Processor {
+func NewProcessor(storage *db.PaymentRepository) Processor {
 	return &processor{
-		storage: storage,
+		paymentStorage: storage,
 	}
 }
 
-func (p *processor) GetAllPayments(ctx context.Context, filter map[string]string) (*dto.Output, error) {
-	payments, err := p.storage.GetAllPayments(filter)
+func (p *processor) GetAllPayments(ctx context.Context, filter map[string]string, companyId string) (*dto.Output, error) {
+	payments, err := p.paymentStorage.GetAllPayments(filter, companyId)
 	if err != nil {
 		return nil, err
 	}

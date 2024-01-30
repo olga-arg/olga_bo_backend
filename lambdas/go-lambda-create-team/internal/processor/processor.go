@@ -1,31 +1,31 @@
 package processor
 
 import (
+	"commons/domain"
+	"commons/utils/db"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
-	"go-lambda-create-team/internal/storage"
-	"go-lambda-create-team/pkg/domain"
 	"go-lambda-create-team/pkg/dto"
 )
 
 type Processor interface {
-	CreateTeam(ctx context.Context, input *dto.CreateTeamInput) error
-	ValidateTeamInput(ctx context.Context, input *dto.CreateTeamInput, request events.APIGatewayProxyRequest) error
+	CreateTeam(ctx context.Context, input *dto.CreateTeamInput, companyId string) error
+	ValidateTeamInput(ctx context.Context, input *dto.CreateTeamInput, request events.APIGatewayProxyRequest, companyId string) error
 }
 
 type processor struct {
-	storage storage.TeamRepository
+	teamStorage db.TeamRepository
 }
 
-func New(s storage.TeamRepository) Processor {
+func New(s db.TeamRepository) Processor {
 	return &processor{
-		storage: s,
+		teamStorage: s,
 	}
 }
 
-func (p *processor) CreateTeam(ctx context.Context, input *dto.CreateTeamInput) error {
+func (p *processor) CreateTeam(ctx context.Context, input *dto.CreateTeamInput, companyId string) error {
 	// Creates a new team
 	team, err := domain.NewTeam(input.Name, input.ReviewerId, input.AnnualBudget) //input.Employees)
 	if err != nil {
@@ -33,7 +33,7 @@ func (p *processor) CreateTeam(ctx context.Context, input *dto.CreateTeamInput) 
 		return err
 	}
 	// Saves the team to the database if it doesn't already exist
-	if err := p.storage.Save(team); err != nil {
+	if err := p.teamStorage.Save(team, companyId); err != nil {
 		fmt.Println("Error saving team: ", err)
 		return err
 	}
@@ -41,7 +41,7 @@ func (p *processor) CreateTeam(ctx context.Context, input *dto.CreateTeamInput) 
 	return nil
 }
 
-func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeamInput, request events.APIGatewayProxyRequest) error {
+func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeamInput, request events.APIGatewayProxyRequest, companyId string) error {
 	fmt.Println("Validating input")
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		return fmt.Errorf("invalid request body: %s", err.Error())
@@ -56,12 +56,12 @@ func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeam
 		return fmt.Errorf("missing request body")
 	}
 	// Validate that the team doesn't already exist
-	if err := p.storage.GetTeamByName(input.Name); err != nil {
+	if err := p.teamStorage.GetTeamByName(input.Name, companyId); err != nil {
 		return err
 	}
 	// Validate that the reviewer exists only if provided
 	if input.ReviewerId != "" {
-		err := p.storage.GetReviewerById(input.ReviewerId)
+		err := p.teamStorage.GetReviewerById(input.ReviewerId, companyId)
 		if err != nil {
 			return err
 		}

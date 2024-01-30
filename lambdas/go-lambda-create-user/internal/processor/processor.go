@@ -1,6 +1,8 @@
 package processor
 
 import (
+	"commons/domain"
+	"commons/utils/db"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,28 +11,26 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/badoux/checkmail"
-	"go-lambda-create-user/internal/storage"
-	"go-lambda-create-user/pkg/domain"
 	"go-lambda-create-user/pkg/dto"
 	"os"
 )
 
 type Processor interface {
-	CreateUser(ctx context.Context, input *dto.CreateUserInput) error
+	CreateUser(ctx context.Context, input *dto.CreateUserInput, companyId string) error
 	ValidateUserInput(ctx context.Context, input *dto.CreateUserInput, request events.APIGatewayProxyRequest) error
 }
 
 type processor struct {
-	storage storage.UserRepository
+	userStorage db.UserRepository
 }
 
-func New(s storage.UserRepository) Processor {
+func New(s db.UserRepository) Processor {
 	return &processor{
-		storage: s,
+		userStorage: s,
 	}
 }
 
-func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) error {
+func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput, companyId string) error {
 	// Creates a new user. New user takes a name and email and returns a user struct
 	user, err := domain.NewUser(input.Name, input.Surname, input.Email)
 	if err != nil {
@@ -70,6 +70,10 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 				Name:  aws.String("email_verified"),
 				Value: aws.String("True"),
 			},
+			{
+				Name:  aws.String("name"),
+				Value: aws.String(companyId),
+			},
 		},
 	}
 
@@ -81,7 +85,7 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput) 
 	fmt.Println("User created successfully in Cognito")
 
 	// Saves the user to the database if it doesn't already exist
-	if err := p.storage.Save(user); err != nil {
+	if err := p.userStorage.Save(user, companyId); err != nil {
 		fmt.Println("Error saving user: ", err)
 		return err
 	}

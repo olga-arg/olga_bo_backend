@@ -1,28 +1,28 @@
 package processor
 
 import (
+	"commons/utils/db"
 	"context"
 	"fmt"
-	"go-lambda-delete-team/internal/storage"
 )
 
 type Processor interface {
-	DeleteTeam(ctx context.Context, teamID string) error
+	DeleteTeam(ctx context.Context, teamID, companyId string) error
 }
 
 type processor struct {
-	storage *storage.TeamRepository
+	teamStorage *db.TeamRepository
 }
 
-func NewProcessor(storage *storage.TeamRepository) Processor {
+func NewProcessor(storage *db.TeamRepository) Processor {
 	return &processor{
-		storage: storage,
+		teamStorage: storage,
 	}
 }
 
-func (p *processor) DeleteTeam(ctx context.Context, teamID string) error {
+func (p *processor) DeleteTeam(ctx context.Context, teamID, companyId string) error {
 	fmt.Println("Deleting team in storage")
-	err := p.storage.DeleteTeam(teamID)
+	err := p.teamStorage.DeleteTeam(teamID, companyId)
 	if err != nil {
 		fmt.Println("error", err.Error())
 		return err

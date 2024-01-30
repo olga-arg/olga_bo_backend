@@ -1,43 +1,25 @@
 package dto
 
 import (
-	"go-lambda-get-all-users/pkg/domain"
+	"commons/domain"
 )
 
-type Team struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type User struct {
-	ID              string                    `json:"id"`
-	Name            string                    `json:"name"`
-	Surname         string                    `json:"surname"`
-	Email           string                    `json:"email"`
-	PurchaseLimit   int                       `json:"purchase_limit" default:"0"`
-	MonthlyLimit    int                       `json:"monthly_limit" default:"0"`
-	MonthlySpending float32                   `json:"monthly_spending" default:"0"`
-	IsAdmin         bool                      `json:"isAdmin" default:"false"`
-	Status          domain.ConfirmationStatus `json:"status" default:"Pending"`
-	Teams           []Team                    `json:"teams"`
-}
-
 type Output struct {
-	Users []User `json:"users"`
+	Users []domain.User `json:"users"`
 }
 
-// From domain.Users ([]User) to dto.Output (Output)
 func NewOutput(users []domain.User) *Output {
-	var dtoUsers []User
+	var dtoUsers []domain.User
 	for _, user := range users {
-		var teams []Team
+		var teams []*domain.Team // Change the type to a slice of pointers
 		for _, team := range user.Teams {
-			teams = append(teams, Team{
+			// Append a pointer to the new Team object
+			teams = append(teams, &domain.Team{
 				ID:   team.ID,
 				Name: team.Name,
 			})
 		}
-		dtoUsers = append(dtoUsers, User{
+		dtoUsers = append(dtoUsers, domain.User{
 			ID:              user.ID,
 			Name:            user.Name,
 			Surname:         user.Surname,
