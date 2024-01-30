@@ -17,9 +17,10 @@ type processor struct {
 	userStorage    db.UserRepository
 }
 
-func New(paymentRepo db.PaymentRepository) Processor {
+func New(paymentRepo db.PaymentRepository, userRepo db.UserRepository) Processor {
 	return &processor{
 		paymentStorage: paymentRepo,
+		userStorage:    userRepo,
 	}
 }
 
@@ -30,7 +31,6 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 		fmt.Println("Error getting user: ", err)
 		return err
 	}
-
 	// Validate the purchase limit
 	purchaseLimit := user.PurchaseLimit
 	if float32(purchaseLimit) < input.Amount {
