@@ -39,8 +39,8 @@ jobs:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
           npm install serverless
-          serverless plugin install -n serverless-domain-manager --stage dev
-          serverless plugin install -n serverless-ssm-fetch --stage dev
+          npx serverless plugin install -n serverless-domain-manager --stage dev
+          npx serverless plugin install -n serverless-ssm-fetch --stage dev
           npx serverless deploy --stage dev
           npx serverless create_domain
 
@@ -52,8 +52,8 @@ jobs:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
           npm install serverless
-          serverless plugin install -n serverless-domain-manager --stage dev
-          serverless plugin install -n serverless-ssm-fetch --stage dev
+          npx serverless plugin install -n serverless-domain-manager --stage dev
+          npx serverless plugin install -n serverless-ssm-fetch --stage dev
           if [ -n "$(ls -A lambdas/bin/)" ]; then
             for f in lambdas/bin/*; do
               if [ -f "$f" ]; then
