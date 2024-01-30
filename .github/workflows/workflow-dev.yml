@@ -42,7 +42,7 @@ jobs:
           npx serverless plugin install -n serverless-domain-manager --stage dev
           npx serverless plugin install -n serverless-ssm-fetch --stage dev
           npx serverless deploy --stage dev
-          npx serverless create_domain
+          #npx serverless create_domain
 
       - name: Serverless Deploy Lambdas
         if: steps.filter.outputs.serverless != 'true'
