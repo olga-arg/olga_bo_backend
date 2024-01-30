@@ -268,7 +268,7 @@ resources:
     PythonLambdaScanReceiptRole:
       Type: 'AWS::IAM::Role'
       Properties:
-        RoleName: 'PythonLambdaScanReceiptRole'
+        RoleName: 'PythonLambdaScanReceiptRole-${sls:stage}'
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
