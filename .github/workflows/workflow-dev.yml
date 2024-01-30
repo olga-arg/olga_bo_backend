@@ -5,9 +5,9 @@ name: Go
 
 on:
   push:
-    branches: ['prod']
+    branches: ['dev']
   pull_request:
-    branches: ['prod']
+    branches: ['dev']
 
 jobs:
   build:
@@ -39,9 +39,9 @@ jobs:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
           npm install serverless
-          npm install serverless-domain-manager
-          npm install serverless-ssm-fetch
-          npx serverless deploy --stage prod
+          npx serverless plugin install -n serverless-domain-manager --stage dev
+          npx serverless plugin install -n serverless-ssm-fetch --stage dev
+          npx serverless deploy --stage dev
           npx serverless create_domain
 
       - name: Serverless Deploy Lambdas
@@ -52,14 +52,14 @@ jobs:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
           npm install serverless
-          npm install serverless-domain-manager
-          npm install serverless-ssm-fetch
+          npx serverless plugin install -n serverless-domain-manager --stage dev
+          npx serverless plugin install -n serverless-ssm-fetch --stage dev
           if [ -n "$(ls -A lambdas/bin/)" ]; then
             for f in lambdas/bin/*; do
               if [ -f "$f" ]; then
                 FUNCTION_NAME=$(basename "$f" | cut -d '.' -f 1)
                 echo "Updating code of $FUNCTION_NAME..."
-                npx serverless deploy function -f "$FUNCTION_NAME" --stage prod
+                npx serverless deploy function -f "$FUNCTION_NAME" --stage dev
               fi
             done
           fi
