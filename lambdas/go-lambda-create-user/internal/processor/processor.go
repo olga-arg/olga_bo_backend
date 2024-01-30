@@ -63,6 +63,10 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput, 
 				Value: aws.String(input.Email),
 			},
 			{
+				Name:  aws.String("name"),
+				Value: aws.String(input.Name),
+			},
+			{
 				Name:  aws.String("email_verified"),
 				Value: aws.String("True"),
 			},
