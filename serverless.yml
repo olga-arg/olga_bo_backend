@@ -234,8 +234,8 @@ functions:
           path: /me
           method: get
   python-lambda-scan-receipt:
-    handler: lambdas/python-lambda-scan-receipt/handler.main
-    package:
+    handler: handler.main
+    package: 
       artifact: lambdas/bin/python-lambda-scan-receipt/python-lambda-scan-receipt.zip
     environment:
       STAGE: ${sls:stage}
@@ -253,9 +253,7 @@ functions:
       - arn:aws:lambda:sa-east-1:588257415519:layer:aiofiles:1
     role: PythonLambdaScanReceiptRole
     ssmToEnvironment:
-      - S3_USER_AC
-      - S3_USER_SAC
-
+      - S3_BUCKET
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
@@ -266,10 +264,6 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${sls:stage}-${self:service}-assets
-    ReceiptsBucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${sls:stage}-${self:service}-receipts
     PythonLambdaScanReceiptRole:
       Type: 'AWS::IAM::Role'
       Properties:
@@ -299,6 +293,14 @@ resources:
                     - 'ssm:GetParameter'
                     - 'ssm:PutParameter'
                   Resource: '*'
+                - Effect: 'Allow'
+                  Action:
+                    - 's3:GetObject'
+                    - 's3:PutObject'
+                    - 's3:ListBucket'
+                  Resource:
+                    - 'arn:aws:s3:::olga-backend-payments222643-dev/*'
+                    - 'arn:aws:s3:::olga-backend-payments155150-prod/*'
 
     ### Aurora Serverless Cluster and Instance ###
     #    postgresCluster:
@@ -349,6 +351,7 @@ custom:
     DB_HOST_WRITER: /${sls:stage}/db_host_writer_instance
     DB_HOST_READER: /${sls:stage}/db_host_reader_instance
     USER_POOL_ID: /${sls:stage}/user_pool_id
+    S3_BUCKET: /${sls:stage}/s3_bucket_name
   customDomain:
     domainName: 'api.olga.lat'
     basePath: '${sls:stage}'

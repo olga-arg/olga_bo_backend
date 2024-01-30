@@ -8,7 +8,7 @@ async def generate_access_ticket(access_ticket_name):
     now = datetime.utcnow() + argentina_offset
 
     # Calculate the expiration time (1 day later)
-    expiration_time = now + timedelta(days=1)
+    expiration_time = now + timedelta(hours=22)
 
     # Format the dates in the desired format
     generation_time_str = now.strftime('%Y-%m-%dT%H:%M:%S')

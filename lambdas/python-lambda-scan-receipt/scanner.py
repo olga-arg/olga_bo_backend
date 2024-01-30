@@ -40,7 +40,6 @@ async def get_receipt_info(api_key, file_url):
             info = {}
 
             predictions = result['document']['inference']['prediction']
-            print(predictions)
 
             fields = ['business_name', 'cuit_number', 'receipt_number', 'receipt_or_ticket_type', 'receipt_datetime', 'total_amount']
 
@@ -49,12 +48,11 @@ async def get_receipt_info(api_key, file_url):
                     content = predictions[field]['value']
                     if field == 'cuit_number':
                         content = ''.join(filter(lambda i: i.isdigit(), content))
-                    # TODO: When the total is added to the Mindee model, uncomment this
-                    
+
                     if field == 'total_amount':
-                        formato_correcto = r'^(\d{1,3}(,\d{3})*|\d+)(\.\d{2})$'
-                        if not re.match(formato_correcto, content):
-                            content = correct_amount_format_v2(content)
+                        print(type(content), content)
+                        content = correct_amount_format_v2(str(content))
+                   
                     info[field] = content
 
             # If 'cuit' key is not present or its length is not 11, raise an error
@@ -63,6 +61,8 @@ async def get_receipt_info(api_key, file_url):
 
             if 'CONSUMIDOR' or 'FINAL' in info['receipt_or_ticket_type'].upper():
                 info['receipt_or_ticket_type'] = 'B'
+
+            print('FINISHED', info)
 
             return info
 
