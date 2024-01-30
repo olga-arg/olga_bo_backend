@@ -41,7 +41,6 @@ jobs:
           npm install serverless
           npm install serverless-domain-manager
           npm install serverless-ssm-fetch
-          cat serverless.yml
           npx serverless deploy --stage dev
           npx serverless create_domain
 
