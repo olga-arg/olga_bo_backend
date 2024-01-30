@@ -41,7 +41,7 @@ jobs:
           npm install serverless
           npm install serverless-domain-manager
           npm install serverless-ssm-fetch
-          npx serverless deploy
+          npx serverless deploy --stage prod
           npx serverless create_domain
 
       - name: Serverless Deploy Lambdas
@@ -59,7 +59,7 @@ jobs:
               if [ -f "$f" ]; then
                 FUNCTION_NAME=$(basename "$f" | cut -d '.' -f 1)
                 echo "Updating code of $FUNCTION_NAME..."
-                npx serverless deploy function -f "$FUNCTION_NAME"
+                npx serverless deploy function -f "$FUNCTION_NAME" --stage prod
               fi
             done
           fi
