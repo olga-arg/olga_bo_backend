@@ -17,7 +17,7 @@ provider:
           Action:
             - cognito-idp:AdminGetUser
             - cognito-idp:AdminCreateUser
-          Resource: ${self:custom.cognitoUserPoolArn.${self:provider.stage}}
+          Resource: ${self:custom.cognitoUserPoolArn.${sls:stage}}
 
 # you can define service wide environment variables here
 #  environment:
@@ -40,7 +40,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /company
@@ -59,7 +59,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /users
@@ -76,7 +76,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /users
@@ -93,7 +93,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /users/{user_id}
@@ -110,7 +110,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /payments/{payment_id}
@@ -127,7 +127,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /teams
@@ -144,7 +144,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /teams
@@ -161,7 +161,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /teams/{team_id}
@@ -178,7 +178,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /teams/{team_id}
@@ -195,7 +195,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /payments
@@ -212,7 +212,7 @@ functions:
       - DB_PORT
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /payments
@@ -228,7 +228,7 @@ functions:
       - DB_HOST_READER
       - USER_POOL_ID
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     events:
       - httpApi:
           path: /me
@@ -238,7 +238,7 @@ functions:
     package:
       artifact: lambdas/bin/python-lambda-scan-receipt/python-lambda-scan-receipt.zip
     environment:
-      STAGE: ${self:provider.stage}
+      STAGE: ${sls:stage}
     timeout: 29
     runtime: python3.9
     events:
@@ -265,11 +265,11 @@ resources:
     Assets:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:provider.stage}-${self:service}-assets
+        BucketName: ${sls:stage}-${self:service}-assets
     ReceiptsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:provider.stage}-${self:service}-receipts
+        BucketName: ${sls:stage}-${self:service}-receipts
     PythonLambdaScanReceiptRole:
       Type: 'AWS::IAM::Role'
       Properties:
@@ -314,15 +314,15 @@ resources:
     postgresInstance:
       Type: 'AWS::RDS::DBInstance'
       Properties:
-        DBInstanceIdentifier: ${self:provider.stage}-${self:service}-postgres
+        DBInstanceIdentifier: ${sls:stage}-${self:service}-postgres
         PubliclyAccessible: true
         Engine: postgres
         EngineVersion: '14.6'
         DBInstanceClass: db.t4g.micro
         AllocatedStorage: 20
-        DBName: ${ssm:/${self:provider.stage}/db_name}
-        MasterUsername: ${ssm:/${self:provider.stage}/db_username}
-        MasterUserPassword: ${ssm:/${self:provider.stage}/db_password}
+        DBName: ${ssm:/${sls:stage}/db_name}
+        MasterUsername: ${ssm:/${sls:stage}/db_username}
+        MasterUserPassword: ${ssm:/${sls:stage}/db_password}
 
 #        DBClusterIdentifier: !Ref postgresCluster
 #    Add a read replica when need to scale up the database.
@@ -342,16 +342,16 @@ custom:
   serverlessSsmFetch:
     EMAIL_SENDER_ADDRESS: /email_sender_address
     EMAIL_SENDER_PASSWORD: /email_sender_password
-    DB_USER: /${self:provider.stage}/db_username
-    DB_PASSWORD: /${self:provider.stage}/db_password
-    DB_NAME: /${self:provider.stage}/db_name
+    DB_USER: /${sls:stage}/db_username
+    DB_PASSWORD: /${sls:stage}/db_password
+    DB_NAME: /${sls:stage}/db_name
     DB_PORT: /db_port
-    DB_HOST_WRITER: /${self:provider.stage}/db_host_writer_instance
-    DB_HOST_READER: /${self:provider.stage}/db_host_reader_instance
-    USER_POOL_ID: /${self:provider.stage}/user_pool_id
+    DB_HOST_WRITER: /${sls:stage}/db_host_writer_instance
+    DB_HOST_READER: /${sls:stage}/db_host_reader_instance
+    USER_POOL_ID: /${sls:stage}/user_pool_id
   customDomain:
     domainName: 'api.olga.lat'
-    basePath: '${self:provider.stage}'
+    basePath: '${sls:stage}'
     stage: $default
     createRoute53Record: true
     endpointType: regional
