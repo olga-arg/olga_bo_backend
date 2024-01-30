@@ -113,3 +113,14 @@ func (r *UserRepository) GetUserByID(userID, companyId string) (*domain.User, er
 	}
 	return &user, nil
 }
+
+func (r *UserRepository) GetUserInformation(email, companyId string) (domain.User, error) {
+	var user domain.User
+	query := r.Db.Scopes(getUserTable(companyId)).Where("email = ?", email)
+	err := query.First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		fmt.Println("No user found with email: ", email)
+		return user, err
+	}
+	return user, nil
+}

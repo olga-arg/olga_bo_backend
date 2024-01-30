@@ -1,32 +1,34 @@
 package processor
 
 import (
+	"commons/utils/db"
 	"context"
-	"go-lambda-me/internal/storage"
 	"go-lambda-me/pkg/dto"
 	"time"
 )
 
 type Processor interface {
-	GetUserInformation(ctx context.Context, email string) (*dto.Output, error)
+	GetUserInformation(ctx context.Context, email, companyId string) (*dto.Output, error)
 }
 
 type processor struct {
-	storage *storage.PaymentRepository
+	paymentStorage db.PaymentRepository
+	userStorage    db.UserRepository
 }
 
-func NewProcessor(storage *storage.PaymentRepository) Processor {
+func NewProcessor(paymentRepo db.PaymentRepository, userRepo db.UserRepository) Processor {
 	return &processor{
-		storage: storage,
+		paymentStorage: paymentRepo,
+		userStorage:    userRepo,
 	}
 }
 
-func (p *processor) GetUserInformation(ctx context.Context, email string) (*dto.Output, error) {
-	userInformation, err := p.storage.GetUserInformation(email)
+func (p *processor) GetUserInformation(ctx context.Context, email, companyId string) (*dto.Output, error) {
+	userInformation, err := p.userStorage.GetUserInformation(email, companyId)
 	if err != nil {
 		return nil, err
 	}
-	payments, err := p.storage.GetAllPayments(userInformation.ID)
+	payments, err := p.paymentStorage.GetAllPayments(nil, companyId)
 	if err != nil {
 		return nil, err
 	}

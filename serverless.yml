@@ -226,6 +226,7 @@ functions:
       - DB_PASSWORD
       - DB_NAME
       - DB_HOST_READER
+      - DB_PORT
       - USER_POOL_ID
     environment:
       STAGE: ${sls:stage}
