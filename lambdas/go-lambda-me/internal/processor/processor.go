@@ -4,6 +4,7 @@ import (
 	"context"
 	"go-lambda-me/internal/storage"
 	"go-lambda-me/pkg/dto"
+	"time"
 )
 
 type Processor interface {
@@ -28,6 +29,12 @@ func (p *processor) GetUserInformation(ctx context.Context, email string) (*dto.
 	payments, err := p.storage.GetAllPayments(userInformation.ID)
 	if err != nil {
 		return nil, err
+	}
+	// Transformar las fechas a UTC-3 (hora de Argentina)
+	for i := range payments {
+		if !payments[i].CreatedDate.IsZero() {
+			payments[i].CreatedDate = payments[i].CreatedDate.In(time.FixedZone("UTC-3", -3*60*60))
+		}
 	}
 
 	return dto.NewOutput(userInformation, payments), nil
