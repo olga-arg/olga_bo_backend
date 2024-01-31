@@ -23,9 +23,16 @@ func NewOutput(userInformation domain.User, payments []domain.Payment) *Output {
 	var dtoPayments []domain.Payment
 	for _, payment := range payments {
 		dtoPayments = append(dtoPayments, domain.Payment{
+			ID:              payment.ID,
 			Amount:          payment.Amount,
 			ShopName:        payment.ShopName,
+			Cuit:            payment.Cuit,
+			Date:            payment.Date,
+			Time:            payment.Time,
+			UserID:          payment.UserID,
 			Category:        payment.Category,
+			ReceiptNumber:   payment.ReceiptNumber,
+			ReceiptType:     payment.ReceiptType,
 			Status:          payment.Status,
 			ReceiptImageKey: payment.ReceiptImageKey,
 			CreatedDate:     payment.CreatedDate,
