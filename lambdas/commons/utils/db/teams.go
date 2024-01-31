@@ -91,7 +91,7 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string
 
 	if teamName, ok := filters["name"]; ok {
 		println("team name:", teamName)
-		querySyntax = querySyntax + fmt.Sprintf(" WHERE teams.name = '%s'", teamName)
+		querySyntax = querySyntax + fmt.Sprintf(" WHERE teams.name ILIKE '%%%s%%'", teamName)
 	} else if annualBudget, ok := filters["annual_budget"]; ok {
 		println("annual budget:", annualBudget)
 		Int, err := strconv.Atoi(annualBudget)
