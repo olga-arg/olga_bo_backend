@@ -54,7 +54,9 @@ func (r *PaymentRepository) GetAllPayments(filters map[string]string, companyId 
 			query = query.Where("receipt_image_key = '' OR receipt_image_key IS NULL")
 		}
 	}
-
+	if status, ok := filters["status"]; ok {
+		query = query.Where("status = ?", status)
+	}
 	// Order and execute the query
 	query = query.Order("created_date")
 	err := query.Find(&payments).Error
