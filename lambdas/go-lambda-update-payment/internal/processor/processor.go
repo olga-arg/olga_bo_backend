@@ -7,7 +7,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
+	"github.com/google/uuid"
 	"go-lambda-update-payment/pkg/dto"
+	"os"
 	"time"
 )
 
@@ -70,6 +75,61 @@ func (p *processor) ValidatePaymentInput(ctx context.Context, input *dto.UpdateP
 	if input.Date != (time.Time{}) {
 		payment.Date = input.Date
 	}
+
+	cuitChanged := input.Cuit != "" && input.Cuit != payment.Cuit
+	if cuitChanged {
+		payment.Cuit = input.Cuit
+		err := logCuitChange(ctx, payment.ID, payment.Cuit, input.Cuit, payment.ReceiptImageKey)
+		if err != nil {
+			fmt.Println("error logging CUIT change: ", err.Error())
+			// Decidir si quieres devolver el error o simplemente registrarlo
+		}
+	}
 	fmt.Println("Input validated successfully")
 	return payment, nil
+}
+
+func logCuitChange(ctx context.Context, paymentId, oldCuit, newCuit, receiptImageKey string) error {
+	stage := os.Getenv("STAGE")
+	// Crear una sesión de AWS
+	sess := session.Must(session.NewSession())
+	// Crear un cliente de CloudWatch Logs
+	cw := cloudwatchlogs.New(sess)
+
+	logGroupName := stage + "-cuit-change"
+	logStreamName := uuid.New().String()
+
+	// Intentar crear el stream de log y manejar cualquier error
+	_, err := cw.CreateLogStream(&cloudwatchlogs.CreateLogStreamInput{
+		LogGroupName:  aws.String(logGroupName),
+		LogStreamName: aws.String(logStreamName),
+	})
+	if err != nil {
+		fmt.Printf("Error al crear el stream de log: %s\n", err)
+		return err
+	}
+
+	// Crear el mensaje de log
+	logMessage := fmt.Sprintf("Cuit changed from %s to %s for payment ID %s. Receipt Image Key: %s", oldCuit, newCuit, paymentId, receiptImageKey)
+	timestamp := aws.Int64(time.Now().UnixNano() / int64(time.Millisecond))
+
+	// Preparar los eventos de log
+	input := &cloudwatchlogs.PutLogEventsInput{
+		LogGroupName:  aws.String(logGroupName),
+		LogStreamName: aws.String(logStreamName),
+		LogEvents: []*cloudwatchlogs.InputLogEvent{
+			{
+				Message:   aws.String(logMessage),
+				Timestamp: timestamp,
+			},
+		},
+	}
+
+	// Enviar el evento de log
+	_, err = cw.PutLogEvents(input)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
