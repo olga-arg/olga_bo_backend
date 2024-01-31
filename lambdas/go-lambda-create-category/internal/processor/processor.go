@@ -16,10 +16,10 @@ type Processor interface {
 }
 
 type processor struct {
-	categoryStorage db.CategoryStorage
+	categoryStorage db.CategoryRepository
 }
 
-func New(c db.CategoryStorage) Processor {
+func New(c db.CategoryRepository) Processor {
 	return &processor{
 		categoryStorage: c,
 	}
