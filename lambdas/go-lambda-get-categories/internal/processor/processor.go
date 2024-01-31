@@ -7,7 +7,7 @@ import (
 )
 
 type Processor interface {
-	GetCategories(ctx context.Context, companyId string) (*dto.Output, error)
+	GetCategories(ctx context.Context, companyId string) (map[string]interface{}, error)
 }
 
 type processor struct {
@@ -20,7 +20,7 @@ func NewProcessor(storage *db.CategoryStorage) Processor {
 	}
 }
 
-func (p *processor) GetCategories(ctx context.Context, companyId string) (*dto.Output, error) {
+func (p *processor) GetCategories(ctx context.Context, companyId string) (map[string]interface{}, error) {
 	categories, err := p.categoryStorage.GetCategories(companyId)
 	if err != nil {
 		return nil, err

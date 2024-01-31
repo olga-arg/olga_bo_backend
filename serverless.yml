@@ -60,7 +60,7 @@ functions:
       STAGE: ${sls:stage}
     events:
       - httpApi:
-          path: /company/category
+          path: /company/categories
           method: post
   go-lambda-create-user:
     handler: bootstrap
@@ -164,7 +164,7 @@ functions:
       STAGE: ${sls:stage}
     events:
       - httpApi:
-          path: /company/category
+          path: /company/categories
           method: get
   go-lambda-get-teams:
     handler: bootstrap

@@ -4,12 +4,13 @@ import (
 	"commons/domain"
 )
 
-type Output struct {
-	Categories domain.Categories `json:"categories"`
-}
-
-func NewOutput(categories domain.Categories) *Output {
-	return &Output{
-		Categories: categories,
+func NewOutput(categories domain.Categories) map[string]interface{} {
+	var response = make(map[string]interface{})
+	for _, category := range categories {
+		response[category.Name] = map[string]interface{}{
+			"color": category.Color,
+			"icon":  category.Icon,
+		}
 	}
+	return response
 }
