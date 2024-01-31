@@ -7,18 +7,18 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type CategoryStorage struct {
+type CategoryRepository struct {
 	Db *gorm.DB
 }
 
-func NewCategoryRepository(db *gorm.DB) *CategoryStorage {
+func NewCategoryRepository(db *gorm.DB) *CategoryRepository {
 	db.AutoMigrate(&domain.Category{})
-	return &CategoryStorage{
+	return &CategoryRepository{
 		Db: db,
 	}
 }
 
-func (r *CategoryStorage) Save(category *domain.Category) error {
+func (r *CategoryRepository) Save(category *domain.Category) error {
 	db := r.Db.AutoMigrate(&domain.Category{})
 	err := db.Save(category).Error
 	if err != nil {
@@ -28,7 +28,7 @@ func (r *CategoryStorage) Save(category *domain.Category) error {
 	return nil
 }
 
-func (r *CategoryStorage) GetCategories(companyId string) (domain.Categories, error) {
+func (r *CategoryRepository) GetCategories(companyId string) (domain.Categories, error) {
 	var categories domain.Categories
 	err := r.Db.Where("company_id = ?", companyId).Find(&categories).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
