@@ -18,6 +18,13 @@ provider:
             - cognito-idp:AdminGetUser
             - cognito-idp:AdminCreateUser
           Resource: ${self:custom.cognitoUserPoolArn.${sls:stage}}
+        - Effect: 'Allow'
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource:
+            - 'arn:aws:logs:sa-east-1:588257415519:log-group:dev-cuit-change:*'
 
 # you can define service wide environment variables here
 #  environment:
@@ -336,6 +343,10 @@ resources:
                   Resource:
                     - 'arn:aws:s3:::olga-backend-payments222643-dev/*'
                     - 'arn:aws:s3:::olga-backend-payments155150-prod/*'
+    CuitChangeLogGroup:
+      Type: "AWS::Logs::LogGroup"
+      Properties:
+        LogGroupName: ${sls:stage}-cuit-change
 
     ### Aurora Serverless Cluster and Instance ###
     #    postgresCluster:

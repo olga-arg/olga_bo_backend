@@ -21,14 +21,16 @@ type Processor interface {
 }
 
 type processor struct {
-	companyStorage db.CompanyRepository
-	userStorage    db.UserRepository
+	companyStorage  db.CompanyRepository
+	userStorage     db.UserRepository
+	categoryStorage db.CategoryRepository
 }
 
-func New(c db.CompanyRepository, u db.UserRepository) Processor {
+func New(c db.CompanyRepository, u db.UserRepository, ca db.CategoryRepository) Processor {
 	return &processor{
-		userStorage:    u,
-		companyStorage: c,
+		userStorage:     u,
+		companyStorage:  c,
+		categoryStorage: ca,
 	}
 }
 
@@ -50,6 +52,97 @@ func (p *processor) CreateCompany(ctx context.Context, input *dto.CreateCompanyI
 	if err := p.companyStorage.CreateCompanySpecificTables(company.ID); err != nil {
 		fmt.Println("Error creating users table: ", err)
 		return err
+	}
+
+	// Create company expense categories
+	var categories = map[string]map[string]string{
+		"Comidas y Bebidas": {
+			"icon":  "mdiSilverwareForkKnife",
+			"color": "FF6384",
+		},
+		"Transporte": {
+			"icon":  "mdiSubwayVariant",
+			"color": "36A2EB",
+		},
+		"Electrónica": {
+			"icon":  "mdiLaptop",
+			"color": "FFCE56",
+		},
+		"Entretenimiento": {
+			"icon":  "mdiRobotHappy",
+			"color": "4BC0C0",
+		},
+		"Material de Oficina": {
+			"icon":  "mdiOfficeBuilding",
+			"color": "9966FF",
+		},
+		"Indumentaria": {
+			"icon":  "mdiTshirtCrew",
+			"color": "FF9F40",
+		},
+		"Salud y cuidado personal": {
+			"icon":  "mdiBottleTonicPlus",
+			"color": "C9CBCF",
+		},
+		"Educación": {
+			"icon":  "mdiSchool",
+			"color": "7E7F9A",
+		},
+		"Mascotas": {
+			"icon":  "mdiPaw",
+			"color": "f5e050",
+		},
+		"Supermercado": {
+			"icon":  "mdiStore",
+			"color": "FFC0CB",
+		},
+		"Viajes": {
+			"icon":  "mdiAirplaneTakeoff",
+			"color": "1E90FF",
+		},
+		"Servicios profesionales": {
+			"icon":  "mdiAccountWrench",
+			"color": "DAA520",
+		},
+		"Impuestos": {
+			"icon":  "mdiCash",
+			"color": "B22222",
+		},
+		"Cuentas y Servicios": {
+			"icon":  "mdiAccountCash",
+			"color": "FFD700",
+		},
+		"Donaciones": {
+			"icon":  "mdiHandHeart",
+			"color": "32CD32",
+		},
+		"Inversiones": {
+			"icon":  "mdiFinance",
+			"color": "4682B4",
+		},
+		"Préstamos y financiación": {
+			"icon":  "mdiCurrencyUsd",
+			"color": "DA70D6",
+		},
+		"Suscripciones": {
+			"icon":  "mdiCart",
+			"color": "40E0D0",
+		},
+		"Shopping": {
+			"icon":  "mdiShopping",
+			"color": "FF4500",
+		},
+		"Otros": {
+			"icon":  "mdiMenu",
+			"color": "808080",
+		},
+	}
+	for category, data := range categories {
+		cat, _ := domain.NewCategory(company.ID, category, data["color"], data["icon"])
+		if err := p.categoryStorage.Save(cat); err != nil {
+			fmt.Println("Error creating company expense icons: ", err)
+			return err
+		}
 	}
 
 	// Creates a new user. New user takes a name and email and returns a user struct

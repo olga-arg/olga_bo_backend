@@ -17,7 +17,8 @@ func main() {
 	}
 	companyRepo := db.NewCompanyRepository(gormDb)
 	userRepo := db.NewUserRepository(gormDb)
-	userProcessor := processor.New(*companyRepo, *userRepo)
+	categoryRepo := db.NewCategoryRepository(gormDb)
+	userProcessor := processor.New(*companyRepo, *userRepo, *categoryRepo)
 	createUserHandler := handler.NewCreateUserHandler(userProcessor)
 	lambda.Start(createUserHandler.Handle)
 }
