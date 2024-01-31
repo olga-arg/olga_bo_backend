@@ -32,16 +32,16 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 		return err
 	}
 	// Validate the purchase limit
-	purchaseLimit := user.PurchaseLimit
-	if float32(purchaseLimit) < input.Amount {
-		return fmt.Errorf("the amount is greater than the purchase limit")
-	}
-	// Validate the monthly limit
-	monthlyLimit := user.MonthlyLimit
-	remainingMonthlyLimit := float32(monthlyLimit) - user.MonthlySpending
-	if remainingMonthlyLimit < input.Amount {
-		return fmt.Errorf("Error: The amount is greater than the monthly limit")
-	}
+	//purchaseLimit := user.PurchaseLimit
+	//if float32(purchaseLimit) < input.Amount {
+	//	return fmt.Errorf("the amount is greater than the purchase limit")
+	//}
+	//// Validate the monthly limit
+	//monthlyLimit := user.MonthlyLimit
+	//remainingMonthlyLimit := float32(monthlyLimit) - user.MonthlySpending
+	//if remainingMonthlyLimit < input.Amount {
+	//	return fmt.Errorf("Error: The amount is greater than the monthly limit")
+	//}
 
 	// Create payment
 	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.Cuit, input.Time, input.Category, input.ReceiptNumber, input.ReceiptType, input.ReceiptImageKey, user.ID, input.Date)
