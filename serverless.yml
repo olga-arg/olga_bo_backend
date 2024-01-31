@@ -276,7 +276,7 @@ functions:
           path: /me
           method: get
   python-lambda-scan-receipt:
-    handler: handler.main
+    handler: handler.lambda_handler
     package: 
       artifact: lambdas/bin/python-lambda-scan-receipt/python-lambda-scan-receipt.zip
     environment:
@@ -287,15 +287,15 @@ functions:
       - httpApi:
           path: /scan
           method: post
-    layers:
-      - arn:aws:lambda:sa-east-1:588257415519:layer:bs4:1
-      - arn:aws:lambda:sa-east-1:034541671702:layer:openssl-lambda:1
-      - arn:aws:lambda:sa-east-1:588257415519:layer:httpx:1
-      - arn:aws:lambda:sa-east-1:588257415519:layer:aioboto3:1
-      - arn:aws:lambda:sa-east-1:588257415519:layer:aiofiles:1
     role: PythonLambdaScanReceiptRole
     ssmToEnvironment:
       - S3_BUCKET
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_READER
+      - DB_PORT
+      - USER_POOL_ID
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
@@ -343,6 +343,11 @@ resources:
                   Resource:
                     - 'arn:aws:s3:::olga-backend-payments222643-dev/*'
                     - 'arn:aws:s3:::olga-backend-payments155150-prod/*'
+                - Effect: 'Allow'
+                  Action:
+                    - cognito-idp:AdminGetUser
+                    - cognito-idp:AdminCreateUser
+                  Resource: ${self:custom.cognitoUserPoolArn.${sls:stage}}
     CuitChangeLogGroup:
       Type: "AWS::Logs::LogGroup"
       Properties:
@@ -385,6 +390,7 @@ resources:
 plugins:
   - serverless-domain-manager
   - serverless-ssm-fetch
+  - serverless-python-requirements
 
 custom:
   serverlessSsmFetch:
@@ -408,5 +414,7 @@ custom:
   cognitoUserPoolArn:
     dev: 'arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_7Npn25c8F'
     prod: 'arn:aws:cognito-idp:us-east-1:588257415519:userpool/us-east-1_XL73TDAKs'
+  pythonRequirements:
+    requirementsFile: requirements.txt
 
 configValidationMode: error

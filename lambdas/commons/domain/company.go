@@ -7,6 +7,7 @@ import (
 
 type Company struct {
 	ID         string             `json:"id"`
+	Cuit       string             `json:"cuit"`
 	Name       string             `json:"name"`
 	Status     ConfirmationStatus `json:"status" default:"Approved"`
 	UsersLimit int                `json:"users_limit" default:"0"`

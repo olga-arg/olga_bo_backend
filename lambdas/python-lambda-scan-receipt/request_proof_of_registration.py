@@ -1,9 +1,8 @@
 import xml.etree.ElementTree as ET
-import httpx
+import requests
 import time
 
-
-async def request_registration(token, sign, olga_cuit, company_cuit):
+def request_registration(token, sign, olga_cuit, company_cuit):
     url = "https://aws.afip.gov.ar/sr-padron/webservices/personaServiceA5"
     headers = {
         "Content-Type": "text/xml;charset=utf-8",
@@ -27,55 +26,52 @@ async def request_registration(token, sign, olga_cuit, company_cuit):
 
     for attempt in range(max_retries):
         try:
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                response = await client.post(url, data=soap_request, headers=headers)
-                root = ET.fromstring(response.content)
+            response = requests.post(url, data=soap_request, headers=headers, timeout=timeout)
+            root = ET.fromstring(response.content)
 
-                # Handle error message
-                error_message = root.find(".//faultstring")
-                if error_message is not None:
-                    if "No existe persona con ese Id" in error_message.text:
-                        print(
-                            "Afip response: No existe persona con ese Id: ", company_cuit)
-                    else:
-                        print("Afip response: ", error_message.text)
-                    return None, None
-
-                # Check if activities exist
-                activities = root.findall(".//actividad")
-                if activities:
-                    for activity in activities:
-                        if activity.find('orden').text == "1":
-                            activity_id = activity.find('idActividad').text
-                            break
+            # Handle error message
+            error_message = root.find(".//faultstring")
+            if error_message is not None:
+                if "No existe persona con ese Id" in error_message.text:
+                    print(
+                        "Afip response: No existe persona con ese Id: ", company_cuit)
                 else:
-                    activity_id = None
+                    print("Afip response: ", error_message.text)
+                return None, None
 
-                person_element = root.findall(".//tipoPersona")
-                if person_element:
-                    person = person_element[0].text
-                else:
-                    person = None
+            # Check if activities exist
+            activities = root.findall(".//actividad")
+            if activities:
+                for activity in activities:
+                    if activity.find('orden').text == "1":
+                        activity_id = activity.find('idActividad').text
+                        break
+            else:
+                activity_id = None
 
-                if person == "FISICA":
-                    comapny_name_element = root.find(".//nombre")
-                    company_last_name_element = root.find(".//apellido")
-                    company_name = f"{comapny_name_element.text} {company_last_name_element.text}" if comapny_name_element is not None else None
-                else:
-                    company_name_element = root.find(".//razonSocial")
-                    company_name = company_name_element.text if company_name_element is not None else None
+            person_element = root.findall(".//tipoPersona")
+            if person_element:
+                person = person_element[0].text
+            else:
+                person = None
 
-                return activity_id, company_name
+            if person == "FISICA":
+                comapny_name_element = root.find(".//nombre")
+                company_last_name_element = root.find(".//apellido")
+                company_name = f"{comapny_name_element.text} {company_last_name_element.text}" if comapny_name_element is not None else None
+            else:
+                company_name_element = root.find(".//razonSocial")
+                company_name = company_name_element.text if company_name_element is not None else None
 
-        except httpx.ReadTimeout:
-            if attempt < max_retries - 1:  # if it's not the last attempt
+            return activity_id, company_name
+
+        except requests.exceptions.ReadTimeout:
+            if attempt < max_retries - 1:
                 sleep_duration = backoff_factor * (2 ** attempt)
                 time.sleep(sleep_duration)
-                continue
             else:
                 return None, None
     return None, None
-
 
 def afip_categories(id):
     categories = {'011111': 'Comidas y Bebidas', '011112': 'Comidas y Bebidas', '011119': 'Comidas y Bebidas', '011121': 'Comidas y Bebidas', '011129': 'Comidas y Bebidas', '011130': 'Comidas y Bebidas', '011211': 'Comidas y Bebidas', '011291': 'Comidas y Bebidas', '011299': 'Comidas y Bebidas', '011310': 'Comidas y Bebidas', '011321': 'Comidas y Bebidas', '011329': 'Comidas y Bebidas', '011331': 'Comidas y Bebidas', '011341': 'Comidas y Bebidas', '011342': 'Comidas y Bebidas', '011400': 'Comidas y Bebidas', '011501': 'Comidas y Bebidas', '011509': 'Comidas y Bebidas', '011911': 'Comidas y Bebidas', '011912': 'Comidas y Bebidas', '011990': 'Comidas y Bebidas', '012110': 'Comidas y Bebidas', '012121': 'Comidas y Bebidas', '012200': 'Comidas y Bebidas', '012311': 'Comidas y Bebidas', '012319': 'Comidas y Bebidas', '012320': 'Comidas y Bebidas', '012410': 'Comidas y Bebidas', '012420': 'Comidas y Bebidas', '012490': 'Comidas y Bebidas', '012510': 'Comidas y Bebidas', '012590': 'Comidas y Bebidas', '012600': 'Comidas y Bebidas', '012701': 'Comidas y Bebidas', '012709': 'Comidas y Bebidas', '012800': 'Comidas y Bebidas', '012900': 'Comidas y Bebidas', '013011': 'Comidas y Bebidas', '013012': 'Comidas y Bebidas', '013013': 'Comidas y Bebidas', '013019': 'Comidas y Bebidas', '013020': 'Indumentaria', '014113': 'Comidas y Bebidas', '014114': 'Comidas y Bebidas', '014115': 'Comisiones y Cargos', '014121': 'Comidas y Bebidas', '014211': 'Otros', '014300': 'Otros', '014410': 'Comidas y Bebidas', '014420': 'Comidas y Bebidas', '014430': 'Comidas y Bebidas', '014440': 'Otros', '014510': 'Otros', '014520': 'Otros', '014610': 'Comidas y Bebidas', '014620': 'Comidas y Bebidas', '014710': 'Otros', '014720': 'Otros', '014810': 'Otros', '014820': 'Otros', '014910': 'Otros', '014920': 'Otros', '014930': 'Otros', '014990': 'Shopping', '016111': 'Cuentas y Servicios', '016112': 'Transporte', '016113': 'Cuentas y Servicios', '016119': 'Cuentas y Servicios', '016120': 'Cuentas y Servicios', '016130': 'Cuentas y Servicios', '016140': 'Cuentas y Servicios', '016150': 'Cuentas y Servicios', '016190': 'Cuentas y Servicios', '016210': 'Cuentas y Servicios', '016220': 'Cuentas y Servicios', '016230': 'Cuentas y Servicios', '016291': 'Cuentas y Servicios', '016292': 'Otros', '016299': 'Cuentas y Servicios', '017010': 'Otros', '017020': 'Cuentas y Servicios', '021010': 'Otros', '021020': 'Otros', '021030': 'Otros', '022010': 'Shopping', '022020': 'Shopping', '024010': 'Cuentas y Servicios', '024020': 'Cuentas y Servicios', '031110': 'Otros', '031120': 'Shopping', '031130': 'Otros', '031200': 'Otros', '031300': 'Cuentas y Servicios', '032000': 'Otros', '051000': 'Otros', '052000': 'Otros', '061000': 'Otros', '062000': 'Otros', '071000': 'Otros', '072100': 'Otros', '072910': 'Otros', '072990': 'Otros', '081100': 'Otros', '081200': 'Otros', '081300': 'Otros', '081400': 'Otros', '089110': 'Inversiones', '089120': 'Shopping', '089200': 'Otros', '089300': 'Otros', '089900': 'Otros', '091000': 'Cuentas y Servicios', '099000': 'Cuentas y Servicios', '101011': 'Comidas y Bebidas', '101012': 'Comidas y Bebidas', '101013': 'Comidas y Bebidas', '101020': 'Comidas y Bebidas', '101030': 'Otros', '101040': 'Comidas y Bebidas', '101091': 'Otros', '101099': 'Comidas y Bebidas', '102001': 'Comidas y Bebidas', '102002': 'Comidas y Bebidas', '102003': 'Comidas y Bebidas', '103011': 'Comidas y Bebidas', '103012': 'Otros', '103020': 'Comidas y Bebidas', '103030': 'Comidas y Bebidas', '103091': 'Hogar', '103099': 'Comidas y Bebidas', '104011': 'Otros', '104012': 'Otros', '104013': 'Otros', '104020': 'Otros', '105010': 'Comidas y Bebidas', '105020': 'Comidas y Bebidas', '105030': 'Otros', '105090': 'Shopping', '106110': 'Comidas y Bebidas', '106120': 'Comidas y Bebidas', '106131': 'Comidas y Bebidas', '106139': 'Comidas y Bebidas', '106200': 'Comidas y Bebidas', '107110': 'Otros', '107121': 'Shopping', '107129': 'Shopping', '107200': 'Otros', '107301': 'Otros', '107309': 'Shopping', '107410': 'Otros', '107420': 'Otros', '107500': 'Comidas y Bebidas', '107911': 'Comidas y Bebidas', '107912': 'Otros', '107920': 'Hogar', '107930': 'Otros', '107991': 'Otros', '107992': 'Otros', '107999': 'Shopping', '108000': 'Comidas y Bebidas', '109000': 'Comidas y Bebidas', '110100': 'Comidas y Bebidas', '110211': 'Otros', '110212': 'Comidas y Bebidas', '110290': 'Comidas y Bebidas', '110300': 'Comidas y Bebidas', '110411': 'Otros', '110412': 'Otros', '110420': 'Comidas y Bebidas', '110491': 'Otros', '110492': 'Comidas y Bebidas', '120010': 'Hogar', '120091': 'Otros', '120099': 'Shopping', '131110': 'Hogar', '131120': 'Hogar', '131131': 'Otros', '131132': 'Otros', '131139': 'Otros', '131201': 'Otros', '131202': 'Otros', '131209': 'Otros', '131300': 'Shopping', '139100': 'Otros', '139201': 'Otros', '139202': 'Indumentaria', '139203': 'Shopping', '139204': 'Shopping', '139209': 'Shopping', '139300': 'Otros', '139400': 'Otros', '139900': 'Shopping', '141110': 'Indumentaria', '141120': 'Indumentaria', '141130': 'Otros', '141140': 'Otros', '141191': 'Indumentaria', '141199': 'Otros', '141201': 'Indumentaria', '141202': 'Otros', '142000': 'Shopping', '143010': 'Otros', '143020': 'Shopping', '149000': 'Cuentas y Servicios', '151100': 'Otros', '151200': 'Shopping', '152011': 'Indumentaria', '152021': 'Indumentaria', '152031': 'Indumentaria', '152040': 'Indumentaria', '161001': 'Otros', '161002': 'Otros', '162100': 'Otros', '162201': 'Hogar', '162202': 'Otros', '162300': 'Otros', '162901': 'Otros', '162902': 'Shopping', '162903': 'Shopping', '162909': 'Shopping', '170101': 'Otros', '170102': 'Otros', '170201': 'Otros', '170202': 'Otros', '170910': 'Shopping', '170990': 'Shopping', '181101': 'Suscripciones', '181109': 'Suscripciones', '181200': 'Cuentas y Servicios', '182000': 'Otros', '191000': 'Shopping', '192000': 'Shopping', '201110': 'Salud y cuidado personal', '201120': 'Otros', '201130': 'Otros', '201140': 'Transporte', '201180': 'Otros', '201190': 'Otros', '201210': 'Otros', '201220': 'Transporte', '201300': 'Inversiones', '201401': 'Otros', '201409': 'Otros', '202101': 'Shopping', '202200': 'Shopping', '202311': 'Hogar', '202312': 'Otros', '202320': 'Salud y cuidado personal', '202906': 'Shopping', '202907': 'Otros', '202908': 'Shopping', '203000': 'Otros', '204000': 'Cuentas y Servicios', '210010': 'Shopping', '210020': 'Mascotas', '210030': 'Otros', '210090': 'Shopping', '221110': 'Otros', '221120': 'Otros', '221901': 'Otros', '221909': 'Shopping', '222010': 'Otros', '222090': 'Shopping', '231010': 'Otros', '231020': 'Otros', '231090': 'Shopping', '239100': 'Shopping', '239201': 'Otros', '239202': 'Otros', '239209': 'Shopping', '239310': 'Shopping', '239391': 'Otros', '239399': 'Shopping', '239410': 'Otros', '239421': 'Otros', '239422': 'Otros', '239510': 'Otros', '239591': 'Otros', '239592': 'Hogar', '239593': 'Shopping', '239600': 'Otros', '239900': 'Shopping', '241001': 'Otros', '241009': 'Shopping', '242010': 'Otros', '242090': 'Shopping', '243100': 'Otros', '243200': 'Otros', '251101': 'Otros', '251102': 'Shopping', '251200': 'Otros', '251300': 'Otros', '252000': 'Otros', '259100': 'Otros', '259200': 'Otros', '259301': 'Indumentaria', '259302': 'Shopping', '259309': 'Shopping', '259910': 'Otros', '259991': 'Otros', '259992': 'Otros', '259993': 'Shopping', '259999': 'Shopping', '261000': 'Electrónica', '262000': 'Shopping', '263000': 'Otros', '264000': 'Shopping', '265101': 'Otros', '265102': 'Otros', '265200': 'Otros', '266010': 'Electrónica', '266090': 'Otros', '267001': 'Indumentaria', '267002': 'Indumentaria', '268000': 'Otros', '271010': 'Otros', '271020': 'Otros', '272000': 'Otros', '273110': 'Salud y cuidado personal', '273190': 'Otros', '274000': 'Otros', '275010': 'Otros', '275020': 'Indumentaria', '275091': 'Otros', '275092': 'Otros', '275099': 'Otros', '279000': 'Otros', '281100': 'Transporte', '281201': 'Otros', '281301': 'Otros', '281400': 'Otros', '281500': 'Hogar', '281600': 'Otros', '281700': 'Otros', '281900': 'Otros', '282110': 'Otros', '282120': 'Otros', '282130': 'Otros', '282200': 'Otros', '282300': 'Otros', '282400': 'Hogar', '282500': 'Comidas y Bebidas', '282600': 'Shopping', '282901': 'Otros', '282909': 'Otros', '291000': 'Transporte', '292000': 'Transporte', '293011': 'Otros', '293090': 'Indumentaria', '301100': 'Hogar', '301200': 'Hogar', '302000': 'Transporte', '303000': 'Hogar', '309100': 'Transporte', '309200': 'Transporte', '309900': 'Transporte', '310010': 'Hogar', '310020': 'Hogar', '310030': 'Otros', '321011': 'Shopping', '321012': 'Otros', '321020': 'Otros', '322001': 'Entretenimiento', '323001': 'Entretenimiento', '324000': 'Entretenimiento', '329010': 'Shopping', '329020': 'Otros', '329030': 'Otros', '329040': 'Indumentaria', '329090': 'Otros', '331101': 'Hogar', '331210': 'Hogar', '331220': 'Hogar', '331290': 'Hogar', '331400': 'Hogar', '331900': 'Hogar', '332000': 'Otros', '351110': 'Otros', '351120': 'Otros', '351130': 'Otros', '351190': 'Otros', '351201': 'Transporte', '351310': 'Shopping', '351320': 'Otros', '352010': 'Otros', '352020': 'Transporte', '353001': 'Otros', '360010': 'Otros', '360020': 'Otros', '370000': 'Cuentas y Servicios', '381100': 'Transporte', '381200': 'Transporte', '382010': 'Otros', '382020': 'Otros', '390000': 'Cuentas y Servicios', '410011': 'Hogar', '410021': 'Hogar', '421000': 'Hogar', '422100': 'Otros', '422200': 'Hogar', '429010': 'Hogar', '429090': 'Hogar', '431100': 'Otros', '431210': 'Hogar', '432110': 'Transporte', '432190': 'Otros', '432200': 'Otros', '432910': 'Otros', '432920': 'Otros', '432990': 'Otros', '433010': 'Otros', '433020': 'Otros', '433030': 'Otros', '433040': 'Hogar', '433090': 'Otros', '439100': 'Hogar', '439910': 'Otros', '439990': 'Hogar', '451110': 'Shopping', '451190': 'Transporte', '451210': 'Shopping', '451290': 'Transporte', '452101': 'Transporte', '452210': 'Hogar', '452220': 'Hogar', '452300': 'Hogar', '452401': 'Hogar', '452500': 'Otros', '452600': 'Hogar', '452700': 'Hogar', '452800': 'Hogar', '452910': 'Hogar', '452990': 'Hogar', '453100': 'Indumentaria', '453210': 'Shopping', '453220': 'Shopping', '453291': 'Indumentaria', '453292': 'Indumentaria', '454010': 'Indumentaria', '454020': 'Transporte', '461011': 'Comidas y Bebidas', '461012': 'Comisiones y Cargos', '461013': 'Comidas y Bebidas', '461014': 'Comidas y Bebidas', '461019': 'Comisiones y Cargos', '461021': 'Comidas y Bebidas', '461022': 'Comidas y Bebidas', '461029': 'Comisiones y Cargos', '461031': 'Comidas y Bebidas', '461032': 'Comidas y Bebidas', '461039': 'Comidas y Bebidas', '461040': 'Transporte', '461092': 'Hogar', '461093': 'Comisiones y Cargos', '461094': 'Comisiones y Cargos', '461095': 'Educación', '461099': 'Comisiones y Cargos', '462110': 'Otros', '462120': 'Shopping', '462131': 'Comidas y Bebidas', '462132': 'Otros', '462190': 'Shopping', '462201': 'Shopping', '462209': 'Shopping', '463111': 'Shopping', '463112': 'Comidas y Bebidas', '463121': 'Comidas y Bebidas', '463129': 'Shopping', '463130': 'Comidas y Bebidas', '463140': 'Comidas y Bebidas', '463151': 'Shopping', '463152': 'Shopping', '463153': 'Shopping', '463154': 'Comidas y Bebidas', '463159': 'Shopping', '463160': 'Shopping', '463170': 'Comidas y Bebidas', '463180': 'Supermercado', '463191': 'Comidas y Bebidas', '463199': 'Shopping', '463211': 'Comidas y Bebidas', '463212': 'Comidas y Bebidas', '463219': 'Comidas y Bebidas', '463220': 'Comidas y Bebidas', '463300': 'Shopping', '464111': 'Shopping', '464112': 'Shopping', '464113': 'Indumentaria', '464114': 'Shopping', '464119': 'Shopping', '464121': 'Shopping', '464122': 'Shopping', '464129': 'Indumentaria', '464130': 'Indumentaria', '464141': 'Shopping', '464142': 'Shopping', '464149': 'Shopping', '464150': 'Indumentaria', '464211': 'Educación', '464212': 'Suscripciones', '464221': 'Shopping', '464222': 'Shopping', '464223': 'Shopping', '464310': 'Shopping', '464320': 'Salud y cuidado personal', '464330': 'Shopping', '464340': 'Mascotas', '464410': 'Salud y cuidado personal',

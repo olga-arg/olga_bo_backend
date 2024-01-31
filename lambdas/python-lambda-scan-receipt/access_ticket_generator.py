@@ -1,8 +1,6 @@
-import aiofiles
 from datetime import datetime, timedelta
 
-
-async def generate_access_ticket(access_ticket_name):
+def generate_access_ticket(access_ticket_name):
     uniqueId = 190926
     argentina_offset = timedelta(hours=-3)
     now = datetime.utcnow() + argentina_offset
@@ -24,8 +22,8 @@ async def generate_access_ticket(access_ticket_name):
         <service>ws_sr_constancia_inscripcion</service>
     </loginTicketRequest>'''
 
-    # Save the XML content to a file asynchronously
-    async with aiofiles.open(f'/tmp/{access_ticket_name}', 'w') as file:
-        await file.write(xml_content)
+    # Save the XML content to a file synchronously
+    with open(f'/tmp/{access_ticket_name}', 'w') as file:
+        file.write(xml_content)
 
     return datetime.utcnow()

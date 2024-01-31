@@ -1,17 +1,15 @@
 import xml.etree.ElementTree as ET
-import httpx
-import aiofiles
+import requests
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
-
-async def login(cms_file_name_path):
+def login(cms_file_name_path):
     url = "https://wsaa.afip.gov.ar/ws/services/LoginCms"
 
-    # Asynchronously read the content of the file and omit the first and last lines
-    async with aiofiles.open(f"/tmp/{cms_file_name_path}", "r") as file:
-        lines = await file.readlines()
+    # Leer sincrónicamente el contenido del archivo y omitir la primera y última líneas
+    with open(f"/tmp/{cms_file_name_path}", "r") as file:
+        lines = file.readlines()
         xml_content = "".join(lines[1:-1])
 
     headers = {
@@ -19,7 +17,7 @@ async def login(cms_file_name_path):
         "SOAPAction": "",
     }
 
-    # Construct the SOAP request with the content from the file
+    # Construir la solicitud SOAP con el contenido del archivo
     soap_request = f'''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsaa="http://wsaa.view.sua.dvadac.desein.afip.gov">
         <soapenv:Header/>
         <soapenv:Body>
@@ -29,16 +27,14 @@ async def login(cms_file_name_path):
         </soapenv:Body>
     </soapenv:Envelope>'''
 
-    timeout = httpx.Timeout(30.0, read=30.0)  # Ejemplo: timeout total de 30 segundos, timeout de lectura de 30 segundos
-    async with httpx.AsyncClient(timeout=timeout) as client:
-        try:
-            response = await client.post(url, data=soap_request, headers=headers)
-        except httpx.ReadTimeout:
-            logging.error("Timeout error when trying to POST to the URL: %s", url)
-            raise
+    timeout = 30.0  # Timeout total de 30 segundos
+    try:
+        response = requests.post(url, data=soap_request, headers=headers, timeout=timeout)
+    except requests.exceptions.ReadTimeout:
+        logging.error("Timeout error when trying to POST to the URL: %s", url)
+        raise
 
     root = ET.fromstring(response.content.decode("utf-8"))
-    print(response.content.decode("utf-8"))
 
     login_cms_return = root.find(".//{http://wsaa.view.sua.dvadac.desein.afip.gov}loginCmsReturn")
 

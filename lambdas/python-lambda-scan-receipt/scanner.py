@@ -1,4 +1,7 @@
 import httpx
+import os
+import psycopg2
+import requests
 
 
 def correct_amount_format(amount: str) -> str:
@@ -23,48 +26,85 @@ def correct_amount_format_v2(amount: str) -> str:
     return correct_amount_format(amount)
 
 
-async def get_receipt_info(api_key, file_url):
+def get_receipt_info(api_key, file_url, company_id):
     try:
-        async with httpx.AsyncClient() as client:
+        db_user = os.environ['DB_USER']
+        db_password = os.environ['DB_PASSWORD']
+        db_name = os.environ['DB_NAME']
+        db_host_reader = os.environ['DB_HOST_READER']
+        db_port = os.environ['DB_PORT']
 
-            response = await client.post(
-                'https://api.mindee.net/v1/products/mindee/argentine-expense-receipt/v1/predict',
-                headers={"Authorization": f"Token {api_key}"},
-                data={'document': file_url},
-                timeout=30.0
-            )
-            response.raise_for_status()  # Raise an error for HTTP errors
-            result = response.json()
+        # Establecer la conexión con la base de datos
+        conn = psycopg2.connect(
+            user=db_user,
+            password=db_password,
+            dbname=db_name,
+            host=db_host_reader,
+            port=db_port
+        )
 
-            # Extracting the necessary fields from the result
-            info = {}
+        # Crear un cursor para ejecutar consultas
+        cur = conn.cursor()
 
-            predictions = result['document']['inference']['prediction']
+        # Ejecutar la consulta SQL
+        sql = f"SELECT cuit FROM companies WHERE id = '{company_id}' LIMIT 1"
+        cur.execute(sql)
 
-            fields = ['business_name', 'cuit_number', 'receipt_number', 'receipt_or_ticket_type', 'receipt_datetime', 'total_amount']
+        # Obtener el resultado
+        company_cuit = cur.fetchone()
+        if company_cuit:
+            company_cuit = company_cuit[0]
+        
+        print('Company cuit: ', company_cuit)
 
-            for field in fields:
-                if predictions[field]['value']:
-                    content = predictions[field]['value']
-                    if field == 'cuit_number':
-                        content = ''.join(filter(lambda i: i.isdigit(), content))
+        # Cerrar el cursor y la conexión
+        cur.close()
+        conn.close()
 
-                    if field == 'total_amount':
-                        print(type(content), content)
-                        content = correct_amount_format_v2(str(content))
-                   
-                    info[field] = content
+        if not company_cuit:
+            raise ValueError("Company cuit not found")
 
-            # If 'cuit' key is not present or its length is not 11, raise an error
-            if 'cuit_number' not in info or len(info['cuit_number']) != 11:
-                raise ValueError("Cuit not visible")
+        response = requests.post(
+            'https://api.mindee.net/v1/products/mindee/argentine-expense-receipt/v1/predict',
+            headers={"Authorization": f"Token {api_key}"},
+            data={'document': file_url},
+            timeout=30.0
+        )
+        response.raise_for_status()  # Raise an error for HTTP errors
+        result = response.json()
 
-            if 'CONSUMIDOR' or 'FINAL' in info['receipt_or_ticket_type'].upper():
-                info['receipt_or_ticket_type'] = 'B'
+        # Extracting the necessary fields from the result
+        info = {}
 
-            print('FINISHED', info)
+        predictions = result['document']['inference']['prediction']
 
-            return info
+        fields = ['business_name', 'cuit_number', 'receipt_number', 'receipt_or_ticket_type', 'receipt_datetime', 'total_amount']
+
+        for field in fields:
+            if predictions[field]['value']:
+                content = predictions[field]['value']
+                if field == 'cuit_number':
+                    content = ''.join(filter(lambda i: i.isdigit(), content))
+
+                if field == 'total_amount':
+                    print(type(content), content)
+                    content = correct_amount_format_v2(str(content))
+                
+                info[field] = content
+        
+        if info['cuit_number'] == company_cuit:
+            raise ValueError("Cuit not visible")
+
+        # If 'cuit' key is not present or its length is not 11, raise an error
+        if 'cuit_number' not in info or len(info['cuit_number']) != 11:
+            raise ValueError("Cuit not visible")
+
+        if 'CONSUMIDOR' or 'FINAL' in info['receipt_or_ticket_type'].upper():
+            info['receipt_or_ticket_type'] = 'B'
+
+        print('Receipt info: ', info)
+
+        return info
 
     except httpx.HTTPError:
         raise ValueError("HTTP error occurred while fetching receipt info.")
