@@ -11,22 +11,25 @@ const (
 	Pending ConfirmationStatus = iota
 	Canceled
 	Approved
-)
-
-const (
-	Created ConfirmationStatus = iota
+	Created
 	Deleted
-	Awating
+	Exported
 )
 
 func ParseConfirmationStatus(s string) ConfirmationStatus {
 	switch s {
 	case "Pending":
 		return Pending
+	case "Canceled":
+		return Canceled
+	case "Approved":
+		return Approved
 	case "Created":
 		return Created
 	case "Deleted":
 		return Deleted
+	case "Exported":
+		return Exported
 	default:
 		return Created
 	}

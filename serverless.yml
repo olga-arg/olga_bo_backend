@@ -45,6 +45,23 @@ functions:
       - httpApi:
           path: /company
           method: post
+  go-lambda-create-category:
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-create-category/go-lambda-create-category.zip
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+      - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
+    events:
+      - httpApi:
+          path: /company/category
+          method: post
   go-lambda-create-user:
     handler: bootstrap
     package:
@@ -132,6 +149,23 @@ functions:
       - httpApi:
           path: /teams
           method: post
+  go-lambda-get-categories:
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-get-categories/go-lambda-get-categories.zip
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_READER
+      - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
+    events:
+      - httpApi:
+          path: /company/category
+          method: get
   go-lambda-get-teams:
     handler: bootstrap
     package:
