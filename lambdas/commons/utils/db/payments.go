@@ -73,10 +73,38 @@ func (r *PaymentRepository) GetAllPayments(filters map[string]string, companyId 
 }
 
 func (r *PaymentRepository) UpdatePayment(newPayment *domain.Payment, companyId string) error {
-	query := r.Db.Scopes(getPaymentTable(companyId)).Save(newPayment)
+	// First we need to get the payment from the database
+	query := r.Db.Scopes(getPaymentTable(companyId)).Where("id = ?", newPayment.ID)
+	// Now we need to know the amount that was previously set
+	var oldPayment domain.Payment
+	err := query.First(&oldPayment).Error
+	if err != nil {
+		fmt.Println("Error getting payment by ID:", err)
+		return errors.Wrap(err, "failed to get payment by ID")
+	}
+	// Now we can update the payment
+	query = r.Db.Scopes(getPaymentTable(companyId)).Save(newPayment)
 	if query.Error != nil {
 		fmt.Println("Error updating payment:", query.Error)
 		return errors.Wrap(query.Error, "failed to update payment")
+	}
+	// Now we need to update the user's monthly spending
+	if oldPayment.Amount != newPayment.Amount {
+		// We need to get the user
+		var user domain.User
+		query = r.Db.Scopes(getUserTable(companyId)).Where("id = ?", newPayment.UserID)
+		err = query.First(&user).Error
+		if err != nil {
+			fmt.Println("Error getting user by ID:", err)
+			return errors.Wrap(err, "failed to get user by ID")
+		}
+		// Now we can update the user's monthly spending
+		user.MonthlySpending += newPayment.Amount - oldPayment.Amount
+		query = r.Db.Scopes(getUserTable(companyId)).Save(&user)
+		if query.Error != nil {
+			fmt.Println("Error updating user:", query.Error)
+			return errors.Wrap(query.Error, "failed to update user")
+		}
 	}
 	return nil
 }
