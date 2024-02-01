@@ -19,16 +19,20 @@ import (
 type Processor interface {
 	UpdatePayment(ctx context.Context, newPayment *domain.Payment, companyId string) error
 	GetPayment(ctx context.Context, paymentID, companyId string) (*domain.Payment, error)
-	ValidatePaymentInput(ctx context.Context, input *dto.UpdatePaymentInput, request events.APIGatewayProxyRequest, companyId string) (*domain.Payment, error)
+	ValidatePaymentInput(ctx context.Context, input *dto.UpdatePaymentInput, request events.APIGatewayProxyRequest, companyId, email string) (*domain.Payment, error)
 }
 
 type processor struct {
-	paymentStorage *db.PaymentRepository
+	paymentStorage db.PaymentRepository
+	teamStorage    db.TeamRepository
+	userStorage    db.UserRepository
 }
 
-func NewProcessor(storage *db.PaymentRepository) Processor {
+func NewProcessor(paymentRepo db.PaymentRepository, teamRepo db.TeamRepository, userRepo db.UserRepository) Processor {
 	return &processor{
-		paymentStorage: storage,
+		paymentStorage: paymentRepo,
+		teamStorage:    teamRepo,
+		userStorage:    userRepo,
 	}
 }
 
@@ -49,7 +53,7 @@ func (p *processor) GetPayment(ctx context.Context, paymentID, companyId string)
 	return user, nil
 }
 
-func (p *processor) ValidatePaymentInput(ctx context.Context, input *dto.UpdatePaymentInput, request events.APIGatewayProxyRequest, companyId string) (*domain.Payment, error) {
+func (p *processor) ValidatePaymentInput(ctx context.Context, input *dto.UpdatePaymentInput, request events.APIGatewayProxyRequest, companyId, email string) (*domain.Payment, error) {
 	fmt.Println("Validating input")
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		return nil, fmt.Errorf("invalid request body: %s", err.Error())
@@ -60,8 +64,40 @@ func (p *processor) ValidatePaymentInput(ctx context.Context, input *dto.UpdateP
 		fmt.Println("error getting payment", err.Error())
 		return nil, fmt.Errorf("failed to get payment")
 	}
+
+	user, err := p.userStorage.GetUserIdByEmail(email, companyId)
+	if err != nil {
+		fmt.Println("Error getting user: ", err)
+		return nil, err
+	}
+
 	if input.Amount != nil {
 		payment.Amount = *input.Amount
+
+		// Update the monthly spending of the user
+		userTeams, err := p.teamStorage.GetTeamByUserID(user.ID, companyId)
+		fmt.Println("User teams: ", userTeams)
+		if err != nil {
+			fmt.Println("Error getting user teams ", err)
+			return nil, err
+		}
+		// If the user is part of a team, update the team's monthly spending
+		if len(userTeams) > 0 {
+			fmt.Println("Updating team monthly spending")
+			for _, userTeam := range userTeams {
+				team, err := p.teamStorage.GetTeamByID(userTeam.TeamID, companyId)
+				if err != nil {
+					fmt.Println("Error getting team: ", err)
+					return nil, err
+				}
+				amount := *input.Amount
+				team.MonthlySpending += int(amount)
+				if err := p.teamStorage.UpdateTeamMonthlySpending(team.MonthlySpending, companyId); err != nil {
+					fmt.Println("Error updating team monthly spending: ", err)
+					return nil, err
+				}
+			}
+		}
 	}
 	if input.Status != nil {
 		payment.Status = domain.ConfirmationStatus(*input.Status)
