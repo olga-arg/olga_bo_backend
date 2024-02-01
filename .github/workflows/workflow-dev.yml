@@ -41,6 +41,7 @@ jobs:
           npm install serverless
           npx serverless plugin install -n serverless-domain-manager --stage dev
           npx serverless plugin install -n serverless-ssm-fetch --stage dev
+          npx serverless plugin install -n serverless-python-requirements --stage dev
           npx serverless deploy --stage dev
           #npx serverless create_domain
 
@@ -54,6 +55,7 @@ jobs:
           npm install serverless
           npx serverless plugin install -n serverless-domain-manager --stage dev
           npx serverless plugin install -n serverless-ssm-fetch --stage dev
+          npx serverless plugin install -n serverless-python-requirements --stage dev
           if [ -n "$(ls -A lambdas/bin/)" ]; then
             for f in lambdas/bin/*; do
               if [ -f "$f" ]; then
