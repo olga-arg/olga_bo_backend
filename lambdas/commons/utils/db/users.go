@@ -124,3 +124,20 @@ func (r *UserRepository) GetUserInformation(email, companyId string) (domain.Use
 	}
 	return user, nil
 }
+
+func (r *UserRepository) UpdateUserStatus(email, companyId string) error {
+	// Use get user id by email
+	user, err := r.GetUserIdByEmail(email, companyId)
+	if err != nil {
+		fmt.Println("Error getting user id by email:", err)
+		return errors.Wrap(err, "failed to get user id by email")
+	}
+
+	user.Status = domain.Confirmed
+	err = r.UpdateUser(user, companyId)
+	if err != nil {
+		fmt.Println("Error updating user status:", err)
+		return errors.Wrap(err, "failed to update user status")
+	}
+	return nil
+}

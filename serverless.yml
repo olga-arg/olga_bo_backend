@@ -275,6 +275,19 @@ functions:
       - httpApi:
           path: /me
           method: get
+  go-lambda-post-confirmation:
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-post-confirmation/go-lambda-post-confirmation.zip
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_READER
+      - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
   python-lambda-scan-receipt:
     handler: handler.lambda_handler
     package: 
@@ -352,6 +365,20 @@ resources:
       Type: "AWS::Logs::LogGroup"
       Properties:
         LogGroupName: ${sls:stage}-cuit-change
+    LambdaInvokePermissionDev:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: "lambda:InvokeFunction"
+        FunctionName: olga-backend-${sls:stage}-go-lambda-post-confirmation
+        Principal: "lambda.amazonaws.com"
+        SourceArn: "arn:aws:lambda:us-east-1:588257415519:function:olgaAuthResourcePostAuthentication-dev"
+#    LambdaInvokePermissionProd:
+#      Type: "AWS::Lambda::Permission"
+#      Properties:
+#        Action: "lambda:InvokeFunction"
+#        FunctionName: olga-backend-${sls:stage}-go-lambda-post-confirmation
+#        Principal: "lambda.amazonaws.com"
+#        SourceArn: "arn:aws:lambda:us-east-1:588257415519:function:olgaAuthResourcePostAuthentication-dev"
 
     ### Aurora Serverless Cluster and Instance ###
     #    postgresCluster:
