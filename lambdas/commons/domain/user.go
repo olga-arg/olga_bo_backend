@@ -42,6 +42,7 @@ func NewUser(name, surname, email string) (*User, error) {
 }
 
 type UpdateUserRequest struct {
-	Email     string `json:"email"`
 	CompanyId string `json:"company_id"`
+	Email     string `json:"email"`
+	Username  string `json:"username"`
 }

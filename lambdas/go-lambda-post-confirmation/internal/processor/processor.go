@@ -1,13 +1,11 @@
 package processor
 
 import (
-	"commons/domain"
 	"commons/utils/db"
-	"encoding/json"
 )
 
 type Processor interface {
-	PostConfirmation(requestBody string) error
+	PostConfirmation(companyId, email, username string) error
 }
 
 type processor struct {
@@ -20,21 +18,14 @@ func NewProcessor(storage *db.UserRepository) Processor {
 	}
 }
 
-func (p *processor) PostConfirmation(request string) error {
-	// Define una estructura para el JSON, por ejemplo:
-	var input domain.UpdateUserRequest
-
-	// Deserializa el JSON en la estructura
-	err := json.Unmarshal([]byte(request), &input)
+func (p *processor) PostConfirmation(companyId, email, username string) error {
+	err := p.userStorage.UpdateUserStatus(companyId, email)
 	if err != nil {
 		return err
 	}
 
-	// Llama a UpdateUserStatus pasando el company id y el email
-	err = p.userStorage.UpdateUserStatus(input.CompanyId, input.Email)
-	if err != nil {
-		return err
-	}
+	// Update user email to verified in cognito
+	err = p.userStorage.UpdateEmailVerified(username)
 
 	return nil
 }

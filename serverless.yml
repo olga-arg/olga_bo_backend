@@ -17,6 +17,7 @@ provider:
           Action:
             - cognito-idp:AdminGetUser
             - cognito-idp:AdminCreateUser
+            - cognito-idp:AdminUpdateUserAttributes
           Resource: ${self:custom.cognitoUserPoolArn.${sls:stage}}
         - Effect: 'Allow'
           Action:

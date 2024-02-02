@@ -3,8 +3,12 @@ package db
 import (
 	"commons/domain"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"os"
 )
 
 type UserRepository struct {
@@ -125,7 +129,7 @@ func (r *UserRepository) GetUserInformation(email, companyId string) (domain.Use
 	return user, nil
 }
 
-func (r *UserRepository) UpdateUserStatus(email, companyId string) error {
+func (r *UserRepository) UpdateUserStatus(companyId, email string) error {
 	// Use get user id by email
 	user, err := r.GetUserIdByEmail(email, companyId)
 	if err != nil {
@@ -139,5 +143,43 @@ func (r *UserRepository) UpdateUserStatus(email, companyId string) error {
 		fmt.Println("Error updating user status:", err)
 		return errors.Wrap(err, "failed to update user status")
 	}
+	return nil
+}
+
+func (r *UserRepository) UpdateEmailVerified(userName string) error {
+	fmt.Println("Updating email verified status for user:", userName)
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1"),
+	})
+	if err != nil {
+		fmt.Println("Error creating session:", err)
+		return err
+	}
+
+	userPoolId := os.Getenv("USER_POOL_ID")
+
+	// Crear un nuevo cliente de Cognito Identity Provider
+	cognitoClient := cognitoidentityprovider.New(sess)
+
+	// Preparar los parámetros para actualizar el atributo email_verified
+	input := &cognitoidentityprovider.AdminUpdateUserAttributesInput{
+		UserPoolId: &userPoolId,
+		Username:   &userName,
+		UserAttributes: []*cognitoidentityprovider.AttributeType{
+			{
+				Name:  aws.String("email_verified"),
+				Value: aws.String("True"),
+			},
+		},
+	}
+
+	// Llamar a la API AdminUpdateUserAttributes
+	_, err = cognitoClient.AdminUpdateUserAttributes(input)
+	if err != nil {
+		fmt.Println("Error updating email verified status:", err)
+		return err
+	}
+
+	fmt.Println("Email verified status updated successfully for user:", userName)
 	return nil
 }
