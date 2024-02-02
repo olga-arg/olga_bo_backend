@@ -24,10 +24,10 @@ type DbTeam struct {
 	ID                  string             `json:"team_id"`
 	Name                string             `json:"team_name"`
 	ReviewerId          string             `json:"reviewer_id"`
-	MonthlySpending     int                `json:"team_monthly_spending"`
-	AnnualBudget        int                `json:"team_annual_budget"`
-	Status              ConfirmationStatus `json:"team_status"`
-	CreatedDate         time.Time          `json:"team_created_date"`
+	MonthlySpending     int                `json:"monthly_spending"`
+	AnnualBudget        int                `json:"annual_budget"`
+	Status              ConfirmationStatus `json:"status"`
+	CreatedDate         time.Time          `json:"created_date"`
 	UserId              string             `json:"user_id"`
 	UserName            string             `json:"user_name"`
 	UserSurname         string             `json:"user_surname"`
