@@ -1,15 +1,26 @@
 from scanner import get_receipt_info
 from request_proof_of_registration import request_registration, afip_categories
 from afip_request_credentials import AfipCredentials
+from jwt_token import extract_email_and_company_id_from_token
 
 import boto3
 from botocore.exceptions import ClientError
-import asyncio
 import json
 import os
 
 
-async def async_lambda_handler(event, context):
+def lambda_handler(event, context):
+    _, company_id, err = extract_email_and_company_id_from_token(event)
+
+    if err:
+        return {
+            "statusCode": 401,
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": json.dumps({"error": "Unauthorized"})
+        }
+
     s3bucket_name = os.environ['S3_BUCKET']
     ssm_client = boto3.client('ssm')
     s3 = boto3.client('s3', region_name='us-east-1')
@@ -17,13 +28,13 @@ async def async_lambda_handler(event, context):
         'Parameter']['Value']
     mindee_api_key = ssm_client.get_parameter(Name='mindee_api_key')[
         'Parameter']['Value']
-    receipt_key = json.loads(event.get('body')).get('receipt_key')
+    receipt_key = json.loads(event.get('body')).get("receipt_key")
 
     cuit = json.loads(event.get('body')).get('cuit')
     if cuit:
-        afip_creds = await AfipCredentials.create(force=False)
+        afip_creds = AfipCredentials.create(force=False)
         if afip_creds.TOKEN is None or afip_creds.SIGN is None:
-            afip_creds = await AfipCredentials.create(force=True)
+            afip_creds = AfipCredentials.create(force=True)
         if afip_creds.TOKEN is None or afip_creds.SIGN is None:
             return {
                 "statusCode": 404,
@@ -32,7 +43,7 @@ async def async_lambda_handler(event, context):
                 },
                 "body": "Cuit not visible"
             }
-        activity_id, company_name = await request_registration(afip_creds.TOKEN, afip_creds.SIGN, olga_cuit, cuit)
+        activity_id, company_name = request_registration(afip_creds.TOKEN, afip_creds.SIGN, olga_cuit, cuit)
         if not company_name:
             # If there's an error with request_registration, set default values and log the error
             activity_id, company_name = None, None
@@ -112,7 +123,7 @@ async def async_lambda_handler(event, context):
         'get_object', Params={'Bucket': s3bucket_name, 'Key': receipt_key}, ExpiresIn=60)
 
     try:
-        receipt_info = await get_receipt_info(mindee_api_key, file_url)
+        receipt_info = get_receipt_info(mindee_api_key, file_url, company_id)
 
     except ValueError as e:
         return {
@@ -123,9 +134,9 @@ async def async_lambda_handler(event, context):
             "body": json.dumps({"error": str(e)})
         }
 
-    afip_creds = await AfipCredentials.create(force=False)
+    afip_creds = AfipCredentials.create(force=False)
     if afip_creds.TOKEN is None or afip_creds.SIGN is None:
-        afip_creds = await AfipCredentials.create(force=True)
+        afip_creds = AfipCredentials.create(force=True)
     if afip_creds.TOKEN is None or afip_creds.SIGN is None:
         return {
             "statusCode": 404,
@@ -135,7 +146,7 @@ async def async_lambda_handler(event, context):
             "body": "Cuit not visible"
         }
 
-    activity_id, company_name = await request_registration(afip_creds.TOKEN, afip_creds.SIGN, olga_cuit, receipt_info['cuit_number'])
+    activity_id, company_name = request_registration(afip_creds.TOKEN, afip_creds.SIGN, olga_cuit, receipt_info['cuit_number'])
 
     if company_name:
         receipt_info['business_name'] = company_name
@@ -161,7 +172,3 @@ async def async_lambda_handler(event, context):
             },
             "body": "Cuit not visible"
         }
-
-
-def main(event, context):
-    return asyncio.run(async_lambda_handler(event, context))

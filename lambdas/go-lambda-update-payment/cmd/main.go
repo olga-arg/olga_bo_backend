@@ -14,8 +14,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	userRepo := db.NewPaymentRepository(gormDb)
-	paymentProcessor := processor.NewProcessor(userRepo)
+	userRepo := db.NewUserRepository(gormDb)
+	teamRepo := db.NewTeamRepository(gormDb)
+	paymentRepo := db.NewPaymentRepository(gormDb)
+	paymentProcessor := processor.NewProcessor(*paymentRepo, *teamRepo, *userRepo)
 	getAllPaymentsHandler := handler.NewUpdatePaymentHandler(paymentProcessor)
 	lambda.Start(getAllPaymentsHandler.Handle)
 }

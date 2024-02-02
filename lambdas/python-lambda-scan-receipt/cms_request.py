@@ -1,8 +1,7 @@
-import asyncio
 import os
+import subprocess
 
-
-async def get_cms_request(access_ticket_name, cms_file_name_path, prod_certificate_path, private_key_path):
+def get_cms_request(access_ticket_name, cms_file_name_path, prod_certificate_path, private_key_path):
     current_path = os.path.dirname(os.path.abspath(__file__))
     prod_certificate_path = os.path.join(current_path, prod_certificate_path)
     private_key_path = os.path.join(current_path, private_key_path)
@@ -25,14 +24,11 @@ async def get_cms_request(access_ticket_name, cms_file_name_path, prod_certifica
     ]
 
     try:
-        process = await asyncio.create_subprocess_exec(*command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        stdout, stderr = await process.communicate()
-
-        if process.returncode == 0:
-            return True  # Return a success indicator
-        else:
-            print(f"Subprocess error: {stderr.decode()}")  # Optionally print the error for debugging
-            return False  # Return a failure indicator
+        process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        return True  # Return a success indicator
+    except subprocess.CalledProcessError as e:
+        print(f"Subprocess error: {e.stderr.decode()}")  # Optionally print the error for debugging
+        return False  # Return a failure indicator
     except Exception as e:
         print(f"Error occurred: {e}")  # Optionally print the exception for debugging
         return False  # Return a failure indicator

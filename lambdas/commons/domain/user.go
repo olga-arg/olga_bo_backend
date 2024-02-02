@@ -40,3 +40,9 @@ func NewUser(name, surname, email string) (*User, error) {
 	user.CreatedDate = time.Now()
 	return &user, nil
 }
+
+type UpdateUserRequest struct {
+	CompanyId string `json:"company_id"`
+	Email     string `json:"email"`
+	Username  string `json:"username"`
+}

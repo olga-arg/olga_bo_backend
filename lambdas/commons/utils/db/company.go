@@ -57,9 +57,9 @@ func (r *CompanyRepository) CreateCompanySpecificTables(companyId string) error 
 	// Migrar la tabla users_teams
 	err = r.Db.Table(usersTeamsTableName).AutoMigrate(&domain.UserTeam{}).Error
 	if err != nil {
-	fmt.Println("Error creating users_teams table: ", err)
-	return err
-}
+		fmt.Println("Error creating users_teams table: ", err)
+		return err
+	}
 
 	// Añadir foreign keys después de crear la tabla
 	// Añadir foreign keys después de crear la tabla
@@ -82,6 +82,17 @@ func (r *CompanyRepository) CreateCompanySpecificTables(companyId string) error 
 
 	if err != nil {
 		fmt.Println("Error adding foreign key for teams: ", err)
+		return err
+	}
+
+	// Add the unique key constraint for the columns user_id and team_id
+	err = r.Db.Debug().Exec(fmt.Sprintf(`
+	ALTER TABLE %s
+	ADD CONSTRAINT unique_user_team UNIQUE (user_id, team_id);
+`, r.Db.Dialect().Quote(usersTeamsTableName))).Error
+
+	if err != nil {
+		fmt.Println("Error adding unique key for users_teams: ", err)
 		return err
 	}
 

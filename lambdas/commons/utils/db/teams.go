@@ -228,6 +228,39 @@ func (r *TeamRepository) UpdateTeam(teamID string, newTeam *domain.UpdateTeamReq
 	return nil
 }
 
+func (r *TeamRepository) GetTeamByUserID(userID, companyId string) ([]domain.UserTeam, error) {
+	// Get all the teams that the user is part of in the users_teams table
+	var userTeams []domain.UserTeam
+	err := r.Db.Scopes(getUserTeamTable(companyId)).Where("user_id = ?", userID).Find(&userTeams).Error
+	if err != nil {
+		fmt.Println("Error getting user teams: ", err)
+		return nil, err
+	}
+
+	return userTeams, nil
+}
+
+func (r *TeamRepository) GetTeamByID(teamID, companyId string) (*domain.Team, error) {
+	var team domain.Team
+	err := r.Db.Scopes(getTeamTable(companyId)).Where("id = ?", teamID).First(&team).Error
+	if err != nil {
+		fmt.Println("Error getting team by ID: ", err)
+		return nil, err
+	}
+	return &team, nil
+}
+
+func (r *TeamRepository) UpdateTeamMonthlySpending(newMonthlySpending int, companyId string) error {
+	// Save the new monthly spending to the team
+	fmt.Println("Updating team monthly spending")
+	err := r.Db.Scopes(getTeamTable(companyId)).Model(&domain.Team{}).Update("monthly_spending", newMonthlySpending).Error
+	if err != nil {
+		fmt.Println("Error updating team: ", err)
+		return err
+	}
+	return nil
+}
+
 //func (r *TeamRepository) FindTeamByID(id string) (*domain.Team, error) {
 //	var team domain.Team
 //	err := r.Db.Scopes(getTeamsTable(&team)).Where("id = ?", id).First(&team).Error

@@ -8,20 +8,18 @@ const (
 type ConfirmationStatus int
 
 const (
-	Pending ConfirmationStatus = iota
-	Canceled
-	Approved
-	Created
-	Deleted
-	Exported
+	Pending   ConfirmationStatus = iota // User, Payment
+	Approved                            // Payment
+	Created                             // Payment, Team
+	Deleted                             // User, Payment, Team
+	Exported                            // Payment
+	Confirmed                           // User
 )
 
 func ParseConfirmationStatus(s string) ConfirmationStatus {
 	switch s {
 	case "Pending":
 		return Pending
-	case "Canceled":
-		return Canceled
 	case "Approved":
 		return Approved
 	case "Created":
@@ -30,6 +28,8 @@ func ParseConfirmationStatus(s string) ConfirmationStatus {
 		return Deleted
 	case "Exported":
 		return Exported
+	case "Confirmed":
+		return Confirmed
 	default:
 		return Created
 	}

@@ -44,7 +44,7 @@ func (h *UpdatePaymentHandler) Handle(request events.APIGatewayProxyRequest) (ev
 
 	// Validate input
 	fmt.Println("Validating input")
-	newPayment, err := h.processor.ValidatePaymentInput(context.Background(), &input, request, companyId)
+	newPayment, err := h.processor.ValidatePaymentInput(context.Background(), &input, request, companyId, email)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
