@@ -373,13 +373,13 @@ resources:
         FunctionName: olga-backend-dev-go-lambda-post-confirmation
         Principal: "lambda.amazonaws.com"
         SourceArn: "arn:aws:lambda:us-east-1:588257415519:function:olgaAuthResourcePostAuthentication-dev"
-#    LambdaInvokePermissionProd:
-#      Type: "AWS::Lambda::Permission"
-#      Properties:
-#        Action: "lambda:InvokeFunction"
-#        FunctionName: olga-backend-${sls:stage}-go-lambda-post-confirmation
-#        Principal: "lambda.amazonaws.com"
-#        SourceArn: "arn:aws:lambda:us-east-1:588257415519:function:olgaAuthResourcePostAuthentication-dev"
+    LambdaInvokePermissionProd:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: "lambda:InvokeFunction"
+        FunctionName: olga-backend-prod-go-lambda-post-confirmation
+        Principal: "lambda.amazonaws.com"
+        SourceArn: "arn:aws:lambda:us-east-1:588257415519:function:olgaAuthResourcePostAuthentication-prod"
 
     ### Aurora Serverless Cluster and Instance ###
     #    postgresCluster:
