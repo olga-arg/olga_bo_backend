@@ -302,6 +302,8 @@ functions:
           path: /scan
           method: post
     role: PythonLambdaScanReceiptRole
+    layers:
+      - arn:aws:lambda:sa-east-1:034541671702:layer:openssl-lambda:1
     ssmToEnvironment:
       - S3_BUCKET
       - DB_USER
