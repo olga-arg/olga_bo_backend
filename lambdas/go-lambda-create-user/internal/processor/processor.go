@@ -39,6 +39,9 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput, 
 		return err
 	}
 
+	// TODO: Erase this line when the monthly limit is implemented
+	user.MonthlyLimit = 10
+
 	// Creates the user in cognito
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-1"),
