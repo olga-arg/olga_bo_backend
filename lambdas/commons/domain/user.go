@@ -19,6 +19,7 @@ type User struct {
 	Status          ConfirmationStatus `json:"status" default:"Pending"`
 	CreatedDate     time.Time          `json:"created_date"`
 	Teams           []*Team            `gorm:"many2many:user_teams;"`
+	Role            UserRoles          `json:"role" default:"Employee"`
 }
 
 type Users []User

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"commons/domain"
 	"commons/utils"
 	"context"
 	"fmt"
@@ -17,6 +18,7 @@ type CreateCategoryHandler struct {
 func NewCreateCategoryHandler(p processor.Processor) *CreateCategoryHandler {
 	return &CreateCategoryHandler{processor: p}
 }
+
 func (h *CreateCategoryHandler) Handle(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var input dto.CreateCategoryInput
 
@@ -31,6 +33,22 @@ func (h *CreateCategoryHandler) Handle(request events.APIGatewayProxyRequest) (e
 
 	if companyId == "" || email == "" {
 		println("companyId or email is empty", companyId, email)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
+	// Validate user
+	allowedRoles := []domain.UserRoles{domain.Admin}
+	isAuthorized, err := h.processor.ValidateUser(context.Background(), email, companyId, allowedRoles)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+	if !isAuthorized {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
 			Body:       "Unauthorized",

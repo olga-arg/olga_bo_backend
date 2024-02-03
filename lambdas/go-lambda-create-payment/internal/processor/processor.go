@@ -10,6 +10,7 @@ import (
 
 type Processor interface {
 	CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email, companyId string) error
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
@@ -87,4 +88,16 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 	}
 
 	return nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

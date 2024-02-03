@@ -15,7 +15,8 @@ func main() {
 		panic(err)
 	}
 	teamRepo := db.NewTeamRepository(gormDb)
-	teamProcessor := processor.NewProcessor(teamRepo)
+	userRepo := db.NewUserRepository(gormDb)
+	teamProcessor := processor.NewProcessor(*teamRepo, *userRepo)
 	deleteTeamHandler := handler.NewTeamHandler(teamProcessor)
 	lambda.Start(deleteTeamHandler.Handle)
 }

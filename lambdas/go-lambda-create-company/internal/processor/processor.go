@@ -18,6 +18,7 @@ import (
 type Processor interface {
 	CreateCompany(ctx context.Context, input *dto.CreateCompanyInput) error
 	ValidateCompanyInput(ctx context.Context, input *dto.CreateCompanyInput, request events.APIGatewayProxyRequest) error
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
@@ -232,4 +233,16 @@ func (p *processor) ValidateCompanyInput(ctx context.Context, input *dto.CreateC
 		return fmt.Errorf("invalid email format")
 	}
 	return nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

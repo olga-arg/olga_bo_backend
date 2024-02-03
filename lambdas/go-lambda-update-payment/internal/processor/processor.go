@@ -20,6 +20,7 @@ type Processor interface {
 	UpdatePayment(ctx context.Context, newPayment *domain.Payment, companyId string) error
 	GetPayment(ctx context.Context, paymentID, companyId string) (*domain.Payment, error)
 	ValidatePaymentInput(ctx context.Context, input *dto.UpdatePaymentInput, request events.APIGatewayProxyRequest, companyId, email string) (*domain.Payment, error)
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
@@ -168,4 +169,16 @@ func logCuitChange(ctx context.Context, paymentId, oldCuit, newCuit, receiptImag
 	}
 
 	return nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

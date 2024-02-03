@@ -40,6 +40,21 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 		}, nil
 	}
 
+	allowedRoles := []domain.UserRoles{domain.Admin}
+	isAuthorized, err := h.processor.ValidateUser(context.Background(), email, companyId, allowedRoles)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+	if !isAuthorized {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
 	// Extract team ID from URL path parameter
 	fmt.Println("Extracting team ID from URL path parameter")
 	teamID, ok := request.PathParameters["team_id"]

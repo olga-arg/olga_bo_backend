@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"commons/domain"
 	"commons/utils"
 	"context"
 	"encoding/json"
@@ -27,6 +28,21 @@ func (h *GetAllPaymentsHandler) Handle(request events.APIGatewayProxyRequest) (e
 	}
 
 	if companyId == "" || email == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
+	allowedRoles := []domain.UserRoles{domain.Employee, domain.Reviewer, domain.Admin, domain.Accountant}
+	isAuthorized, err := h.processor.ValidateUser(context.Background(), email, companyId, allowedRoles)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+	if !isAuthorized {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
 			Body:       "Unauthorized",

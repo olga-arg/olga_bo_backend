@@ -183,3 +183,19 @@ func (r *UserRepository) UpdateEmailVerified(userName string) error {
 	fmt.Println("Email verified status updated successfully for user:", userName)
 	return nil
 }
+
+// Check the user role and allow or deny the request
+func (r *UserRepository) IsUserAuthorized(email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	user, err := r.GetUserInformation(email, companyId)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to get user information")
+	}
+
+	for _, role := range allowedRoles {
+		if user.Role == role {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}

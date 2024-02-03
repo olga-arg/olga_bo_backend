@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"commons/domain"
 	"commons/utils"
 	"context"
 	"errors"
@@ -30,6 +31,21 @@ func (h *TeamHandler) Handle(request events.APIGatewayProxyRequest) (events.APIG
 	}
 
 	if companyId == "" || email == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
+	allowedRoles := []domain.UserRoles{domain.Admin}
+	isAuthorized, err := h.processor.ValidateUser(context.Background(), email, companyId, allowedRoles)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+	if !isAuthorized {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
 			Body:       "Unauthorized",

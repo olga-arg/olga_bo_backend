@@ -14,20 +14,21 @@ type Processor interface {
 	UpdateUser(ctx context.Context, newUser *domain.User, companyId string) error
 	GetUser(ctx context.Context, userID, companyId string) (*domain.User, error)
 	ValidateUserInput(ctx context.Context, input *dto.UpdateUserInput, request events.APIGatewayProxyRequest, companyId string) (*domain.User, error)
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
-	storage *db.UserRepository
+	userStorage *db.UserRepository
 }
 
 func NewProcessor(storage *db.UserRepository) Processor {
 	return &processor{
-		storage: storage,
+		userStorage: storage,
 	}
 }
 
 func (p *processor) UpdateUser(ctx context.Context, newUser *domain.User, companyId string) error {
-	err := p.storage.UpdateUser(newUser, companyId)
+	err := p.userStorage.UpdateUser(newUser, companyId)
 	if err != nil {
 		return err
 	}
@@ -35,7 +36,7 @@ func (p *processor) UpdateUser(ctx context.Context, newUser *domain.User, compan
 }
 
 func (p *processor) GetUser(ctx context.Context, userID, companyId string) (*domain.User, error) {
-	user, err := p.storage.GetUserByID(userID, companyId)
+	user, err := p.userStorage.GetUserByID(userID, companyId)
 	if err != nil {
 		fmt.Println("Error getting user by ID", err.Error())
 		return nil, err
@@ -87,6 +88,28 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateUser
 	if input.IsAdmin != nil {
 		user.IsAdmin = *input.IsAdmin
 	}
+
+	if input.Role != nil {
+		user.Role = *input.Role
+	}
+
+	// Check if the role number is inside the UserRoles enum
+	if user.Role < 0 || user.Role > 3 {
+		return nil, fmt.Errorf("invalid role")
+	}
+
 	fmt.Println("Input validated successfully")
 	return user, nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

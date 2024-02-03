@@ -34,3 +34,12 @@ func ParseConfirmationStatus(s string) ConfirmationStatus {
 		return Created
 	}
 }
+
+type UserRoles int
+
+const (
+	Employee UserRoles = iota
+	Reviewer
+	Admin
+	Accountant
+)
