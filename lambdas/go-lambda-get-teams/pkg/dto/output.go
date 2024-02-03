@@ -5,48 +5,61 @@ import (
 )
 
 type Output struct {
-	Teams domain.Teams `json:"teams"`
+	Teams []domain.TeamOutput `json:"teams"`
 }
 
 // From domain.Teams ([]Team) to dto.Output (Output)
 func NewOutput(teams domain.DbTeams) *Output {
-	teamMap := make(map[string]*domain.Team)
-	var dtoTeams domain.Teams
-	//teamsAlreadyVisited := make(map[string]bool)
-	for _, team := range teams {
-		if existingTeam, ok := teamMap[team.ID]; ok {
-			// El equipo ya existe, agregamos el usuario al equipo existente
-			user := domain.User{
-				ID:   team.UserId,
-				Name: team.UserName,
+	teamMap := make(map[string]*domain.TeamOutput)
+	var dtoTeams []domain.TeamOutput
+
+	for _, dbTeam := range teams {
+		var reviewer *domain.User
+		if dbTeam.ReviewerId != "" {
+			reviewer = &domain.User{
+				ID: dbTeam.ReviewerId,
+				// Agregar otros campos de revisor según sea necesario
 			}
-			existingTeam.Users = append(existingTeam.Users, user)
+		} // reviewer es nil si dbTeam.ReviewerId es ""
+
+		if existingTeam, ok := teamMap[dbTeam.ID]; ok {
+			if dbTeam.UserId != "" {
+				user := domain.User{
+					ID:   dbTeam.UserId,
+					Name: dbTeam.UserName,
+					// Agregar otros campos de usuario según sea necesario
+				}
+				existingTeam.Users = append(existingTeam.Users, user)
+			}
 		} else {
-			// El equipo no existe, creamos uno nuevo y lo agregamos al mapa
-			team := domain.Team{
-				ID:   team.ID,
-				Name: team.Name,
-				// Agregar otros campos de equipo según sea necesario
-				Users: domain.Users{
-					domain.User{
-						ID:              team.UserId,
-						Name:            team.UserName,
-						Surname:         team.UserSurname,
-						Email:           team.UserEmail,
-						MonthlySpending: team.UserMonthlySpending,
+			newTeam := domain.TeamOutput{
+				ID:              dbTeam.ID,
+				Name:            dbTeam.Name,
+				MonthlySpending: dbTeam.MonthlySpending,
+				AnnualBudget:    dbTeam.AnnualBudget,
+				Status:          dbTeam.Status,
+				CreatedDate:     dbTeam.CreatedDate,
+				Reviewer:        reviewer,
+				ReviewerId:      dbTeam.ReviewerId,
+			}
+
+			if dbTeam.UserId != "" {
+				newTeam.Users = []domain.User{
+					{
+						ID:   dbTeam.UserId,
+						Name: dbTeam.UserName,
 						// Agregar otros campos de usuario según sea necesario
 					},
-				},
-				ReviewerId:      team.ReviewerId,
-				MonthlySpending: team.MonthlySpending,
-				AnnualBudget:    team.AnnualBudget,
-				Status:          team.Status,
-				CreatedDate:     team.CreatedDate,
+				}
+			} else {
+				newTeam.Users = []domain.User{}
 			}
-			dtoTeams = append(dtoTeams, team)
-			teamMap[team.ID] = &dtoTeams[len(dtoTeams)-1]
+
+			dtoTeams = append(dtoTeams, newTeam)
+			teamMap[dbTeam.ID] = &dtoTeams[len(dtoTeams)-1]
 		}
 	}
+
 	return &Output{
 		Teams: dtoTeams,
 	}

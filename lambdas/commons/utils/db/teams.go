@@ -82,11 +82,11 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string
 	usersTableName := fmt.Sprintf("%s_users", companyId)
 	teamsTableName := fmt.Sprintf("%s_teams", companyId)
 	querySyntax := fmt.Sprintf(
-		`SELECT teams.id, teams.name, teams.monthly_spending, teams.annual_budget, teams.status, teams.created_date, 
-	users.id as "user_id", users.name as "user_name", users.surname as "user_surname", users.email as "user_email", users.monthly_spending as "user_monthly_spending"
-    FROM "%s" as teams 
-    LEFT JOIN "%s" as users_teams ON teams.id = users_teams.team_id 
-    LEFT JOIN "%s" as users ON users.id = users_teams.user_id`,
+		`SELECT teams.id, teams.name, teams.reviewer_id, teams.monthly_spending, teams.annual_budget, teams.status, teams.created_date, 
+        users.id as "user_id", users.name as "user_name", users.surname as "user_surname", users.email as "user_email", users.monthly_spending as "user_monthly_spending"
+        FROM "%s" as teams 
+        LEFT JOIN "%s" as users_teams ON teams.id = users_teams.team_id 
+        LEFT JOIN "%s" as users ON users.id = users_teams.user_id`,
 		teamsTableName, usersTeamsTableName, usersTableName)
 
 	if teamName, ok := filters["name"]; ok {
@@ -117,9 +117,11 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string
 	return teams, nil
 }
 
-func (r *TeamRepository) GetAllReviewers(teams []domain.Team, companyId string) ([]domain.Team, error) {
+func (r *TeamRepository) GetAllReviewers(teams []domain.DbTeam, companyId string) ([]domain.DbTeam, error) {
 	for i, team := range teams {
 		var reviewer domain.User
+		fmt.Println("Getting reviewer by ID in db")
+		fmt.Println("Reviewer ID:", team.ReviewerId)
 		err := r.Db.Scopes(getUserTable(companyId)).Model(&reviewer).Where("id = ?", team.ReviewerId).Find(&reviewer).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			fmt.Println("No reviewer found for team:", team)

@@ -4,6 +4,7 @@ import (
 	"commons/domain"
 	"commons/utils/db"
 	"context"
+	"fmt"
 	"go-lambda-get-teams/pkg/dto"
 )
 
@@ -29,7 +30,13 @@ func (p *processor) GetAllTeams(ctx context.Context, filter map[string]string, c
 	if err != nil {
 		return nil, err
 	}
-	//teams, err = p.teamStorage.GetAllReviewers(teams, companyId)
+	fmt.Println("Teams from db:", teams)
+	teams, err = p.teamStorage.GetAllReviewers(teams, companyId)
+	fmt.Println("Teams with reviewers:", teams)
+	if err != nil {
+		return nil, err
+	}
+
 	return dto.NewOutput(teams), nil
 }
 
