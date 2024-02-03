@@ -30,7 +30,7 @@ func (p *processor) GetUserInformation(ctx context.Context, email, companyId str
 	if err != nil {
 		return nil, err
 	}
-	payments, err := p.paymentStorage.GetAllPayments(nil, companyId)
+	payments, err := p.paymentStorage.GetUserPayments(companyId, userInformation.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -122,3 +122,20 @@ func (r *PaymentRepository) GetPaymentByID(paymentID string, companyId string) (
 	}
 	return &payment, nil
 }
+
+func (r *PaymentRepository) GetUserPayments(companyId, userId string) ([]domain.Payment, error) {
+	var payments []domain.Payment
+	query := r.Db.Scopes(getPaymentTable(companyId)).Where("user_id = ?", userId).Order("created_date")
+
+	// Execute the query
+	err := query.Find(&payments).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		fmt.Println("No payments found with id: ", userId)
+	}
+	if err != nil {
+		fmt.Println("Error getting payments:", err)
+		return nil, err
+	}
+
+	return payments, nil
+}
