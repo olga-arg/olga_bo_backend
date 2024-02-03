@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"time"
 )
 
 type PaymentRepository struct {
@@ -69,6 +70,35 @@ func (r *PaymentRepository) GetAllPayments(filters map[string]string, companyId 
 	// Filter by category
 	if category, ok := filters["category"]; ok {
 		query = query.Where("category = ?", category)
+	}
+
+	// Filter by date range
+	startDateStr, hasStartDate := filters["start_date"]
+	endDateStr, hasEndDate := filters["end_date"]
+
+	if hasStartDate && hasEndDate {
+		// Asumimos que las fechas de inicio y fin vienen en formato "YYYY-MM-DD"
+		loc, err := time.LoadLocation("America/Argentina/Buenos_Aires")
+		if err != nil {
+			fmt.Println("Error getting location:", err)
+			return nil, err
+		}
+
+		startDate, err := time.ParseInLocation("2006-01-02", startDateStr, loc)
+		if err != nil {
+			fmt.Println("Error parsing start date:", err)
+			return nil, err
+		}
+		endDate, err := time.ParseInLocation("2006-01-02", endDateStr, loc)
+		if err != nil {
+			fmt.Println("Error parsing end date:", err)
+			return nil, err
+		}
+
+		startOfDay := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, loc)
+		endOfDay := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 999000000, loc)
+		
+		query = query.Where("date >= ? AND date <= ?", startOfDay, endOfDay)
 	}
 
 	// Order and execute the query

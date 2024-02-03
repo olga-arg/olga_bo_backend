@@ -66,6 +66,11 @@ func (p *processor) ValidatePaymentInput(ctx context.Context, input *dto.UpdateP
 		return nil, fmt.Errorf("failed to get payment")
 	}
 
+	// If the payment status is Exported, it cannot be updated
+	if payment.Status == domain.Exported {
+		return nil, fmt.Errorf("payment is already exported")
+	}
+
 	user, err := p.userStorage.GetUserIdByEmail(email, companyId)
 	if err != nil {
 		fmt.Println("Error getting user: ", err)
