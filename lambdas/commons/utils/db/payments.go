@@ -54,9 +54,23 @@ func (r *PaymentRepository) GetAllPayments(filters map[string]string, companyId 
 			query = query.Where("receipt_image_key = '' OR receipt_image_key IS NULL")
 		}
 	}
+
+	// Filter by status, but not using the number, but the string
 	if status, ok := filters["status"]; ok {
-		query = query.Where("status = ?", status)
+		// We need to convert the string to the enum
+		parsedStatus, err := domain.ParseConfirmationStatus(status)
+		if err != nil {
+			fmt.Printf("Error parsing status: %s\n", err)
+			return nil, err
+		}
+		query = query.Where("status = ?", parsedStatus)
 	}
+
+	// Filter by category
+	if category, ok := filters["category"]; ok {
+		query = query.Where("category = ?", category)
+	}
+
 	// Order and execute the query
 	query = query.Order("created_date")
 	err := query.Find(&payments).Error

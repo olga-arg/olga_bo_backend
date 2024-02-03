@@ -1,5 +1,7 @@
 package domain
 
+import "fmt"
+
 const (
 	Card = iota
 	Cash
@@ -16,22 +18,22 @@ const (
 	Confirmed                           // User
 )
 
-func ParseConfirmationStatus(s string) ConfirmationStatus {
+func ParseConfirmationStatus(s string) (ConfirmationStatus, error) {
 	switch s {
 	case "Pending":
-		return Pending
+		return Pending, nil
 	case "Approved":
-		return Approved
+		return Approved, nil
 	case "Created":
-		return Created
+		return Created, nil
 	case "Deleted":
-		return Deleted
+		return Deleted, nil
 	case "Exported":
-		return Exported
+		return Exported, nil
 	case "Confirmed":
-		return Confirmed
+		return Confirmed, nil
 	default:
-		return Created
+		return -1, fmt.Errorf("invalid status: %s", s)
 	}
 }
 

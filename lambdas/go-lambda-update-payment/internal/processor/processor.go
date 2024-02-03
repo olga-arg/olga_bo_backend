@@ -100,9 +100,21 @@ func (p *processor) ValidatePaymentInput(ctx context.Context, input *dto.UpdateP
 			}
 		}
 	}
-	if input.Status != nil {
-		payment.Status = domain.ConfirmationStatus(*input.Status)
+	// Validate the status has to be: Pending, Approved, Deleted, Exported
+	if input.Status != "" {
+		var err error
+		payment.Status, err = domain.ParseConfirmationStatus(input.Status)
+		if err != nil {
+			// The status is invalid
+			return nil, err
+		}
+
+		// Additional check to disallow 'Created' or 'Confirmed' status
+		if payment.Status == domain.Created || payment.Status == domain.Confirmed {
+			return nil, fmt.Errorf("invalid status: %s", input.Status)
+		}
 	}
+
 	if input.ShopName != "" {
 		payment.ShopName = input.ShopName
 	}
