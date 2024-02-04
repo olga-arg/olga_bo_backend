@@ -3,9 +3,9 @@ package main
 import (
 	"commons/utils/db"
 	"github.com/aws/aws-lambda-go/lambda"
-	"go-lambda-get-all-users/internal/application"
-	"go-lambda-get-all-users/internal/processor"
-	"go-lambda-get-all-users/pkg/handler"
+	"go-lambda-post-confirmation/internal/application"
+	"go-lambda-post-confirmation/internal/processor"
+	"go-lambda-post-confirmation/pkg/handler"
 )
 
 func main() {

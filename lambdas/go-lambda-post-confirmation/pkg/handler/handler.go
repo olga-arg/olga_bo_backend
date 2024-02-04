@@ -3,7 +3,7 @@ package handler
 import (
 	"commons/domain"
 	"fmt"
-	"go-lambda-get-all-users/internal/processor"
+	"go-lambda-post-confirmation/internal/processor"
 )
 
 type PostConfirmationHandler struct {
