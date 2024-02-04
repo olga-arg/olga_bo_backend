@@ -17,7 +17,11 @@ func NewOutput(teams domain.DbTeams) *Output {
 		var reviewer *domain.User
 		if dbTeam.ReviewerId != "" {
 			reviewer = &domain.User{
-				ID: dbTeam.ReviewerId,
+				ID:       dbTeam.ReviewerId,
+				Name:     dbTeam.Reviewer.Name,
+				Surname:  dbTeam.Reviewer.Surname,
+				FullName: dbTeam.Reviewer.FullName,
+				Email:    dbTeam.Reviewer.Email,
 				// Agregar otros campos de revisor según sea necesario
 			}
 		} // reviewer es nil si dbTeam.ReviewerId es ""
@@ -25,9 +29,11 @@ func NewOutput(teams domain.DbTeams) *Output {
 		if existingTeam, ok := teamMap[dbTeam.ID]; ok {
 			if dbTeam.UserId != "" {
 				user := domain.User{
-					ID:   dbTeam.UserId,
-					Name: dbTeam.UserName,
-					// Agregar otros campos de usuario según sea necesario
+					ID:       dbTeam.UserId,
+					Name:     dbTeam.UserName,
+					Surname:  dbTeam.UserSurname,
+					FullName: dbTeam.UserFullName,
+					Email:    dbTeam.UserEmail,
 				}
 				existingTeam.Users = append(existingTeam.Users, user)
 			}
@@ -46,9 +52,11 @@ func NewOutput(teams domain.DbTeams) *Output {
 			if dbTeam.UserId != "" {
 				newTeam.Users = []domain.User{
 					{
-						ID:   dbTeam.UserId,
-						Name: dbTeam.UserName,
-						// Agregar otros campos de usuario según sea necesario
+						ID:       dbTeam.UserId,
+						Name:     dbTeam.UserName,
+						Surname:  dbTeam.UserSurname,
+						FullName: dbTeam.UserFullName,
+						Email:    dbTeam.UserEmail,
 					},
 				}
 			} else {

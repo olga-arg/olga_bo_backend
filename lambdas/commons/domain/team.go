@@ -44,6 +44,7 @@ type DbTeam struct {
 	UserId              string             `json:"user_id"`
 	UserName            string             `json:"user_name"`
 	UserSurname         string             `json:"user_surname"`
+	UserFullName        string             `json:"user_full_name"`
 	UserEmail           string             `json:"user_email"`
 	UserMonthlySpending float32            `json:"user_monthly_spending"`
 }
