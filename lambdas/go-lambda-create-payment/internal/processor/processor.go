@@ -46,6 +46,10 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 	//	return fmt.Errorf("Error: The amount is greater than the monthly limit")
 	//}
 
+	if input.Amount < 0 {
+		return fmt.Errorf("Error: The amount cannot be negative")
+	}
+
 	// Create payment
 	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.Cuit, input.Time, input.Category, input.ReceiptNumber, input.ReceiptType, input.ReceiptImageKey, user.ID, input.Date)
 	if err != nil {
