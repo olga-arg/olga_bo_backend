@@ -37,6 +37,25 @@ func ParseConfirmationStatus(s string) (ConfirmationStatus, error) {
 	}
 }
 
+func ConfirmationStatusToString(status ConfirmationStatus) string {
+	switch status {
+	case Pending:
+		return "Pendiente"
+	case Approved:
+		return "Aprobado"
+	case Created:
+		return "Creado"
+	case Deleted:
+		return "Eliminado"
+	case Exported:
+		return "Exportado"
+	case Confirmed:
+		return "Confirmado"
+	default:
+		return "Desconocido"
+	}
+}
+
 type UserRoles int
 
 const (

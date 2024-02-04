@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"strings"
 	"time"
 )
 
@@ -97,7 +98,7 @@ func (r *PaymentRepository) GetAllPayments(filters map[string]string, companyId 
 
 		startOfDay := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, loc)
 		endOfDay := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 999000000, loc)
-		
+
 		query = query.Where("date >= ? AND date <= ?", startOfDay, endOfDay)
 	}
 
@@ -182,4 +183,40 @@ func (r *PaymentRepository) GetUserPayments(companyId, userId string) ([]domain.
 	}
 
 	return payments, nil
+}
+
+func (r *PaymentRepository) GetPaymentsByMultipleIDs(paymentIDs []string, companyId string) ([]domain.Payment, error) {
+	var payments []domain.Payment
+
+	if len(paymentIDs) == 0 {
+		return payments, nil // o manejar como error si se espera al menos un ID
+	}
+
+	placeholders := make([]string, len(paymentIDs))
+	for i := range placeholders {
+		placeholders[i] = "?"
+	}
+	placeholderString := strings.Join(placeholders, ",")
+
+	query := r.Db.Scopes(getPaymentTable(companyId)).
+		Preload("User", func(db *gorm.DB) *gorm.DB { return db.Scopes(getUserTable(companyId)) }).
+		Where(fmt.Sprintf("id IN (%s)", placeholderString), toInterfaceSlice(paymentIDs)...)
+
+	err := query.Find(&payments).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.Wrap(err, "payments not found")
+		}
+		fmt.Println("Error getting payments by multiple IDs:", err)
+		return nil, errors.Wrap(err, "failed to get payments by multiple IDs")
+	}
+	return payments, nil
+}
+
+func toInterfaceSlice(slice []string) []interface{} {
+	interfaceSlice := make([]interface{}, len(slice))
+	for i, d := range slice {
+		interfaceSlice[i] = d
+	}
+	return interfaceSlice
 }
