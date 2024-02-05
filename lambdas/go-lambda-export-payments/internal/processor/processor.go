@@ -129,5 +129,12 @@ func (p *processor) ExportPayments(companyId string, paymentsId []string) (strin
 		return "", fmt.Errorf("error presigning URL: %v", err)
 	}
 
+	// Update the payments Status to exported
+
+	err = p.paymentStorage.UpdatePaymentsStatus(paymentsId, domain.Exported, companyId)
+	if err != nil {
+		return "", fmt.Errorf("error updating payments status: %v", err)
+	}
+
 	return url, nil
 }

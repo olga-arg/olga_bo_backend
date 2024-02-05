@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
-	"strings"
 	"time"
 )
 
@@ -192,15 +191,10 @@ func (r *PaymentRepository) GetPaymentsByMultipleIDs(paymentIDs []string, compan
 		return payments, nil // o manejar como error si se espera al menos un ID
 	}
 
-	placeholders := make([]string, len(paymentIDs))
-	for i := range placeholders {
-		placeholders[i] = "?"
-	}
-	placeholderString := strings.Join(placeholders, ",")
-
 	query := r.Db.Scopes(getPaymentTable(companyId)).
 		Preload("User", func(db *gorm.DB) *gorm.DB { return db.Scopes(getUserTable(companyId)) }).
-		Where(fmt.Sprintf("id IN (%s)", placeholderString), toInterfaceSlice(paymentIDs)...)
+		Where("id IN (?)", paymentIDs).
+		Not("status", domain.Exported)
 
 	err := query.Find(&payments).Error
 	if err != nil {
@@ -213,10 +207,11 @@ func (r *PaymentRepository) GetPaymentsByMultipleIDs(paymentIDs []string, compan
 	return payments, nil
 }
 
-func toInterfaceSlice(slice []string) []interface{} {
-	interfaceSlice := make([]interface{}, len(slice))
-	for i, d := range slice {
-		interfaceSlice[i] = d
+func (r *PaymentRepository) UpdatePaymentsStatus(paymentIDs []string, newStatus domain.ConfirmationStatus, companyId string) error {
+	query := r.Db.Scopes(getPaymentTable(companyId)).Where("id IN (?)", paymentIDs).Update("status", newStatus)
+	if query.Error != nil {
+		fmt.Println("Error updating payments status:", query.Error)
+		return errors.Wrap(query.Error, "failed to update payments status")
 	}
-	return interfaceSlice
+	return nil
 }
