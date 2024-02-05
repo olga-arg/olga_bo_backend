@@ -200,6 +200,7 @@ func (p *processor) CreateCompany(ctx context.Context, input *dto.CreateCompanyI
 
 	// TODO: Erase this line when the monthly limit is implemented
 	user.MonthlyLimit = 10
+	user.Role = domain.Admin
 
 	// Saves the user to the database if it doesn't already exist
 	if err := p.userStorage.Save(user, company.ID); err != nil {
