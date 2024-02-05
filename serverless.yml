@@ -358,7 +358,6 @@ resources:
                 - "POST"
               AllowedOrigins:
                 - "*"
-              ExposeHeaders: []
     PythonLambdaScanReceiptRole:
       Type: 'AWS::IAM::Role'
       Properties:
