@@ -85,6 +85,6 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 			"Access-Control-Allow-Origin":  "*",
 			"Access-Control-Allow-Headers": "*",
 		},
-		Body: "Company created successfully",
+		Body: "User created successfully",
 	}, nil
 }
