@@ -41,6 +41,11 @@ func (p *processor) ExportPayments(companyId string, paymentsId []string) (strin
 		return "", fmt.Errorf("error getting payments: %v", err)
 	}
 
+	// If there are no payments, return an error
+	if len(payments) == 0 {
+		return "", fmt.Errorf("no payments found")
+	}
+
 	// Access the S3 bucket to get the template
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("sa-east-1")},
@@ -77,6 +82,13 @@ func (p *processor) ExportPayments(companyId string, paymentsId []string) (strin
 
 	sheetName := "Template"
 
+	style, err := f.NewStyle(&excelize.Style{
+		NumFmt: 177, // El formato 177 en Excel corresponde a formato de moneda
+	})
+	if err != nil {
+		return "", fmt.Errorf("error creating currency style: %v", err)
+	}
+
 	// Iterate over the payments and add them to the Excel file
 	for i, payment := range payments {
 		rowIndex := i + 2
@@ -90,6 +102,7 @@ func (p *processor) ExportPayments(companyId string, paymentsId []string) (strin
 
 		_ = f.SetCellValue(sheetName, "A"+strconv.Itoa(rowIndex), payment.ID)
 		_ = f.SetCellValue(sheetName, "B"+strconv.Itoa(rowIndex), payment.Amount)
+		_ = f.SetCellStyle(sheetName, "B"+strconv.Itoa(rowIndex), "B"+strconv.Itoa(rowIndex), style)
 		_ = f.SetCellValue(sheetName, "C"+strconv.Itoa(rowIndex), payment.ShopName)
 		_ = f.SetCellValue(sheetName, "D"+strconv.Itoa(rowIndex), payment.Cuit)
 		_ = f.SetCellValue(sheetName, "E"+strconv.Itoa(rowIndex), payment.Date)
