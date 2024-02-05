@@ -86,8 +86,12 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateUser
 		user.MonthlyLimit = input.MonthlyLimit
 	}
 
-	if input.Role != nil {
-		user.Role = *input.Role
+	if input.Role != "" {
+		role, err := domain.ParseUserRole(input.Role)
+		if err != nil {
+			return nil, fmt.Errorf("invalid role")
+		}
+		user.Role = role
 	}
 
 	// Check if the role number is inside the UserRoles enum
