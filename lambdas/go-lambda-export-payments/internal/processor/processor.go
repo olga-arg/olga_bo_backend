@@ -3,6 +3,7 @@ package processor
 import (
 	"commons/domain"
 	"commons/utils/db"
+	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -17,15 +18,18 @@ import (
 
 type Processor interface {
 	ExportPayments(companyId string, paymentsId []string) (string, error)
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
 	paymentStorage db.PaymentRepository
+	userStorage    db.UserRepository
 }
 
-func New(paymentStorage db.PaymentRepository) Processor {
+func New(paymentRepo db.PaymentRepository, userRepo db.UserRepository) Processor {
 	return &processor{
-		paymentStorage: paymentStorage,
+		paymentStorage: paymentRepo,
+		userStorage:    userRepo,
 	}
 }
 
@@ -137,4 +141,16 @@ func (p *processor) ExportPayments(companyId string, paymentsId []string) (strin
 	}
 
 	return url, nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

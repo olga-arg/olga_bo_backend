@@ -15,7 +15,8 @@ func main() {
 		panic(err)
 	}
 	paymentRepo := db.NewPaymentRepository(gormDb)
-	paymentProcessor := processor.New(*paymentRepo)
+	userRepo := db.NewUserRepository(gormDb)
+	paymentProcessor := processor.New(*paymentRepo, *userRepo)
 	createUserHandler := handler.NewExportPaymentHandler(paymentProcessor)
 	lambda.Start(createUserHandler.Handle)
 }
