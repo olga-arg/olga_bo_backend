@@ -61,9 +61,6 @@ def get_receipt_info(api_key, file_url, company_id):
         cur.close()
         conn.close()
 
-        if not company_cuit:
-            raise ValueError("Company cuit not found")
-
         response = requests.post(
             'https://api.mindee.net/v1/products/mindee/argentine-expense-receipt/v1/predict',
             headers={"Authorization": f"Token {api_key}"},
