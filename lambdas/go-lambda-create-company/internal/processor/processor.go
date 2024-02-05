@@ -198,6 +198,9 @@ func (p *processor) CreateCompany(ctx context.Context, input *dto.CreateCompanyI
 	}
 	fmt.Println("User created successfully in Cognito")
 
+	// TODO: Erase this line when the monthly limit is implemented
+	user.MonthlyLimit = 10
+
 	// Saves the user to the database if it doesn't already exist
 	if err := p.userStorage.Save(user, company.ID); err != nil {
 		fmt.Println("Error saving user: ", err)
