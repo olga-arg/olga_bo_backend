@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"commons/domain"
 	"commons/utils/db"
 	"context"
 	"go-lambda-me/pkg/dto"
@@ -9,6 +10,7 @@ import (
 
 type Processor interface {
 	GetUserInformation(ctx context.Context, email, companyId string) (*dto.Output, error)
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
@@ -28,7 +30,7 @@ func (p *processor) GetUserInformation(ctx context.Context, email, companyId str
 	if err != nil {
 		return nil, err
 	}
-	payments, err := p.paymentStorage.GetAllPayments(nil, companyId)
+	payments, err := p.paymentStorage.GetUserPayments(companyId, userInformation.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -40,4 +42,16 @@ func (p *processor) GetUserInformation(ctx context.Context, email, companyId str
 	}
 
 	return dto.NewOutput(userInformation, payments), nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

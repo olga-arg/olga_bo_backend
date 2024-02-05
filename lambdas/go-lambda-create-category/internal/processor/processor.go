@@ -13,15 +13,18 @@ import (
 type Processor interface {
 	CreateCategory(ctx context.Context, input *dto.CreateCategoryInput, companyId string) error
 	ValidateCategoryInput(ctx context.Context, input *dto.CreateCategoryInput, request events.APIGatewayProxyRequest) error
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
 	categoryStorage db.CategoryRepository
+	userStorage     db.UserRepository
 }
 
-func New(c db.CategoryRepository) Processor {
+func New(c db.CategoryRepository, u db.UserRepository) Processor {
 	return &processor{
 		categoryStorage: c,
+		userStorage:     u,
 	}
 }
 
@@ -61,4 +64,16 @@ func (p *processor) ValidateCategoryInput(ctx context.Context, input *dto.Create
 		return fmt.Errorf("icon is required")
 	}
 	return nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

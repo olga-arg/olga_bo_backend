@@ -289,6 +289,26 @@ functions:
       - USER_POOL_ID
     environment:
       STAGE: ${sls:stage}
+  go-lambda-export-payments:
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-export-payments/go-lambda-export-payments.zip
+    ssmToEnvironment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+      - DB_PORT
+      - USER_POOL_ID
+      - TEMPLATE_S3_BUCKET_NAME
+      - TEMPLATE_FILE_PATH
+      - ASSET_S3_BUCKET_NAME
+    environment:
+      STAGE: ${sls:stage}
+    events:
+      - httpApi:
+          path: /payments/export
+          method: post
   python-lambda-scan-receipt:
     handler: handler.lambda_handler
     package: 
@@ -302,6 +322,8 @@ functions:
           path: /scan
           method: post
     role: PythonLambdaScanReceiptRole
+    layers:
+      - arn:aws:lambda:sa-east-1:034541671702:layer:openssl-lambda:1
     ssmToEnvironment:
       - S3_BUCKET
       - DB_USER
@@ -320,6 +342,12 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${sls:stage}-${self:service}-assets
+        LifecycleConfiguration:
+          Rules:
+            - Id: ExpireExportedPayments
+              Prefix: "exported-payments/"
+              Status: Enabled
+              ExpirationInDays: 1
     PythonLambdaScanReceiptRole:
       Type: 'AWS::IAM::Role'
       Properties:
@@ -432,6 +460,8 @@ custom:
     DB_HOST_READER: /${sls:stage}/db_host_reader_instance
     USER_POOL_ID: /${sls:stage}/user_pool_id
     S3_BUCKET: /${sls:stage}/s3_bucket_name
+    TEMPLATE_FILE_PATH: /${sls:stage}/template_file_path
+    ASSET_S3_BUCKET_NAME: /${sls:stage}/asset_s3_bucket_name
   customDomain:
     domainName: 'api.olga.lat'
     basePath: '${sls:stage}'

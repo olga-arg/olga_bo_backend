@@ -1,4 +1,4 @@
-module go-lambda-get-all-users
+module go-lambda-post-confirmation
 
 go 1.18
 

@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"commons/domain"
 	"commons/utils/db"
 	"context"
 	"go-lambda-get-categories/pkg/dto"
@@ -8,15 +9,18 @@ import (
 
 type Processor interface {
 	GetCategories(ctx context.Context, companyId string) (map[string]interface{}, error)
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
-	categoryStorage *db.CategoryRepository
+	categoryStorage db.CategoryRepository
+	userStorage     db.UserRepository
 }
 
-func NewProcessor(storage *db.CategoryRepository) Processor {
+func NewProcessor(categoryStorage db.CategoryRepository, userStorage db.UserRepository) Processor {
 	return &processor{
-		categoryStorage: storage,
+		categoryStorage: categoryStorage,
+		userStorage:     userStorage,
 	}
 }
 
@@ -26,4 +30,16 @@ func (p *processor) GetCategories(ctx context.Context, companyId string) (map[st
 		return nil, err
 	}
 	return dto.NewOutput(categories), nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

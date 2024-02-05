@@ -13,15 +13,18 @@ import (
 type Processor interface {
 	CreateTeam(ctx context.Context, input *dto.CreateTeamInput, companyId string) error
 	ValidateTeamInput(ctx context.Context, input *dto.CreateTeamInput, request events.APIGatewayProxyRequest, companyId string) error
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
 	teamStorage db.TeamRepository
+	userStorage db.UserRepository
 }
 
-func New(s db.TeamRepository) Processor {
+func New(s db.TeamRepository, u db.UserRepository) Processor {
 	return &processor{
 		teamStorage: s,
+		userStorage: u,
 	}
 }
 
@@ -67,4 +70,16 @@ func (p *processor) ValidateTeamInput(ctx context.Context, input *dto.CreateTeam
 		}
 	}
 	return nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

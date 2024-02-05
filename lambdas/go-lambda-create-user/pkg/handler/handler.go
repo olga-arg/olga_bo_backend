@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"commons/domain"
 	"commons/utils"
 	"context"
 	"fmt"
@@ -31,6 +32,23 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	}
 
 	if companyId == "" || email == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       "Unauthorized",
+		}, nil
+	}
+
+	// Validate user
+	allowedRoles := []domain.UserRoles{domain.Admin}
+	isAuthorized, err := h.processor.ValidateUser(context.Background(), email, companyId, allowedRoles)
+	if err != nil {
+		fmt.Println("Error validating user: ", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusUnauthorized,
+			Body:       err.Error(),
+		}, nil
+	}
+	if !isAuthorized {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
 			Body:       "Unauthorized",

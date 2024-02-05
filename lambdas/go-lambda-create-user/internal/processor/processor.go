@@ -18,6 +18,7 @@ import (
 type Processor interface {
 	CreateUser(ctx context.Context, input *dto.CreateUserInput, companyId string) error
 	ValidateUserInput(ctx context.Context, input *dto.CreateUserInput, request events.APIGatewayProxyRequest) error
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
@@ -37,6 +38,9 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput, 
 		fmt.Println("Error creating user: ", err)
 		return err
 	}
+
+	// TODO: Erase this line when the monthly limit is implemented
+	user.MonthlyLimit = 10
 
 	// Creates the user in cognito
 	sess, err := session.NewSession(&aws.Config{
@@ -127,4 +131,16 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.CreateUser
 		return fmt.Errorf("invalid email format")
 	}
 	return nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

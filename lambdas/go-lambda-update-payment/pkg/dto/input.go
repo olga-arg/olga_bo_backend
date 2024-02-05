@@ -7,6 +7,6 @@ type UpdatePaymentInput struct {
 	Amount   *float32  `json:"amount,omitempty"`
 	Category string    `json:"category,omitempty"`
 	Date     time.Time `json:"date,omitempty"`
-	Status   *int      `json:"status,omitempty"`
+	Status   string    `json:"status,omitempty"`
 	Cuit     string    `json:"cuit,omitempty"`
 }

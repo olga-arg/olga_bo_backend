@@ -20,6 +20,7 @@ type Processor interface {
 	UpdatePayment(ctx context.Context, newPayment *domain.Payment, companyId string) error
 	GetPayment(ctx context.Context, paymentID, companyId string) (*domain.Payment, error)
 	ValidatePaymentInput(ctx context.Context, input *dto.UpdatePaymentInput, request events.APIGatewayProxyRequest, companyId, email string) (*domain.Payment, error)
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
@@ -65,6 +66,11 @@ func (p *processor) ValidatePaymentInput(ctx context.Context, input *dto.UpdateP
 		return nil, fmt.Errorf("failed to get payment")
 	}
 
+	// If the payment status is Exported, it cannot be updated
+	if payment.Status == domain.Exported {
+		return nil, fmt.Errorf("payment is already exported")
+	}
+
 	user, err := p.userStorage.GetUserIdByEmail(email, companyId)
 	if err != nil {
 		fmt.Println("Error getting user: ", err)
@@ -99,9 +105,21 @@ func (p *processor) ValidatePaymentInput(ctx context.Context, input *dto.UpdateP
 			}
 		}
 	}
-	if input.Status != nil {
-		payment.Status = domain.ConfirmationStatus(*input.Status)
+	// Validate the status has to be: Pending, Approved, Deleted, Exported
+	if input.Status != "" {
+		var err error
+		payment.Status, err = domain.ParseConfirmationStatus(input.Status)
+		if err != nil {
+			// The status is invalid
+			return nil, err
+		}
+
+		// Additional check to disallow 'Created' or 'Confirmed' status
+		if payment.Status == domain.Created || payment.Status == domain.Confirmed {
+			return nil, fmt.Errorf("invalid status: %s", input.Status)
+		}
 	}
+
 	if input.ShopName != "" {
 		payment.ShopName = input.ShopName
 	}
@@ -168,4 +186,16 @@ func logCuitChange(ctx context.Context, paymentId, oldCuit, newCuit, receiptImag
 	}
 
 	return nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

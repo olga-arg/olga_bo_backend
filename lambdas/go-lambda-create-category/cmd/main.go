@@ -15,7 +15,8 @@ func main() {
 		panic(err)
 	}
 	categoryRepo := db.NewCategoryRepository(gormDb)
-	categoryProcessor := processor.New(*categoryRepo)
+	userRepo := db.NewUserRepository(gormDb)
+	categoryProcessor := processor.New(*categoryRepo, *userRepo)
 	createCategoryHandler := handler.NewCreateCategoryHandler(categoryProcessor)
 	lambda.Start(createCategoryHandler.Handle)
 }

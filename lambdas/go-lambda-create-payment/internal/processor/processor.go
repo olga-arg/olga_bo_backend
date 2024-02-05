@@ -10,6 +10,7 @@ import (
 
 type Processor interface {
 	CreatePayment(ctx context.Context, input *dto.CreatePaymentInput, email, companyId string) error
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
@@ -44,6 +45,10 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 	//if remainingMonthlyLimit < input.Amount {
 	//	return fmt.Errorf("Error: The amount is greater than the monthly limit")
 	//}
+
+	if input.Amount < 0 {
+		return fmt.Errorf("Error: The amount cannot be negative")
+	}
 
 	// Create payment
 	payment, err := domain.NewPayment(input.Amount, input.ShopName, input.Cuit, input.Time, input.Category, input.ReceiptNumber, input.ReceiptType, input.ReceiptImageKey, user.ID, input.Date)
@@ -87,4 +92,16 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 	}
 
 	return nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }
