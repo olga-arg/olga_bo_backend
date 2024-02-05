@@ -27,7 +27,6 @@ func NewOutput(users []domain.User) *Output {
 			PurchaseLimit:   user.PurchaseLimit,
 			MonthlyLimit:    user.MonthlyLimit,
 			MonthlySpending: user.MonthlySpending,
-			IsAdmin:         user.IsAdmin,
 			Status:          user.Status,
 			Teams:           teams,
 		})

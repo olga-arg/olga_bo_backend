@@ -85,9 +85,6 @@ func (p *processor) ValidateUserInput(ctx context.Context, input *dto.UpdateUser
 		}
 		user.MonthlyLimit = input.MonthlyLimit
 	}
-	if input.IsAdmin != nil {
-		user.IsAdmin = *input.IsAdmin
-	}
 
 	if input.Role != nil {
 		user.Role = *input.Role

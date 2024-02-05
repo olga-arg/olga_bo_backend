@@ -76,9 +76,7 @@ func (r *UserRepository) GetAllUsers(filters map[string]string, companyId string
 	if email, ok := filters["email"]; ok {
 		query = query.Where("email ILIKE ?", "%"+email+"%")
 	}
-	if isAdmin, ok := filters["isAdmin"]; ok {
-		query = query.Where("is_admin = ?", isAdmin)
-	}
+	
 
 	// Execute the query
 	err := query.Find(&users).Error
