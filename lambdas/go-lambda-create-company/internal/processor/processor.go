@@ -18,7 +18,6 @@ import (
 type Processor interface {
 	CreateCompany(ctx context.Context, input *dto.CreateCompanyInput) error
 	ValidateCompanyInput(ctx context.Context, input *dto.CreateCompanyInput, request events.APIGatewayProxyRequest) error
-	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
@@ -41,6 +40,10 @@ func (p *processor) CreateCompany(ctx context.Context, input *dto.CreateCompanyI
 	if err != nil {
 		fmt.Println("Error creating company: ", err)
 		return err
+	}
+
+	if input.Cuit == "" {
+		return fmt.Errorf("cuit is required")
 	}
 
 	// Saves the company to the database if it doesn't already exist
@@ -195,6 +198,10 @@ func (p *processor) CreateCompany(ctx context.Context, input *dto.CreateCompanyI
 	}
 	fmt.Println("User created successfully in Cognito")
 
+	// TODO: Erase this line when the monthly limit is implemented
+	user.MonthlyLimit = 10
+	user.Role = domain.Admin
+
 	// Saves the user to the database if it doesn't already exist
 	if err := p.userStorage.Save(user, company.ID); err != nil {
 		fmt.Println("Error saving user: ", err)
@@ -233,16 +240,4 @@ func (p *processor) ValidateCompanyInput(ctx context.Context, input *dto.CreateC
 		return fmt.Errorf("invalid email format")
 	}
 	return nil
-}
-
-func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
-	// Validate user
-	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
-	if err != nil {
-		return false, err
-	}
-	if isAuthorized {
-		return true, nil
-	}
-	return false, nil
 }

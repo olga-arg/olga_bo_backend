@@ -47,6 +47,8 @@ type DbTeam struct {
 	UserFullName        string             `json:"user_full_name"`
 	UserEmail           string             `json:"user_email"`
 	UserMonthlySpending float32            `json:"user_monthly_spending"`
+	UserStatus          ConfirmationStatus `json:"user_status"`
+	UserRole            UserRoles          `json:"user_role"`
 }
 
 type UpdateTeamRequest struct {

@@ -76,8 +76,14 @@ func (r *UserRepository) GetAllUsers(filters map[string]string, companyId string
 	if email, ok := filters["email"]; ok {
 		query = query.Where("email ILIKE ?", "%"+email+"%")
 	}
-	if isAdmin, ok := filters["isAdmin"]; ok {
-		query = query.Where("is_admin = ?", isAdmin)
+
+	if role, ok := filters["role"]; ok {
+		roleInt, err := domain.ParseUserRole(role)
+		if err != nil {
+			fmt.Println("Error parsing role:", err)
+			return nil, err
+		}
+		query = query.Where("role = ?", roleInt)
 	}
 
 	// Execute the query

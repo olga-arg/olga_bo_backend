@@ -3,6 +3,7 @@ package processor
 import (
 	"commons/domain"
 	"commons/utils/db"
+	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -17,15 +18,18 @@ import (
 
 type Processor interface {
 	ExportPayments(companyId string, paymentsId []string) (string, error)
+	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 }
 
 type processor struct {
 	paymentStorage db.PaymentRepository
+	userStorage    db.UserRepository
 }
 
-func New(paymentStorage db.PaymentRepository) Processor {
+func New(paymentRepo db.PaymentRepository, userRepo db.UserRepository) Processor {
 	return &processor{
-		paymentStorage: paymentStorage,
+		paymentStorage: paymentRepo,
+		userStorage:    userRepo,
 	}
 }
 
@@ -35,6 +39,11 @@ func (p *processor) ExportPayments(companyId string, paymentsId []string) (strin
 	payments, err := p.paymentStorage.GetPaymentsByMultipleIDs(paymentsId, companyId)
 	if err != nil {
 		return "", fmt.Errorf("error getting payments: %v", err)
+	}
+
+	// If there are no payments, return an error
+	if len(payments) == 0 {
+		return "", fmt.Errorf("no payments found")
 	}
 
 	// Access the S3 bucket to get the template
@@ -73,6 +82,13 @@ func (p *processor) ExportPayments(companyId string, paymentsId []string) (strin
 
 	sheetName := "Template"
 
+	style, err := f.NewStyle(&excelize.Style{
+		NumFmt: 177, // El formato 177 en Excel corresponde a formato de moneda
+	})
+	if err != nil {
+		return "", fmt.Errorf("error creating currency style: %v", err)
+	}
+
 	// Iterate over the payments and add them to the Excel file
 	for i, payment := range payments {
 		rowIndex := i + 2
@@ -86,6 +102,7 @@ func (p *processor) ExportPayments(companyId string, paymentsId []string) (strin
 
 		_ = f.SetCellValue(sheetName, "A"+strconv.Itoa(rowIndex), payment.ID)
 		_ = f.SetCellValue(sheetName, "B"+strconv.Itoa(rowIndex), payment.Amount)
+		_ = f.SetCellStyle(sheetName, "B"+strconv.Itoa(rowIndex), "B"+strconv.Itoa(rowIndex), style)
 		_ = f.SetCellValue(sheetName, "C"+strconv.Itoa(rowIndex), payment.ShopName)
 		_ = f.SetCellValue(sheetName, "D"+strconv.Itoa(rowIndex), payment.Cuit)
 		_ = f.SetCellValue(sheetName, "E"+strconv.Itoa(rowIndex), payment.Date)
@@ -137,4 +154,16 @@ func (p *processor) ExportPayments(companyId string, paymentsId []string) (strin
 	}
 
 	return url, nil
+}
+
+func (p *processor) ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error) {
+	// Validate user
+	isAuthorized, err := p.userStorage.IsUserAuthorized(email, companyId, allowedRoles)
+	if err != nil {
+		return false, err
+	}
+	if isAuthorized {
+		return true, nil
+	}
+	return false, nil
 }

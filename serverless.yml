@@ -348,6 +348,16 @@ resources:
               Prefix: "exported-payments/"
               Status: Enabled
               ExpirationInDays: 1
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - "GET"
+                - "PUT"
+                - "POST"
+              AllowedOrigins:
+                - "*"
     PythonLambdaScanReceiptRole:
       Type: 'AWS::IAM::Role'
       Properties:

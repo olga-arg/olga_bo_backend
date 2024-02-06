@@ -42,6 +42,13 @@ func (p *processor) CreateUser(ctx context.Context, input *dto.CreateUserInput, 
 	// TODO: Erase this line when the monthly limit is implemented
 	user.MonthlyLimit = 10
 
+	// Parse the role from the input
+	role, err := domain.ParseUserRole(input.Role)
+	if err != nil {
+		return err
+	}
+	user.Role = role
+
 	// Creates the user in cognito
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-1"),

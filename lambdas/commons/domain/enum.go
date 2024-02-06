@@ -64,3 +64,18 @@ const (
 	Admin
 	Accountant
 )
+
+func ParseUserRole(s string) (UserRoles, error) {
+	switch s {
+	case "Employee":
+		return Employee, nil
+	case "Reviewer":
+		return Reviewer, nil
+	case "Admin":
+		return Admin, nil
+	case "Accountant":
+		return Accountant, nil
+	default:
+		return -1, fmt.Errorf("invalid role: %s", s)
+	}
+}

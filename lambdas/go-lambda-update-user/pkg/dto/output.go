@@ -12,7 +12,6 @@ func NewOutput(user *domain.User) *domain.User {
 		PurchaseLimit:   user.PurchaseLimit,
 		MonthlyLimit:    user.MonthlyLimit,
 		MonthlySpending: user.MonthlySpending,
-		IsAdmin:         user.IsAdmin,
 		Status:          user.Status,
 	}
 	return &dtoUser

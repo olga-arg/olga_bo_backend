@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"commons/domain"
 	"commons/utils"
 	"context"
 	"fmt"
@@ -47,22 +46,6 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		}, nil
 	}
 
-	// Validate user
-	allowedRoles := []domain.UserRoles{domain.Admin}
-	isAuthorized, err := h.processor.ValidateUser(context.Background(), email, companyId, allowedRoles)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusUnauthorized,
-			Body:       err.Error(),
-		}, nil
-	}
-	if !isAuthorized {
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusUnauthorized,
-			Body:       "Unauthorized",
-		}, nil
-	}
-
 	// Validate input
 	err = h.processor.ValidateCompanyInput(context.Background(), &input, request)
 	if err != nil {
@@ -93,6 +76,6 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 			"Access-Control-Allow-Origin":  "*",
 			"Access-Control-Allow-Headers": "*",
 		},
-		Body: "User created successfully",
+		Body: "Company created successfully",
 	}, nil
 }

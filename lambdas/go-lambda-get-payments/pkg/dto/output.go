@@ -33,7 +33,6 @@ func NewOutput(payments domain.Payments) *Output {
 				PurchaseLimit:   payment.User.PurchaseLimit,
 				MonthlyLimit:    payment.User.MonthlyLimit,
 				MonthlySpending: payment.User.MonthlySpending,
-				IsAdmin:         payment.User.IsAdmin,
 			},
 		})
 	}

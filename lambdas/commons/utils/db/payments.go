@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"strings"
 	"time"
 )
 
@@ -68,8 +69,9 @@ func (r *PaymentRepository) GetAllPayments(filters map[string]string, companyId 
 	}
 
 	// Filter by category
-	if category, ok := filters["category"]; ok {
-		query = query.Where("category = ?", category)
+	if categories, ok := filters["category"]; ok {
+		categoryList := strings.Split(categories, ",")
+		query = query.Where("category IN (?)", categoryList)
 	}
 
 	// Filter by date range
@@ -193,8 +195,7 @@ func (r *PaymentRepository) GetPaymentsByMultipleIDs(paymentIDs []string, compan
 
 	query := r.Db.Scopes(getPaymentTable(companyId)).
 		Preload("User", func(db *gorm.DB) *gorm.DB { return db.Scopes(getUserTable(companyId)) }).
-		Where("id IN (?)", paymentIDs).
-		Not("status", domain.Exported)
+		Where("id IN (?)", paymentIDs)
 
 	err := query.Find(&payments).Error
 	if err != nil {
