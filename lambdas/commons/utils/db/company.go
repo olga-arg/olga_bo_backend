@@ -53,6 +53,7 @@ func (r *CompanyRepository) CreateCompanySpecificTables(companyId string) error 
 	usersTeamsTableName := fmt.Sprintf("%s_users_teams", companyId)
 	usersTableName := fmt.Sprintf("%s_users", companyId)
 	teamsTableName := fmt.Sprintf("%s_teams", companyId)
+	uniqueConstraintName := fmt.Sprintf("%s_unique_user_team", companyId)
 
 	// Migrar la tabla users_teams
 	err = r.Db.Table(usersTeamsTableName).AutoMigrate(&domain.UserTeam{}).Error
@@ -61,7 +62,6 @@ func (r *CompanyRepository) CreateCompanySpecificTables(companyId string) error 
 		return err
 	}
 
-	// Añadir foreign keys después de crear la tabla
 	// Añadir foreign keys después de crear la tabla
 	err = r.Db.Debug().Exec(fmt.Sprintf(`
 	ALTER TABLE %s
@@ -88,11 +88,11 @@ func (r *CompanyRepository) CreateCompanySpecificTables(companyId string) error 
 	// Add the unique key constraint for the columns user_id and team_id
 	err = r.Db.Debug().Exec(fmt.Sprintf(`
 	ALTER TABLE %s
-	ADD CONSTRAINT unique_user_team UNIQUE (user_id, team_id);
-`, r.Db.Dialect().Quote(usersTeamsTableName))).Error
+	ADD CONSTRAINT %s UNIQUE (user_id, team_id);
+`, r.Db.Dialect().Quote(usersTeamsTableName), r.Db.Dialect().Quote(uniqueConstraintName))).Error
 
 	if err != nil {
-		fmt.Println("Error adding unique key for users_teams: ", err)
+		fmt.Println("Error adding unique constraint: ", err)
 		return err
 	}
 
