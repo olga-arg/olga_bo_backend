@@ -248,23 +248,17 @@ func (r *TeamRepository) GetTeamByUserID(userID, companyId string) ([]domain.Use
 func (r *TeamRepository) GetTeamByID(teamID, companyId string) (*domain.Team, error) {
 	var team domain.Team
 
-	fmt.Println("Getting team by ID in db")
-	fmt.Println("Team ID:", teamID)
-
 	err := r.Db.Scopes(getTeamTable(companyId)).Where("id = ?", teamID).First(&team).Error
 	if err != nil {
 		fmt.Println("Error getting team by ID: ", err)
 		return nil, err
 	}
 
-	fmt.Println("Team found:", team)
-
 	return &team, nil
 }
 
 func (r *TeamRepository) UpdateTeamMonthlySpending(newMonthlySpending int, companyId, teamId string) error {
 	// Save the new monthly spending to the team
-	fmt.Println("Updating team monthly spending")
 	query := r.Db.Scopes(getTeamTable(companyId)).Model(&domain.Team{}).Where("id = ?", teamId).Update("monthly_spending", newMonthlySpending)
 	if query.Error != nil {
 		fmt.Println("Error updating team monthly spending: ", query.Error)

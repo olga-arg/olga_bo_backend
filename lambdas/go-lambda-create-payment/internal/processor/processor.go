@@ -69,8 +69,6 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 		return err
 	}
 
-	fmt.Println("User ID", user.ID)
-
 	// If the user is part of a team, update the team's monthly spending
 	userTeams, err := p.teamStorage.GetTeamByUserID(user.ID, companyId)
 	fmt.Println("User teams: ", userTeams)
@@ -79,7 +77,6 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 		return err
 	}
 	if len(userTeams) > 0 {
-		fmt.Println("Updating team monthly spending")
 		for _, userTeam := range userTeams {
 			team, err := p.teamStorage.GetTeamByID(userTeam.TeamID, companyId)
 			if err != nil {
