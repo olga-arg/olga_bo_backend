@@ -29,6 +29,7 @@ func NewOutput(users []domain.User) *Output {
 			MonthlySpending: user.MonthlySpending,
 			Status:          user.Status,
 			Teams:           teams,
+			Role:            user.Role,
 		})
 	}
 	return &Output{
