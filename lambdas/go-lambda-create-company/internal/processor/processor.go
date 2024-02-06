@@ -182,7 +182,7 @@ func (p *processor) CreateCompany(ctx context.Context, input *dto.CreateCompanyI
 			},
 			{
 				Name:  aws.String("email_verified"),
-				Value: aws.String("True"),
+				Value: aws.String("False"),
 			},
 			{
 				Name:  aws.String("name"),

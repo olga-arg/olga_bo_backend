@@ -98,7 +98,7 @@ func (p *processor) ValidatePaymentInput(ctx context.Context, input *dto.UpdateP
 				}
 				amount := *input.Amount
 				team.MonthlySpending += int(amount)
-				if err := p.teamStorage.UpdateTeamMonthlySpending(team.MonthlySpending, companyId); err != nil {
+				if err := p.teamStorage.UpdateTeamMonthlySpending(team.MonthlySpending, companyId, team.ID); err != nil {
 					fmt.Println("Error updating team monthly spending: ", err)
 					return nil, err
 				}

@@ -68,6 +68,9 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 		fmt.Println("Error saving payment: ", err)
 		return err
 	}
+
+	fmt.Println("User ID", user.ID)
+
 	// If the user is part of a team, update the team's monthly spending
 	userTeams, err := p.teamStorage.GetTeamByUserID(user.ID, companyId)
 	fmt.Println("User teams: ", userTeams)
@@ -84,7 +87,7 @@ func (p *processor) CreatePayment(ctx context.Context, input *dto.CreatePaymentI
 				return err
 			}
 			team.MonthlySpending += int(input.Amount)
-			if err := p.teamStorage.UpdateTeamMonthlySpending(team.MonthlySpending, companyId); err != nil {
+			if err := p.teamStorage.UpdateTeamMonthlySpending(team.MonthlySpending, companyId, team.ID); err != nil {
 				fmt.Println("Error updating team monthly spending: ", err)
 				return err
 			}

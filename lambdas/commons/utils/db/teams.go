@@ -232,10 +232,13 @@ func (r *TeamRepository) UpdateTeam(teamID string, newTeam *domain.UpdateTeamReq
 
 func (r *TeamRepository) GetTeamByUserID(userID, companyId string) ([]domain.UserTeam, error) {
 	// Get all the teams that the user is part of in the users_teams table
+	fmt.Println("Getting user teams by user ID in db")
+	fmt.Println("User ID:", userID)
+
 	var userTeams []domain.UserTeam
 	err := r.Db.Scopes(getUserTeamTable(companyId)).Where("user_id = ?", userID).Find(&userTeams).Error
 	if err != nil {
-		fmt.Println("Error getting user teams: ", err)
+		fmt.Println("Error getting user teams:", err)
 		return nil, err
 	}
 
@@ -244,21 +247,28 @@ func (r *TeamRepository) GetTeamByUserID(userID, companyId string) ([]domain.Use
 
 func (r *TeamRepository) GetTeamByID(teamID, companyId string) (*domain.Team, error) {
 	var team domain.Team
+
+	fmt.Println("Getting team by ID in db")
+	fmt.Println("Team ID:", teamID)
+
 	err := r.Db.Scopes(getTeamTable(companyId)).Where("id = ?", teamID).First(&team).Error
 	if err != nil {
 		fmt.Println("Error getting team by ID: ", err)
 		return nil, err
 	}
+
+	fmt.Println("Team found:", team)
+
 	return &team, nil
 }
 
-func (r *TeamRepository) UpdateTeamMonthlySpending(newMonthlySpending int, companyId string) error {
+func (r *TeamRepository) UpdateTeamMonthlySpending(newMonthlySpending int, companyId, teamId string) error {
 	// Save the new monthly spending to the team
 	fmt.Println("Updating team monthly spending")
-	err := r.Db.Scopes(getTeamTable(companyId)).Model(&domain.Team{}).Update("monthly_spending", newMonthlySpending).Error
-	if err != nil {
-		fmt.Println("Error updating team: ", err)
-		return err
+	query := r.Db.Scopes(getTeamTable(companyId)).Model(&domain.Team{}).Where("id = ?", teamId).Update("monthly_spending", newMonthlySpending)
+	if query.Error != nil {
+		fmt.Println("Error updating team monthly spending: ", query.Error)
+		return query.Error
 	}
 	return nil
 }
