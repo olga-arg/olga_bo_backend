@@ -22,7 +22,8 @@ func NewOutput(teams domain.DbTeams) *Output {
 				Surname:  dbTeam.Reviewer.Surname,
 				FullName: dbTeam.Reviewer.FullName,
 				Email:    dbTeam.Reviewer.Email,
-				// Agregar otros campos de revisor según sea necesario
+				Status:   dbTeam.Reviewer.Status,
+				Role:     dbTeam.Reviewer.Role,
 			}
 		} // reviewer es nil si dbTeam.ReviewerId es ""
 
@@ -34,6 +35,8 @@ func NewOutput(teams domain.DbTeams) *Output {
 					Surname:  dbTeam.UserSurname,
 					FullName: dbTeam.UserFullName,
 					Email:    dbTeam.UserEmail,
+					Status:   dbTeam.UserStatus,
+					Role:     dbTeam.UserRole,
 				}
 				existingTeam.Users = append(existingTeam.Users, user)
 			}
@@ -57,6 +60,8 @@ func NewOutput(teams domain.DbTeams) *Output {
 						Surname:  dbTeam.UserSurname,
 						FullName: dbTeam.UserFullName,
 						Email:    dbTeam.UserEmail,
+						Status:   dbTeam.UserStatus,
+						Role:     dbTeam.UserRole,
 					},
 				}
 			} else {

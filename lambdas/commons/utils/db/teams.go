@@ -83,7 +83,7 @@ func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string
 	teamsTableName := fmt.Sprintf("%s_teams", companyId)
 	querySyntax := fmt.Sprintf(
 		`SELECT teams.id, teams.name, teams.reviewer_id, teams.monthly_spending, teams.annual_budget, teams.status, teams.created_date, 
-        users.id as "user_id", users.name as "user_name", users.surname as "user_surname", users.full_name as "user_full_name", users.email as "user_email", users.monthly_spending as "user_monthly_spending"
+        users.id as "user_id", users.name as "user_name", users.surname as "user_surname", users.full_name as "user_full_name", users.email as "user_email", users.monthly_spending as "user_monthly_spending", users.status as "user_status", users.role as "user_role"
         FROM "%s" as teams 
         LEFT JOIN "%s" as users_teams ON teams.id = users_teams.team_id 
         LEFT JOIN "%s" as users ON users.id = users_teams.user_id`,

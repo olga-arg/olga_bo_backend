@@ -196,7 +196,7 @@ func (r *PaymentRepository) GetPaymentsByMultipleIDs(paymentIDs []string, compan
 	query := r.Db.Scopes(getPaymentTable(companyId)).
 		Preload("User", func(db *gorm.DB) *gorm.DB { return db.Scopes(getUserTable(companyId)) }).
 		Where("id IN (?)", paymentIDs)
-	
+
 	err := query.Find(&payments).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
