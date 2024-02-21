@@ -64,6 +64,7 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 	var validUsers []dto.CreateUserInput
 
 	for _, userInput := range users {
+		fmt.Println("Validating user input: ", userInput)
 		err = h.processor.ValidateUserInput(context.Background(), &userInput)
 		if err != nil {
 			failedUsers = append(failedUsers, domain.UserNotCreated{Email: userInput.Email, Reason: err.Error()})
@@ -73,9 +74,12 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		validUsers = append(validUsers, userInput)
 	}
 
+	fmt.Println("Creating users:", validUsers)
+
 	// Ahora, crea todos los usuarios válidos en un solo llamado
+	var cognitoFailedUsers []domain.UserNotCreated
 	if len(validUsers) > 0 {
-		err = h.processor.CreateMultipleUsers(context.Background(), validUsers, companyId)
+		cognitoFailedUsers, err = h.processor.CreateMultipleUsers(context.Background(), validUsers, companyId)
 		if err != nil {
 			// Manejar error
 			fmt.Println("Error creating multiple users:", err)
@@ -84,20 +88,46 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 		}
 	}
 
-	// Envía correos electrónicos solo para usuarios creados con éxito
+	fmt.Println("Cognito failed users:", cognitoFailedUsers)
+
+	// Agrega los usuarios que fallaron en Cognito a la lista de fallos
+	failedUsers = append(failedUsers, cognitoFailedUsers...)
+
+	fmt.Println("Failed users:", failedUsers)
+
+	// Filtra los usuarios válidos para excluir a los que fallaron en Cognito
+	var usersForEmail []dto.CreateUserInput
 	for _, validUser := range validUsers {
-		err = services.NewDefaultEmailService().SendEmail(validUser.Email, services.Welcome, []string{validUser.Name}, nil)
+		var failed bool
+		for _, failedUser := range cognitoFailedUsers {
+			if validUser.Email == failedUser.Email {
+				failed = true
+				break
+			}
+		}
+		if !failed {
+			usersForEmail = append(usersForEmail, validUser)
+		}
+	}
+
+	fmt.Println("Users for email:", usersForEmail)
+
+	// Envía correos electrónicos solo a los usuarios que no fallaron en la creación de Cognito
+	for _, user := range usersForEmail {
+		err = services.NewDefaultEmailService().SendEmail(user.Email, services.Welcome, []string{user.Name}, nil)
 		if err != nil {
 			fmt.Println("Error sending email:", err)
 		} else {
-			fmt.Println("Email sent successfully to", validUser.Email)
+			fmt.Println("Email sent successfully to", user.Email)
 		}
 	}
 
 	result := domain.CreateUserResult{
 		FailedUsers:  failedUsers,
-		SuccessCount: len(validUsers),
+		SuccessCount: len(usersForEmail),
 	}
+
+	fmt.Println("Result:", result)
 
 	// Serializar result a JSON
 	resultBytes, err := json.Marshal(result)
@@ -108,6 +138,8 @@ func (h *CreateUserHandler) Handle(request events.APIGatewayProxyRequest) (event
 			Body:       "Error serializing response",
 		}, nil
 	}
+
+	fmt.Println("Result bytes:", string(resultBytes))
 
 	// Construir y retornar APIGatewayProxyResponse
 	return events.APIGatewayProxyResponse{

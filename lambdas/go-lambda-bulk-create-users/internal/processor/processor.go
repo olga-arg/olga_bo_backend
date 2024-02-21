@@ -1,9 +1,11 @@
 package processor
 
 import (
+	"bytes"
 	"commons/domain"
 	"commons/utils/db"
 	"context"
+	"encoding/base64"
 	"encoding/csv"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
@@ -20,7 +22,7 @@ import (
 )
 
 type Processor interface {
-	CreateMultipleUsers(ctx context.Context, inputs []dto.CreateUserInput, companyId string) error
+	CreateMultipleUsers(ctx context.Context, inputs []dto.CreateUserInput, companyId string) ([]domain.UserNotCreated, error)
 	ValidateUserInput(ctx context.Context, input *dto.CreateUserInput) error
 	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 	ParseCSVFromRequest(ctx context.Context, request events.APIGatewayProxyRequest) ([]dto.CreateUserInput, error)
@@ -36,36 +38,34 @@ func New(s db.UserRepository) Processor {
 	}
 }
 
-func (p *processor) CreateMultipleUsers(ctx context.Context, inputs []dto.CreateUserInput, companyId string) error {
-	var usersToSave []*domain.User // Para almacenar usuarios que serán guardados en la base de datos
+func (p *processor) CreateMultipleUsers(ctx context.Context, inputs []dto.CreateUserInput, companyId string) ([]domain.UserNotCreated, error) {
+	var usersToSave []*domain.User          // Para almacenar usuarios que serán guardados en la base de datos
+	var failedUsers []domain.UserNotCreated // Para almacenar usuarios que fallaron en ser creados
 
-	// Sesión de AWS y cliente de Cognito (asumiendo que esto no cambia entre llamadas)
+	// Configuración inicial de Cognito, como antes
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-1"),
 	})
 	if err != nil {
-		return err
+		return failedUsers, err
 	}
 	cognitoClient := cognitoidentityprovider.New(sess)
 	userPoolID := os.Getenv("USER_POOL_ID")
 
 	for _, input := range inputs {
-		// Creación de la estructura de usuario (domain.NewUser)
 		user, err := domain.NewUser(input.Name, input.Surname, input.Email)
 		if err != nil {
-			fmt.Println("Error creating user structure: ", err)
-			continue // Decide cómo manejar este error; podría ser agregando a un log, etc.
+			failedUsers = append(failedUsers, domain.UserNotCreated{Email: input.Email, Reason: err.Error()})
+			continue
 		}
-		user.MonthlyLimit = 10 // TODO: Adjust according to your logic
-
+		user.MonthlyLimit = 10 // Ajustar según tu lógica
 		role, err := domain.ParseUserRole(input.Role)
 		if err != nil {
-			fmt.Println("Error parsing user role: ", err)
+			failedUsers = append(failedUsers, domain.UserNotCreated{Email: input.Email, Reason: err.Error()})
 			continue
 		}
 		user.Role = role
 
-		// Creación del usuario en Cognito
 		createUserInput := &cognitoidentityprovider.AdminCreateUserInput{
 			MessageAction: aws.String("SUPPRESS"),
 			Username:      aws.String(input.Email),
@@ -76,23 +76,26 @@ func (p *processor) CreateMultipleUsers(ctx context.Context, inputs []dto.Create
 				{Name: aws.String("email_verified"), Value: aws.String("False")},
 			},
 		}
+
 		_, err = cognitoClient.AdminCreateUser(createUserInput)
 		if err != nil {
-			fmt.Println("Error creating user in Cognito: ", err)
+			failedUsers = append(failedUsers, domain.UserNotCreated{Email: input.Email, Reason: err.Error()})
 			continue
 		}
 
 		usersToSave = append(usersToSave, user)
 	}
 
-	// Ahora, guarda todos los usuarios en la base de datos en una sola operación
 	if len(usersToSave) > 0 {
 		if err := p.userStorage.SaveMultipleUsers(usersToSave, companyId); err != nil {
+			// Considera manejar los errores de la base de datos de manera que puedas especificar cuáles usuarios fallaron aquí también
 			fmt.Println("Error saving users to database: ", err)
-			return err
+			// Este error no se agrega a failedUsers porque es un fallo en el batch, no individual
+			return failedUsers, err
 		}
 	}
-	return nil
+
+	return failedUsers, nil // Devuelve la lista de usuarios que no se pudieron crear junto con cualquier error global
 }
 
 func (p *processor) ValidateUserInput(ctx context.Context, input *dto.CreateUserInput) error {
@@ -126,88 +129,77 @@ func (p *processor) ValidateUser(ctx context.Context, email, companyId string, a
 }
 
 func (p *processor) ParseCSVFromRequest(ctx context.Context, request events.APIGatewayProxyRequest) ([]dto.CreateUserInput, error) {
-	reader := strings.NewReader(request.Body)
-	fmt.Println("reader: ", reader)
+	var reader io.Reader
+	if request.IsBase64Encoded {
+		decodedBody, err := base64.StdEncoding.DecodeString(request.Body)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding base64 body: %v", err)
+		}
+		reader = bytes.NewReader(decodedBody)
+	} else {
+		reader = strings.NewReader(request.Body)
+	}
 
-	// Crea un multipart reader.
-	// Necesitarás el "boundary" para crear el reader, que se encuentra en el header "Content-Type" del request.
+	fmt.Println("Content-Type header: ", request.Headers["content-type"])
+
 	contentType := request.Headers["content-type"]
-	fmt.Println("Headers: ", request.Headers)
-	fmt.Println("content-type: ", contentType)
 	_, params, err := mime.ParseMediaType(contentType)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing Content-Type header: %v", err)
 	}
-	fmt.Println("Params: ", params)
-	mr := multipart.NewReader(reader, request.Headers["content-type"])
-	fmt.Println("Multipart reader: ", mr)
-	hola := csv.NewReader(reader)
-	println("csvreader: ", hola)
-	content, err := hola.Read()
-	if err != nil {
-		fmt.Println("Error reading CSV: ", err)
-	}
-	println("content file: ", content)
-	// Encuentra la parte del formulario que contiene el archivo CSV.
-	var csvPart *multipart.Part
-	for {
-		part, err := mr.NextPart()
-		println("formname: ", part.FormName())
-		println("Part: ", part)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			fmt.Printf("type err: %T\n", err)
-			fmt.Println("00 error getting next part of multipart request: ", err)
-			fmt.Println("01 error getting next part of multipart request: ", err.Error())
-			return nil, fmt.Errorf("error getting next part of multipart request: %v", err)
-		}
-		if part.FormName() == "csvfile" { // Asume que el campo del formulario se llama "csvfile"
-			csvPart = part
-			break
-		}
-	}
 
-	if csvPart == nil {
-		return nil, fmt.Errorf("no CSV file part found in the request")
-	}
+	fmt.Println("Finished parsing Content-Type header")
 
-	// Ahora que tienes la parte que contiene el CSV, puedes leerla y parsearla.
-	r := csv.NewReader(csvPart)
+	mr := multipart.NewReader(reader, params["boundary"])
 
-	// Leer la primera fila (encabezados de columna) y descartarla si es necesario
-	_, err = r.Read()
-	if err != nil {
-		return nil, fmt.Errorf("error reading CSV header: %v", err)
-	}
+	fmt.Println("Created multipart reader")
 
 	var users []dto.CreateUserInput
 
-	// Continuar leyendo el resto del archivo CSV como antes
 	for {
-		record, err := r.Read()
+		part, err := mr.NextPart()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("error reading CSV record: %v", err)
+			return nil, fmt.Errorf("error getting next part of multipart request: %v", err)
 		}
 
-		// Procesamiento de cada fila asumiendo formato: Name, Surname, Email, Role
-		if len(record) < 4 {
-			continue // O maneja el error como prefieras
-		}
+		if part.FormName() == "csvfile" {
+			csvReader := csv.NewReader(part)
+			for {
+				record, err := csvReader.Read()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					return nil, fmt.Errorf("error reading CSV record: %v", err)
+				}
 
-		user := dto.CreateUserInput{
-			Name:    record[0],
-			Surname: record[1],
-			Email:   record[2],
-			Role:    record[3],
-		}
+				if len(record) < 4 {
+					continue // O maneja el error como prefieras
+				}
 
-		users = append(users, user)
+				user := dto.CreateUserInput{
+					Name:    record[0],
+					Surname: record[1],
+					Email:   record[2],
+					Role:    record[3],
+				}
+
+				users = append(users, user)
+			}
+			// Asegúrate de cerrar la parte después de leerla
+			part.Close()
+			break // Rompe el ciclo después de encontrar y leer el CSV
+		}
 	}
+
+	if len(users) == 0 {
+		return nil, fmt.Errorf("no CSV file part found in the request or empty CSV")
+	}
+
+	fmt.Println("Users parsed from CSV: ", users)
 
 	return users, nil
 }
