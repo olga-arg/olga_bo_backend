@@ -89,6 +89,25 @@ functions:
       - httpApi:
           path: /users
           method: post
+  go-lambda-bulk-create-users:  
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-bulk-create-users/go-lambda-bulk-create-users.zip
+    ssmToEnvironment:
+      - EMAIL_SENDER_ADDRESS
+      - EMAIL_SENDER_PASSWORD
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+      - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
+    events:
+      - httpApi:
+          path: /users/bulk
+          method: post
   go-lambda-get-users:
     handler: bootstrap
     package:

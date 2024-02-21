@@ -46,3 +46,13 @@ type UpdateUserRequest struct {
 	Email     string `json:"email"`
 	Username  string `json:"username"`
 }
+
+type UserNotCreated struct {
+	Email  string
+	Reason string
+}
+
+type CreateUserResult struct {
+	FailedUsers  []UserNotCreated
+	SuccessCount int
+}

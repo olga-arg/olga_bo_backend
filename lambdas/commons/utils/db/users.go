@@ -48,6 +48,29 @@ func (r *UserRepository) Save(user *domain.User, companyId string) error {
 	return nil
 }
 
+func (r *UserRepository) SaveMultipleUsers(users []*domain.User, companyId string) error {
+	const batchSize = 100
+
+	for i := 0; i < len(users); i += batchSize {
+		end := i + batchSize
+		if end > len(users) {
+			end = len(users)
+		}
+
+		batch := users[i:end]
+
+		// Insertar el lote actual de usuarios
+		for _, user := range batch {
+			if err := r.Db.Scopes(getUserTable(companyId)).Create(user).Error; err != nil {
+				fmt.Println("Error saving user: ", err)
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (r *TeamRepository) GetReviewerById(id, companyId string) error {
 	var user domain.User
 	err := r.Db.Scopes(getUserTable(companyId)).Where("id = ?", id).First(&user).Error
