@@ -127,28 +127,42 @@ func (p *processor) ValidateUser(ctx context.Context, email, companyId string, a
 
 func (p *processor) ParseCSVFromRequest(ctx context.Context, request events.APIGatewayProxyRequest) ([]dto.CreateUserInput, error) {
 	reader := strings.NewReader(request.Body)
+	fmt.Println("reader: ", reader)
 
 	// Crea un multipart reader.
 	// Necesitarás el "boundary" para crear el reader, que se encuentra en el header "Content-Type" del request.
-	contentType := request.Headers["Content-Type"]
+	contentType := request.Headers["content-type"]
+	fmt.Println("Headers: ", request.Headers)
+	fmt.Println("content-type: ", contentType)
 	_, params, err := mime.ParseMediaType(contentType)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing Content-Type header: %v", err)
 	}
-
-	mr := multipart.NewReader(reader, params["boundary"])
-
+	fmt.Println("Params: ", params)
+	mr := multipart.NewReader(reader, request.Headers["content-type"])
+	fmt.Println("Multipart reader: ", mr)
+	hola := csv.NewReader(reader)
+	println("csvreader: ", hola)
+	content, err := hola.Read()
+	if err != nil {
+		fmt.Println("Error reading CSV: ", err)
+	}
+	println("content file: ", content)
 	// Encuentra la parte del formulario que contiene el archivo CSV.
 	var csvPart *multipart.Part
 	for {
 		part, err := mr.NextPart()
+		println("formname: ", part.FormName())
+		println("Part: ", part)
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
+			fmt.Printf("type err: %T\n", err)
+			fmt.Println("00 error getting next part of multipart request: ", err)
+			fmt.Println("01 error getting next part of multipart request: ", err.Error())
 			return nil, fmt.Errorf("error getting next part of multipart request: %v", err)
 		}
-
 		if part.FormName() == "csvfile" { // Asume que el campo del formulario se llama "csvfile"
 			csvPart = part
 			break
