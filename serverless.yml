@@ -26,6 +26,14 @@ provider:
             - logs:PutLogEvents
           Resource:
             - 'arn:aws:logs:sa-east-1:588257415519:log-group:dev-cuit-change:*'
+        - Effect: 'Allow'
+          Action:
+            - sqs:SendMessage
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:GetQueueUrl
+          Resource:
+            - "arn:aws:sqs:sa-east-1:*:${sls:stage}-processor-queue"
 
 # you can define service wide environment variables here
 #  environment:
@@ -104,10 +112,31 @@ functions:
       - USER_POOL_ID
     environment:
       STAGE: ${sls:stage}
+      SQS_QUEUE_NAME: ${sls:stage}-processor-queue
     events:
       - httpApi:
           path: /users/bulk
           method: post
+  go-lambda-bulk-create-users-process-queue:
+    handler: bootstrap
+    package:
+      artifact: lambdas/bin/go-lambda-bulk-create-users-process-queue/go-lambda-bulk-create-users-process-queue.zip
+    ssmToEnvironment:
+      - EMAIL_SENDER_ADDRESS
+      - EMAIL_SENDER_PASSWORD
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST_WRITER
+      - DB_PORT
+      - USER_POOL_ID
+    environment:
+      STAGE: ${sls:stage}
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt: [ProcessorQueue, Arn]
+          batchSize: 1
   go-lambda-get-users:
     handler: bootstrap
     package:
@@ -461,6 +490,11 @@ resources:
         DBName: ${ssm:/${sls:stage}/db_name}
         MasterUsername: ${ssm:/${sls:stage}/db_username}
         MasterUserPassword: ${ssm:/${sls:stage}/db_password}
+
+    ProcessorQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: ${sls:stage}-processor-queue
 
 #        DBClusterIdentifier: !Ref postgresCluster
 #    Add a read replica when need to scale up the database.
