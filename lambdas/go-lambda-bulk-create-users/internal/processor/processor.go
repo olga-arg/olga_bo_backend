@@ -9,20 +9,15 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/badoux/checkmail"
 	"go-lambda-bulk-create-users/pkg/dto"
 	"io"
 	"mime"
 	"mime/multipart"
-	"os"
 	"strings"
 )
 
 type Processor interface {
-	CreateMultipleUsers(ctx context.Context, inputs []dto.CreateUserInput, companyId string) ([]domain.UserNotCreated, error)
 	ValidateUserInput(ctx context.Context, input *dto.CreateUserInput) error
 	ValidateUser(ctx context.Context, email, companyId string, allowedRoles []domain.UserRoles) (bool, error)
 	ParseCSVFromRequest(ctx context.Context, request events.APIGatewayProxyRequest) ([]dto.CreateUserInput, error)
@@ -36,66 +31,6 @@ func New(s db.UserRepository) Processor {
 	return &processor{
 		userStorage: s,
 	}
-}
-
-func (p *processor) CreateMultipleUsers(ctx context.Context, inputs []dto.CreateUserInput, companyId string) ([]domain.UserNotCreated, error) {
-	var usersToSave []*domain.User          // Para almacenar usuarios que serán guardados en la base de datos
-	var failedUsers []domain.UserNotCreated // Para almacenar usuarios que fallaron en ser creados
-
-	// Configuración inicial de Cognito, como antes
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
-	})
-	if err != nil {
-		return failedUsers, err
-	}
-	cognitoClient := cognitoidentityprovider.New(sess)
-	userPoolID := os.Getenv("USER_POOL_ID")
-
-	for _, input := range inputs {
-		user, err := domain.NewUser(input.Name, input.Surname, input.Email)
-		if err != nil {
-			failedUsers = append(failedUsers, domain.UserNotCreated{Email: input.Email, Reason: err.Error()})
-			continue
-		}
-		user.MonthlyLimit = 10 // Ajustar según tu lógica
-		role, err := domain.ParseUserRole(input.Role)
-		if err != nil {
-			failedUsers = append(failedUsers, domain.UserNotCreated{Email: input.Email, Reason: err.Error()})
-			continue
-		}
-		user.Role = role
-
-		createUserInput := &cognitoidentityprovider.AdminCreateUserInput{
-			MessageAction: aws.String("SUPPRESS"),
-			Username:      aws.String(input.Email),
-			UserPoolId:    aws.String(userPoolID),
-			UserAttributes: []*cognitoidentityprovider.AttributeType{
-				{Name: aws.String("email"), Value: aws.String(input.Email)},
-				{Name: aws.String("name"), Value: aws.String(companyId)},
-				{Name: aws.String("email_verified"), Value: aws.String("False")},
-			},
-		}
-
-		_, err = cognitoClient.AdminCreateUser(createUserInput)
-		if err != nil {
-			failedUsers = append(failedUsers, domain.UserNotCreated{Email: input.Email, Reason: err.Error()})
-			continue
-		}
-
-		usersToSave = append(usersToSave, user)
-	}
-
-	if len(usersToSave) > 0 {
-		if err := p.userStorage.SaveMultipleUsers(usersToSave, companyId); err != nil {
-			// Considera manejar los errores de la base de datos de manera que puedas especificar cuáles usuarios fallaron aquí también
-			fmt.Println("Error saving users to database: ", err)
-			// Este error no se agrega a failedUsers porque es un fallo en el batch, no individual
-			return failedUsers, err
-		}
-	}
-
-	return failedUsers, nil // Devuelve la lista de usuarios que no se pudieron crear junto con cualquier error global
 }
 
 func (p *processor) ValidateUserInput(ctx context.Context, input *dto.CreateUserInput) error {

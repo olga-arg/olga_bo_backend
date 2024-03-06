@@ -3,12 +3,13 @@ package main
 import (
 	"commons/utils/db"
 	"github.com/aws/aws-lambda-go/lambda"
-	"go-lambda-bulk-create-users/internal/application"
-	"go-lambda-bulk-create-users/internal/processor"
-	"go-lambda-bulk-create-users/pkg/handler"
+	"go-lambda-bulk-create-users-process-queue/internal/application"
+	"go-lambda-bulk-create-users-process-queue/internal/processor"
+	"go-lambda-bulk-create-users-process-queue/pkg/handler"
 )
 
 func main() {
+	application.SetupEmailService()
 	pgConnector := application.PostgresConnector{}
 	gormDb, err := pgConnector.GetConnection()
 	if err != nil {

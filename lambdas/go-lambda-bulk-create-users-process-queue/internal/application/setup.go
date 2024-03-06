@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"go-lambda-bulk-create-users-process-queue/internal/services"
 	"os"
 )
 
@@ -21,4 +22,8 @@ func (p *PostgresConnector) GetConnection() (db *gorm.DB, err error) {
 	}
 	dbURI := fmt.Sprintf("host=%s user=%s dbname=%s port=%s sslmode=disable password=%s", dbHost, username, dbName, dbPort, password)
 	return gorm.Open("postgres", dbURI)
+}
+
+func SetupEmailService() services.EmailSender {
+	return services.NewDefaultEmailService()
 }
