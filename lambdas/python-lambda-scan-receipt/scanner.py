@@ -70,6 +70,8 @@ def get_receipt_info(api_key, file_url, company_id):
         response.raise_for_status()  # Raise an error for HTTP errors
         result = response.json()
 
+
+        data = {}
         # Extracting the necessary fields from the result
         info = {}
 
@@ -90,11 +92,11 @@ def get_receipt_info(api_key, file_url, company_id):
                 info[field] = content
         
         if info['cuit_number'] == company_cuit:
-            raise ValueError("Cuit not visible")
+            data['error'] = 'Cuit not visible'
 
         # If 'cuit' key is not present or its length is not 11, raise an error
         if 'cuit_number' not in info or len(info['cuit_number']) != 11:
-            raise ValueError("Cuit not visible")
+            data['error'] = 'Cuit not visible'
 
         if 'CONSUMIDOR' or 'FINAL' in info['receipt_or_ticket_type'].upper():
             info['receipt_or_ticket_type'] = 'B'
@@ -104,8 +106,9 @@ def get_receipt_info(api_key, file_url, company_id):
             raise ValueError("Negative amount")
 
         print('Receipt info: ', info)
+        data['receipt_info'] = info
 
-        return info
+        return data
 
     except httpx.HTTPError:
         raise ValueError("HTTP error occurred while fetching receipt info.")

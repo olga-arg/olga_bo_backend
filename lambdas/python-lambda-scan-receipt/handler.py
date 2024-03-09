@@ -123,7 +123,7 @@ def lambda_handler(event, context):
         'get_object', Params={'Bucket': s3bucket_name, 'Key': receipt_key}, ExpiresIn=60)
 
     try:
-        receipt_info = get_receipt_info(mindee_api_key, file_url, company_id)
+        data = get_receipt_info(mindee_api_key, file_url, company_id)
 
     except ValueError as e:
         return {
@@ -146,23 +146,23 @@ def lambda_handler(event, context):
             "body": "Cuit not visible"
         }
 
-    activity_id, company_name = request_registration(afip_creds.TOKEN, afip_creds.SIGN, olga_cuit, receipt_info['cuit_number'])
+    activity_id, company_name = request_registration(afip_creds.TOKEN, afip_creds.SIGN, olga_cuit, data['receipt_info']['cuit_number'])
 
     if company_name:
-        receipt_info['business_name'] = company_name
+        data['receipt_info']['business_name'] = company_name
 
         if not activity_id:
-            receipt_info['category'] = 'Otros'
+            data['receipt_info']['category'] = 'Otros'
         else:
             category = afip_categories(activity_id)
-            receipt_info['category'] = category
+            data['receipt_info']['category'] = category
 
         return {
             "statusCode": 200,
             "headers": {
                 "Content-Type": "application/json"
             },
-            "body": json.dumps(receipt_info)
+            "body": json.dumps(data)
         }
     else:
         return {
