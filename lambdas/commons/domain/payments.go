@@ -24,6 +24,7 @@ type Payment struct {
 	ReceiptImageKey string             `json:"receiptImageKey"`
 	CreatedDate     time.Time          `json:"created"`
 	User            User               `gorm:"foreignKey:user_id"`
+	ImageURL        string             `json:"image_url"`
 }
 
 type Payments []Payment

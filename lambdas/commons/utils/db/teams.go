@@ -2,6 +2,7 @@ package db
 
 import (
 	"commons/domain"
+	"commons/utils"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
@@ -77,6 +78,28 @@ func (r *TeamRepository) DeleteTeam(teamID, companyId string) error {
 
 func (r *TeamRepository) GetAllTeams(filters map[string]string, companyId string) (domain.DbTeams, error) {
 	var teams domain.DbTeams
+
+	// Check if the date is the start of the month and if it is, update the monthly spending of all teams to 0
+	// Get current date
+
+	currentDate := utils.GetCurrentDate()
+	// Format("2006-01-02")
+	fmt.Println("Current date:", currentDate)
+
+	// Get the day of the month
+	day := currentDate[8:10]
+
+	// If the day is 01, update the monthly spending of all teams to 0
+	if day == "01" {
+		fmt.Println("It's the first day of the month")
+		// Set the monthly spending of all teams to 0
+		query := r.Db.Scopes(getTeamTable(companyId)).Model(&domain.Team{}).Update("monthly_spending", 0)
+		if query.Error != nil {
+			fmt.Println("Error updating monthly spending of all teams:", query.Error)
+			return nil, query.Error
+		}
+		fmt.Println("Monthly spending of all teams updated to 0")
+	}
 
 	usersTeamsTableName := fmt.Sprintf("%s_users_teams", companyId)
 	usersTableName := fmt.Sprintf("%s_users", companyId)
