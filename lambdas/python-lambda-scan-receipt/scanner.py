@@ -98,6 +98,10 @@ def get_receipt_info(api_key, file_url, company_id):
 
         if 'CONSUMIDOR' or 'FINAL' in info['receipt_or_ticket_type'].upper():
             info['receipt_or_ticket_type'] = 'B'
+        
+        # Amount cannot be negative
+        if float(info['total_amount']) < 0:
+            raise ValueError("Negative amount")
 
         print('Receipt info: ', info)
 
